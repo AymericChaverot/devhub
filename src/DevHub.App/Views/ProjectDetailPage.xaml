@@ -1,0 +1,492 @@
+<Page
+    x:Class="DevHub.App.Views.ProjectDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:DevHub.App.ViewModels"
+    xmlns:imaging="using:Microsoft.UI.Xaml.Media.Imaging"
+    xmlns:controls="using:DevHub.App.Controls"
+    xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml">
+
+    <Grid Margin="36,16,36,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Hero -->
+        <Grid
+            x:Name="HeroCard"
+            Grid.Row="0"
+            MinHeight="150"
+            CornerRadius="{ThemeResource OverlayCornerRadius}"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            SizeChanged="HeroCard_SizeChanged">
+
+            <!-- Decorative brand logos, gaussian-blurred with Win2D. -->
+            <canvas:CanvasControl
+                x:Name="LangDecor"
+                Width="300"
+                Height="300"
+                Margin="8,0,0,-70"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Opacity="0.20"
+                Draw="LangDecor_Draw"
+                RenderTransformOrigin="0.5,0.5">
+                <canvas:CanvasControl.RenderTransform>
+                    <CompositeTransform x:Name="LangDecorTransform" Rotation="-10" />
+                </canvas:CanvasControl.RenderTransform>
+            </canvas:CanvasControl>
+            <canvas:CanvasControl
+                x:Name="IdeDecor"
+                Width="240"
+                Height="240"
+                Margin="0,-50,24,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Opacity="0.20"
+                Draw="IdeDecor_Draw"
+                RenderTransformOrigin="0.5,0.5">
+                <canvas:CanvasControl.RenderTransform>
+                    <CompositeTransform x:Name="IdeDecorTransform" Rotation="10" />
+                </canvas:CanvasControl.RenderTransform>
+            </canvas:CanvasControl>
+
+            <Grid x:Name="HeroContentGrid" Padding="24,24,224,24" ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Button
+                    x:Name="BackButton"
+                    Grid.Column="0"
+                    VerticalAlignment="Top"
+                    Click="Back_Click"
+                    ToolTipService.ToolTip="Back to projects">
+                    <FontIcon FontSize="14" Glyph="&#xE72B;" />
+                </Button>
+
+                <StackPanel Grid.Column="1" Spacing="10">
+                    <TextBlock x:Name="ProjectName" Style="{StaticResource TitleLargeTextBlockStyle}" />
+                    <TextBlock
+                        x:Name="ProjectPath"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                    <ItemsControl x:Name="TechList">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TechLine">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Image
+                                        Width="20"
+                                        Height="20"
+                                        VerticalAlignment="Center"
+                                        Source="{x:Bind Icon}"
+                                        Visibility="{x:Bind HasIcon}" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource BodyTextBlockStyle}"
+                                        Text="{x:Bind Text}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel x:Name="ActionsRow" Orientation="Horizontal" Spacing="8" Margin="0,6,0,0">
+                        <ComboBox
+                            x:Name="IdePicker"
+                            MinWidth="180"
+                            VerticalAlignment="Center"
+                            SelectionChanged="IdePicker_SelectionChanged" />
+                        <Button
+                            x:Name="OpenInIdeButton"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="OpenInIde_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontSize="14" Glyph="&#xE8A7;" />
+                                <TextBlock Text="Open" />
+                            </StackPanel>
+                        </Button>
+                        <Button Click="OpenInExplorer_Click" Content="Explorer" />
+                        <Button
+                            x:Name="RemoteButton"
+                            Visibility="Collapsed"
+                            Click="Remote_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image x:Name="RemoteIcon" Width="16" Height="16" VerticalAlignment="Center" />
+                                <TextBlock x:Name="RemoteLabel" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                </StackPanel>
+            </Grid>
+
+            <!-- Declared last so it stays on top of the stretched hero text for hit-testing -->
+            <StackPanel
+                x:Name="HeroTopButtons"
+                Margin="0,12,12,12"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Spacing="8">
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="4">
+                    <Button Click="ManageSubprojects_Click" ToolTipService.ToolTip="Manage subprojects">
+                        <FontIcon FontSize="14" Glyph="&#xE71D;" />
+                    </Button>
+                    <Button Click="Rename_Click" ToolTipService.ToolTip="Rename project">
+                        <FontIcon FontSize="14" Glyph="&#xE8AC;" />
+                    </Button>
+                </StackPanel>
+
+                <!-- Subproject shortcuts: regular buttons, folder + name + stack icons -->
+                <ItemsControl x:Name="SubprojectsList" Visibility="Collapsed">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" Spacing="4" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SubprojectItem">
+                            <Button
+                                Width="200"
+                                HorizontalContentAlignment="Stretch"
+                                Click="Subproject_ButtonClick"
+                                Tag="{x:Bind}"
+                                ToolTipService.ToolTip="{x:Bind Name}">
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <FontIcon
+                                        Grid.Column="0"
+                                        FontSize="12"
+                                        VerticalAlignment="Center"
+                                        Glyph="&#xE8B7;" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Text="{x:Bind Name}"
+                                        TextTrimming="CharacterEllipsis" />
+                                    <ItemsControl
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        ItemsSource="{x:Bind Icons}"
+                                        IsHitTestVisible="False"
+                                        Visibility="{x:Bind HasIcons}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="5" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="imaging:SvgImageSource">
+                                                <Image Width="13" Height="13" Source="{x:Bind}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Grid>
+
+        <!-- Section tabs -->
+        <SelectorBar
+            x:Name="SectionBar"
+            Grid.Row="1"
+            Margin="4,10,0,0"
+            SelectionChanged="SectionBar_SelectionChanged">
+            <SelectorBarItem x:Name="ReadmeTab" Text="README" IsSelected="True" />
+            <SelectorBarItem x:Name="GitTab" Text="Git" Visibility="Collapsed" />
+            <SelectorBarItem x:Name="FilesTab" Text="Files" />
+        </SelectorBar>
+
+        <!-- README -->
+        <Grid x:Name="ReadmeContainer" Grid.Row="2" Margin="0,12,0,24">
+            <Border
+                CornerRadius="{ThemeResource OverlayCornerRadius}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1">
+                <Grid>
+                    <WebView2 x:Name="ReadmeView" Visibility="Collapsed" />
+                    <TextBlock
+                        x:Name="NoReadmeText"
+                        Margin="24"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="No README found in this project." />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Git -->
+        <Grid
+            x:Name="GitContainer"
+            Grid.Row="2"
+            Margin="0,12,0,24"
+            RowSpacing="8"
+            Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Toolbar -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                <ComboBox
+                    x:Name="BranchPicker"
+                    MinWidth="170"
+                    VerticalAlignment="Center"
+                    SelectionChanged="BranchPicker_SelectionChanged" />
+                <Button x:Name="NewBranchButton" Click="NewBranch_Click" ToolTipService.ToolTip="Create a branch at HEAD and switch to it">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE710;" />
+                        <TextBlock Text="Branch" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="FetchButton" Click="Fetch_Click" ToolTipService.ToolTip="git fetch --all --prune">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE895;" />
+                        <TextBlock Text="Fetch" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="PullButton" Click="Pull_Click" ToolTipService.ToolTip="git pull">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE896;" />
+                        <TextBlock Text="Pull" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="PushButton" Click="Push_Click" ToolTipService.ToolTip="git push">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE898;" />
+                        <TextBlock Text="Push" />
+                    </StackPanel>
+                </Button>
+                <ProgressRing
+                    x:Name="GitBusyRing"
+                    Width="18"
+                    Height="18"
+                    VerticalAlignment="Center"
+                    IsActive="False" />
+                <TextBlock
+                    x:Name="AheadBehindText"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                <TextBlock
+                    x:Name="GitCountsText"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock
+                    x:Name="GitStatusText"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <InfoBar
+                x:Name="GitOpInfo"
+                Grid.Row="1"
+                IsOpen="False" />
+
+            <!-- Commit graph -->
+            <Border
+                Grid.Row="2"
+                CornerRadius="{ThemeResource OverlayCornerRadius}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1">
+                <ListView x:Name="GraphList" SelectionMode="None" Padding="8,8,8,8">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Padding" Value="8,0" />
+                            <Setter Property="MinHeight" Value="36" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:GraphCommitRow">
+                            <Grid ColumnSpacing="12" Height="36">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="64" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+                                <controls:CommitGraphCanvas
+                                    Grid.Column="0"
+                                    Width="{x:Bind GraphWidth}"
+                                    Row="{x:Bind Row}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    FontFamily="Cascadia Code, Consolas"
+                                    FontSize="12"
+                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                    Text="{x:Bind ShortSha}" />
+                                <ItemsControl
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    ItemsSource="{x:Bind Refs}"
+                                    Visibility="{x:Bind HasRefs}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Border
+                                                Padding="6,1"
+                                                CornerRadius="8"
+                                                Background="{ThemeResource AccentFillColorDefaultBrush}">
+                                                <TextBlock
+                                                    FontSize="10"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                    Text="{x:Bind}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock
+                                    Grid.Column="3"
+                                    VerticalAlignment="Center"
+                                    Text="{x:Bind Message}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <TextBlock
+                                    Grid.Column="4"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind Author}" />
+                                <TextBlock
+                                    Grid.Column="5"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind WhenText}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Border>
+        </Grid>
+
+        <!-- Files -->
+        <Grid
+            x:Name="FilesContainer"
+            Grid.Row="2"
+            Margin="0,12,0,24"
+            ColumnSpacing="12"
+            Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="340" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Grid.Column="0"
+                CornerRadius="{ThemeResource OverlayCornerRadius}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1">
+                <TreeView
+                    x:Name="FileTree"
+                    Margin="4,8"
+                    SelectionMode="Single"
+                    Expanding="FileTree_Expanding"
+                    ItemInvoked="FileTree_ItemInvoked">
+                    <TreeView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:FileTreeNode">
+                            <TreeViewItem
+                                ItemsSource="{x:Bind Children}"
+                                HasUnrealizedChildren="{x:Bind IsDirectory}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Image
+                                        Width="14"
+                                        Height="14"
+                                        VerticalAlignment="Center"
+                                        Source="{x:Bind Icon}"
+                                        Visibility="{x:Bind HasIcon}" />
+                                    <FontIcon
+                                        FontSize="13"
+                                        VerticalAlignment="Center"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Glyph="{x:Bind Glyph}"
+                                        Visibility="{x:Bind ShowsGlyph}" />
+                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
+                                </StackPanel>
+                            </TreeViewItem>
+                        </DataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Border>
+
+            <Border
+                Grid.Column="1"
+                CornerRadius="{ThemeResource OverlayCornerRadius}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        x:Name="FileHeader"
+                        Margin="16,12"
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        Text="Select a file to preview it"
+                        TextTrimming="CharacterEllipsis" />
+                    <Grid Grid.Row="1">
+                        <WebView2 x:Name="FileView" Visibility="Collapsed" />
+                        <ScrollViewer
+                            x:Name="FileFallbackScroll"
+                            Padding="16,0,16,16"
+                            HorizontalScrollBarVisibility="Auto"
+                            VerticalScrollBarVisibility="Auto">
+                            <Grid>
+                                <TextBlock
+                                    x:Name="FileContentText"
+                                    FontFamily="Cascadia Code, Consolas"
+                                    FontSize="12.5"
+                                    IsTextSelectionEnabled="True"
+                                    TextWrapping="NoWrap" />
+                                <Image
+                                    x:Name="FilePreviewImage"
+                                    MaxWidth="900"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Stretch="Uniform"
+                                    Visibility="Collapsed" />
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

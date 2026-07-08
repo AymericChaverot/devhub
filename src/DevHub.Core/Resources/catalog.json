@@ -1,0 +1,512 @@
+[
+  {
+    "displayName": "Node.js",
+    "category": "Languages & runtimes",
+    "description": "JavaScript runtime, includes npm.",
+    "iconText": "Js",
+    "accentColor": "#43853D",
+    "variants": [
+      {
+        "label": "LTS",
+        "wingetId": "OpenJS.NodeJS.LTS"
+      },
+      {
+        "label": "Current",
+        "wingetId": "OpenJS.NodeJS"
+      }
+    ],
+    "iconFile": "nodedotjs.svg"
+  },
+  {
+    "displayName": "Python",
+    "category": "Languages & runtimes",
+    "description": "Python interpreter with pip. Versions install side by side (py launcher picks).",
+    "iconText": "Py",
+    "accentColor": "#3776AB",
+    "variants": [
+      {
+        "label": "3.13",
+        "wingetId": "Python.Python.3.13"
+      },
+      {
+        "label": "3.12",
+        "wingetId": "Python.Python.3.12"
+      },
+      {
+        "label": "3.11",
+        "wingetId": "Python.Python.3.11"
+      }
+    ],
+    "iconFile": "python.svg"
+  },
+  {
+    "displayName": "Java (Microsoft OpenJDK)",
+    "category": "Languages & runtimes",
+    "description": "Microsoft Build of OpenJDK. Multiple JDKs can coexist; JAVA_HOME selects the active one.",
+    "iconText": "Ja",
+    "accentColor": "#EA2D2E",
+    "variants": [
+      {
+        "label": "25 (LTS)",
+        "wingetId": "Microsoft.OpenJDK.25"
+      },
+      {
+        "label": "21 (LTS)",
+        "wingetId": "Microsoft.OpenJDK.21"
+      },
+      {
+        "label": "17 (LTS)",
+        "wingetId": "Microsoft.OpenJDK.17"
+      },
+      {
+        "label": "11 (LTS)",
+        "wingetId": "Microsoft.OpenJDK.11"
+      }
+    ],
+    "iconFile": "openjdk.svg"
+  },
+  {
+    "displayName": ".NET SDK",
+    "category": "Languages & runtimes",
+    "description": "Build and run .NET applications. SDKs install side by side (global.json picks).",
+    "iconText": ".N",
+    "accentColor": "#512BD4",
+    "variants": [
+      {
+        "label": "10 (LTS)",
+        "wingetId": "Microsoft.DotNet.SDK.10"
+      },
+      {
+        "label": "9",
+        "wingetId": "Microsoft.DotNet.SDK.9"
+      },
+      {
+        "label": "8 (LTS)",
+        "wingetId": "Microsoft.DotNet.SDK.8"
+      }
+    ],
+    "iconFile": "dotnet.svg"
+  },
+  {
+    "displayName": "Rust",
+    "category": "Languages & runtimes",
+    "description": "rustup toolchain installer — manages rustc, cargo and multiple toolchains itself.",
+    "iconText": "Rs",
+    "accentColor": "#B7410E",
+    "variants": [
+      {
+        "label": "rustup",
+        "wingetId": "Rustlang.Rustup"
+      }
+    ],
+    "iconFile": "rust.svg"
+  },
+  {
+    "displayName": "Go",
+    "category": "Languages & runtimes",
+    "description": "The Go programming language toolchain.",
+    "iconText": "Go",
+    "accentColor": "#00ADD8",
+    "variants": [
+      {
+        "wingetId": "GoLang.Go"
+      }
+    ],
+    "iconFile": "go.svg"
+  },
+  {
+    "displayName": "PHP",
+    "category": "Languages & runtimes",
+    "description": "PHP scripting language runtime.",
+    "iconText": "Php",
+    "accentColor": "#777BB4",
+    "variants": [
+      {
+        "label": "8.4",
+        "wingetId": "PHP.PHP.8.4"
+      }
+    ],
+    "iconFile": "php.svg"
+  },
+  {
+    "displayName": "Ruby",
+    "category": "Languages & runtimes",
+    "description": "Ruby with MSYS2 DevKit for building native gems.",
+    "iconText": "Rb",
+    "accentColor": "#CC342D",
+    "variants": [
+      {
+        "label": "3.4",
+        "wingetId": "RubyInstallerTeam.RubyWithDevKit.3.4"
+      }
+    ],
+    "iconFile": "ruby.svg"
+  },
+  {
+    "displayName": "Deno",
+    "category": "Languages & runtimes",
+    "description": "Secure TypeScript/JavaScript runtime.",
+    "iconText": "De",
+    "accentColor": "#0C4B33",
+    "variants": [
+      {
+        "wingetId": "DenoLand.Deno"
+      }
+    ],
+    "iconFile": "deno.svg"
+  },
+  {
+    "displayName": "Bun",
+    "category": "Languages & runtimes",
+    "description": "Fast all-in-one JavaScript runtime, bundler and package manager.",
+    "iconText": "Bn",
+    "accentColor": "#8D6E63",
+    "variants": [
+      {
+        "wingetId": "Oven-sh.Bun"
+      }
+    ],
+    "iconFile": "bun.svg"
+  },
+  {
+    "displayName": "Zig",
+    "category": "Languages & runtimes",
+    "description": "General-purpose language and C/C++ toolchain.",
+    "iconText": "Zg",
+    "accentColor": "#F7A41D",
+    "variants": [
+      {
+        "wingetId": "zig.zig"
+      }
+    ],
+    "iconFile": "zig.svg"
+  },
+  {
+    "displayName": "LLVM / Clang",
+    "category": "Languages & runtimes",
+    "description": "LLVM compiler infrastructure with Clang C/C++ compiler.",
+    "iconText": "C++",
+    "accentColor": "#262D3A",
+    "variants": [
+      {
+        "wingetId": "LLVM.LLVM"
+      }
+    ],
+    "iconFile": "llvm.svg"
+  },
+  {
+    "displayName": "CMake",
+    "category": "Languages & runtimes",
+    "description": "Cross-platform build system generator for C/C++.",
+    "iconText": "CM",
+    "accentColor": "#064F8C",
+    "variants": [
+      {
+        "wingetId": "Kitware.CMake"
+      }
+    ],
+    "iconFile": "cmake.svg"
+  },
+  {
+    "displayName": "Git",
+    "category": "Version control",
+    "description": "Distributed version control system.",
+    "iconText": "Git",
+    "accentColor": "#F05033",
+    "variants": [
+      {
+        "wingetId": "Git.Git"
+      }
+    ],
+    "iconFile": "git.svg"
+  },
+  {
+    "displayName": "GitHub CLI",
+    "category": "Version control",
+    "description": "gh — GitHub from the command line.",
+    "iconText": "gh",
+    "accentColor": "#24292F",
+    "variants": [
+      {
+        "wingetId": "GitHub.cli"
+      }
+    ],
+    "iconFile": "github.svg"
+  },
+  {
+    "displayName": "GitLab CLI",
+    "category": "Version control",
+    "description": "glab — GitLab from the command line.",
+    "iconText": "gl",
+    "accentColor": "#FC6D26",
+    "variants": [
+      {
+        "wingetId": "GLab.GLab"
+      }
+    ],
+    "iconFile": "gitlab.svg"
+  },
+  {
+    "displayName": "GitHub Desktop",
+    "category": "Version control",
+    "description": "GUI client for GitHub workflows.",
+    "iconText": "GD",
+    "accentColor": "#8034A9",
+    "variants": [
+      {
+        "wingetId": "GitHub.GitHubDesktop"
+      }
+    ],
+    "iconFile": "github.svg"
+  },
+  {
+    "displayName": "Visual Studio Code",
+    "category": "Editors & IDEs",
+    "description": "Lightweight source-code editor with a huge extension ecosystem.",
+    "iconText": "VS",
+    "accentColor": "#007ACC",
+    "variants": [
+      {
+        "wingetId": "Microsoft.VisualStudioCode"
+      }
+    ],
+    "iconFile": "visualstudiocode.svg"
+  },
+  {
+    "displayName": "Visual Studio 2022",
+    "category": "Editors & IDEs",
+    "description": "Full IDE for .NET and C++ development (Community edition).",
+    "iconText": "VS",
+    "accentColor": "#5C2D91",
+    "variants": [
+      {
+        "label": "Community",
+        "wingetId": "Microsoft.VisualStudio.2022.Community"
+      }
+    ],
+    "iconFile": "visualstudio.svg"
+  },
+  {
+    "displayName": "JetBrains Toolbox",
+    "category": "Editors & IDEs",
+    "description": "Install and manage JetBrains IDEs (IntelliJ, Rider, WebStorm...).",
+    "iconText": "JB",
+    "accentColor": "#000000",
+    "variants": [
+      {
+        "wingetId": "JetBrains.Toolbox"
+      }
+    ],
+    "iconFile": "jetbrains.svg"
+  },
+  {
+    "displayName": "Neovim",
+    "category": "Editors & IDEs",
+    "description": "Hyperextensible Vim-based text editor.",
+    "iconText": "Nv",
+    "accentColor": "#57A143",
+    "variants": [
+      {
+        "wingetId": "Neovim.Neovim"
+      }
+    ],
+    "iconFile": "neovim.svg"
+  },
+  {
+    "displayName": "Sublime Text",
+    "category": "Editors & IDEs",
+    "description": "Fast, lightweight text editor.",
+    "iconText": "St",
+    "accentColor": "#FF9800",
+    "variants": [
+      {
+        "label": "4",
+        "wingetId": "SublimeHQ.SublimeText.4"
+      }
+    ],
+    "iconFile": "sublimetext.svg"
+  },
+  {
+    "displayName": "Cursor",
+    "category": "Editors & IDEs",
+    "description": "AI-first code editor built on VS Code.",
+    "iconText": "Cu",
+    "accentColor": "#4C4C4C",
+    "variants": [
+      {
+        "wingetId": "Anysphere.Cursor"
+      }
+    ],
+    "iconFile": "cursor.svg"
+  },
+  {
+    "displayName": "Zed",
+    "category": "Editors & IDEs",
+    "description": "High-performance collaborative code editor.",
+    "iconText": "Zd",
+    "accentColor": "#084CCF",
+    "variants": [
+      {
+        "wingetId": "ZedIndustries.Zed"
+      }
+    ],
+    "iconFile": "zedindustries.svg"
+  },
+  {
+    "displayName": "Docker Desktop",
+    "category": "Containers & cloud",
+    "description": "Containers on Windows with WSL 2 backend.",
+    "iconText": "Dk",
+    "accentColor": "#2496ED",
+    "variants": [
+      {
+        "wingetId": "Docker.DockerDesktop"
+      }
+    ],
+    "iconFile": "docker.svg"
+  },
+  {
+    "displayName": "kubectl",
+    "category": "Containers & cloud",
+    "description": "Kubernetes command-line tool.",
+    "iconText": "K8s",
+    "accentColor": "#326CE5",
+    "variants": [
+      {
+        "wingetId": "Kubernetes.kubectl"
+      }
+    ],
+    "iconFile": "kubernetes.svg"
+  },
+  {
+    "displayName": "Helm",
+    "category": "Containers & cloud",
+    "description": "Package manager for Kubernetes.",
+    "iconText": "Hm",
+    "accentColor": "#0F1689",
+    "variants": [
+      {
+        "wingetId": "Helm.Helm"
+      }
+    ],
+    "iconFile": "helm.svg"
+  },
+  {
+    "displayName": "Terraform",
+    "category": "Containers & cloud",
+    "description": "Infrastructure as code by HashiCorp.",
+    "iconText": "Tf",
+    "accentColor": "#7B42BC",
+    "variants": [
+      {
+        "wingetId": "Hashicorp.Terraform"
+      }
+    ],
+    "iconFile": "terraform.svg"
+  },
+  {
+    "displayName": "AWS CLI",
+    "category": "Containers & cloud",
+    "description": "Command-line interface for Amazon Web Services.",
+    "iconText": "AWS",
+    "accentColor": "#FF9900",
+    "variants": [
+      {
+        "wingetId": "Amazon.AWSCLI"
+      }
+    ],
+    "iconFile": "amazonaws.svg"
+  },
+  {
+    "displayName": "Azure CLI",
+    "category": "Containers & cloud",
+    "description": "Command-line interface for Microsoft Azure.",
+    "iconText": "Az",
+    "accentColor": "#0078D4",
+    "variants": [
+      {
+        "wingetId": "Microsoft.AzureCLI"
+      }
+    ],
+    "iconFile": "microsoftazure.svg"
+  },
+  {
+    "displayName": "Google Cloud SDK",
+    "category": "Containers & cloud",
+    "description": "gcloud CLI and tools for Google Cloud.",
+    "iconText": "GC",
+    "accentColor": "#4285F4",
+    "variants": [
+      {
+        "wingetId": "Google.CloudSDK"
+      }
+    ],
+    "iconFile": "googlecloud.svg"
+  },
+  {
+    "displayName": "ngrok",
+    "category": "Containers & cloud",
+    "description": "Expose local servers through secure public tunnels.",
+    "iconText": "ng",
+    "accentColor": "#1F1E37",
+    "variants": [
+      {
+        "wingetId": "Ngrok.Ngrok"
+      }
+    ],
+    "iconFile": "ngrok.svg"
+  },
+  {
+    "displayName": "Windows Terminal",
+    "category": "Tools",
+    "description": "Modern terminal with tabs, panes and GPU-accelerated rendering.",
+    "iconText": ">_",
+    "accentColor": "#333333",
+    "variants": [
+      {
+        "wingetId": "Microsoft.WindowsTerminal"
+      }
+    ],
+    "iconFile": "windowsterminal.svg"
+  },
+  {
+    "displayName": "PowerShell 7",
+    "category": "Tools",
+    "description": "Cross-platform PowerShell (pwsh).",
+    "iconText": "PS",
+    "accentColor": "#012456",
+    "variants": [
+      {
+        "wingetId": "Microsoft.PowerShell"
+      }
+    ],
+    "iconFile": "powershell.svg"
+  },
+  {
+    "displayName": "Postman",
+    "category": "Tools",
+    "description": "API design, testing and documentation client.",
+    "iconText": "Pm",
+    "accentColor": "#FF6C37",
+    "variants": [
+      {
+        "wingetId": "Postman.Postman"
+      }
+    ],
+    "iconFile": "postman.svg"
+  },
+  {
+    "displayName": "DBeaver",
+    "category": "Tools",
+    "description": "Universal database client (Community edition).",
+    "iconText": "Db",
+    "accentColor": "#382923",
+    "variants": [
+      {
+        "label": "Community",
+        "wingetId": "DBeaver.DBeaver.Community"
+      }
+    ],
+    "iconFile": "dbeaver.svg"
+  }
+]

@@ -1,0 +1,218 @@
+<Page
+    x:Class="DevHub.App.Views.ProjectsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:DevHub.App.ViewModels">
+
+    <Grid Margin="36,24,36,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Projects" />
+            <TextBlock
+                Style="{StaticResource BodyTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind ViewModel.ProjectsFolderPath, Mode=OneWay, FallbackValue=''}" />
+        </StackPanel>
+
+        <!-- Toolbar -->
+        <StackPanel
+            Grid.Row="1"
+            Margin="0,16,0,0"
+            Orientation="Horizontal"
+            Spacing="8"
+            Visibility="{x:Bind ViewModel.HasProjectsFolder, Mode=OneWay}">
+            <Button Style="{StaticResource AccentButtonStyle}" Click="AddFromGit_Click">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon FontSize="14" Glyph="&#xE710;" />
+                    <TextBlock Text="Add from Git" />
+                </StackPanel>
+            </Button>
+            <Button Command="{x:Bind ViewModel.RescanCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                    <TextBlock Text="Rescan" />
+                </StackPanel>
+            </Button>
+            <Button Click="ChangeFolder_Click" Content="Change folder…" />
+            <StackPanel
+                Margin="8,0,0,0"
+                Orientation="Horizontal"
+                Spacing="8"
+                VerticalAlignment="Center"
+                Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}">
+                <ProgressRing Width="16" Height="16" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+                <TextBlock
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind ViewModel.BusyMessage, Mode=OneWay}" />
+            </StackPanel>
+        </StackPanel>
+
+        <InfoBar
+            Grid.Row="2"
+            Margin="0,12,0,0"
+            Severity="Error"
+            IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+            Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+            CloseButtonClick="ErrorInfoBar_CloseButtonClick" />
+
+        <!-- Empty state: no folder picked yet -->
+        <StackPanel
+            Grid.Row="3"
+            Margin="0,48,0,0"
+            HorizontalAlignment="Center"
+            Spacing="12"
+            Visibility="{x:Bind ViewModel.NeedsFolderSelection, Mode=OneWay}">
+            <FontIcon
+                HorizontalAlignment="Center"
+                FontSize="40"
+                Glyph="&#xE8B7;"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                Style="{StaticResource SubtitleTextBlockStyle}"
+                Text="Choose your Projects folder" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                Style="{StaticResource BodyTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="DevHub will scan it and list every project inside." />
+            <Button
+                HorizontalAlignment="Center"
+                Style="{StaticResource AccentButtonStyle}"
+                Click="ChangeFolder_Click"
+                Content="Choose folder" />
+        </StackPanel>
+
+        <ListView
+            Grid.Row="4"
+            Margin="0,12,0,0"
+            Padding="0,0,0,24"
+            ItemsSource="{x:Bind ViewModel.Projects}"
+            SelectionMode="None"
+            IsItemClickEnabled="True"
+            ItemClick="Project_ItemClick"
+            Visibility="{x:Bind ViewModel.HasProjectsFolder, Mode=OneWay}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="12,8" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="vm:ProjectViewModel">
+                    <Grid ColumnSpacing="12" AutomationProperties.Name="{x:Bind Name}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            FontSize="18"
+                            Glyph="&#xE8B7;"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind Name}" />
+                                <FontIcon
+                                    FontSize="12"
+                                    VerticalAlignment="Center"
+                                    Glyph="&#xE9A6;"
+                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                    Visibility="{x:Bind IsGitRepository}" />
+                                <ItemsControl ItemsSource="{x:Bind Badges}" VerticalAlignment="Center">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:Badge">
+                                            <Border
+                                                Padding="7,2"
+                                                CornerRadius="8"
+                                                Background="{x:Bind Brush}">
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <Image
+                                                        Width="11"
+                                                        Height="11"
+                                                        VerticalAlignment="Center"
+                                                        Source="{x:Bind Icon}"
+                                                        Visibility="{x:Bind HasIcon}" />
+                                                    <TextBlock
+                                                        FontSize="10"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="White"
+                                                        VerticalAlignment="Center"
+                                                        Text="{x:Bind Text}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <TextBlock
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind Path}" />
+                        </StackPanel>
+
+                        <TextBlock
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind RemoteHost}" />
+
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4">
+                            <Button
+                                VerticalAlignment="Center"
+                                Click="OpenInExplorer_Click"
+                                Tag="{x:Bind}"
+                                ToolTipService.ToolTip="Open in Explorer">
+                                <FontIcon FontSize="14" Glyph="&#xE838;" />
+                            </Button>
+                            <Button
+                                VerticalAlignment="Center"
+                                ToolTipService.ToolTip="More options">
+                                <FontIcon FontSize="14" Glyph="&#xE712;" />
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem
+                                            Click="RemoveFromList_Click"
+                                            Tag="{x:Bind}"
+                                            Text="Remove from list">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE738;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                        <MenuFlyoutItem
+                                            Click="DeleteFolder_Click"
+                                            Tag="{x:Bind}"
+                                            Text="Delete folder…">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE74D;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>

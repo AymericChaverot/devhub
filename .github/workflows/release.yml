@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  msix:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Build MSIX package (unsigned)
+        # WindowsPackageType/SelfContained overrides flip the project from its
+        # unpackaged dev default to a packaged MSIX build.
+        run: >
+          msbuild src/DevHub.App/DevHub.App.csproj /restore
+          /p:Configuration=Release
+          /p:Platform=x64
+          /p:WindowsPackageType=MSIX
+          /p:WindowsAppSDKSelfContained=false
+          /p:GenerateAppxPackageOnBuild=true
+          /p:UapAppxPackageBuildMode=SideloadOnly
+          /p:AppxBundle=Never
+          /p:AppxPackageSigningEnabled=false
+
+      - name: Collect package
+        shell: pwsh
+        run: |
+          $msix = Get-ChildItem src/DevHub.App -Recurse -Filter *.msix | Select-Object -First 1
+          if (-not $msix) { throw "No .msix produced" }
+          Copy-Item $msix.FullName "DevHub-$($env:GITHUB_REF_NAME)-x64.msix"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: DevHub-*.msix
+          body: |
+            Unsigned sideload package. To install, enable Developer Mode and
+            trust the package, or sign it first (see DEVELOPMENT_PLAN.md open
+            questions — code signing is still to be decided).

@@ -1,0 +1,158 @@
+<Page
+    x:Class="DevHub.App.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Page.Resources>
+        <Style x:Key="SettingsCard" TargetType="Grid">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="ColumnSpacing" Value="16" />
+            <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style x:Key="SectionHeader" TargetType="TextBlock" BasedOn="{StaticResource BodyStrongTextBlockStyle}">
+            <Setter Property="Margin" Value="0,16,0,0" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer>
+        <StackPanel Margin="36,24,36,36" Spacing="8" MaxWidth="920" HorizontalAlignment="Left">
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Settings" />
+
+            <!-- ============ General ============ -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="General" />
+
+            <Grid Style="{StaticResource SettingsCard}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon Grid.Column="0" VerticalAlignment="Center" Glyph="&#xE8B7;" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Projects folder" />
+                    <TextBlock
+                        x:Name="FolderPathText"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="Not set" />
+                </StackPanel>
+                <Button Grid.Column="2" VerticalAlignment="Center" Click="ChangeFolder_Click" Content="Change…" />
+            </Grid>
+
+            <!-- ============ Appearance ============ -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Appearance" />
+
+            <Grid Style="{StaticResource SettingsCard}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon Grid.Column="0" VerticalAlignment="Center" Glyph="&#xE790;" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Theme" />
+                    <TextBlock
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="Choose how DevHub looks" />
+                </StackPanel>
+                <ComboBox
+                    x:Name="ThemePicker"
+                    Grid.Column="2"
+                    MinWidth="140"
+                    VerticalAlignment="Center"
+                    SelectionChanged="ThemePicker_SelectionChanged">
+                    <ComboBoxItem Content="Use system setting" Tag="System" />
+                    <ComboBoxItem Content="Light" Tag="Light" />
+                    <ComboBoxItem Content="Dark" Tag="Dark" />
+                </ComboBox>
+            </Grid>
+
+            <!-- ============ Data ============ -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Data" />
+
+            <Grid Style="{StaticResource SettingsCard}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon Grid.Column="0" VerticalAlignment="Center" Glyph="&#xE838;" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="App data" />
+                    <TextBlock
+                        x:Name="DataFolderText"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+                <Button Grid.Column="2" VerticalAlignment="Center" Click="OpenLogs_Click" Content="Open logs" />
+                <Button Grid.Column="3" VerticalAlignment="Center" Click="OpenDataFolder_Click" Content="Open folder" />
+            </Grid>
+
+            <!-- ============ About ============ -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="About" />
+
+            <Grid Style="{StaticResource SettingsCard}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Grid.Column="0"
+                    Width="40"
+                    Height="40"
+                    CornerRadius="8">
+                    <Image Source="ms-appx:///Assets/Square44x44Logo.png" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="DevHub" />
+                    <TextBlock
+                        x:Name="VersionText"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="Built with WinUI 3 (Windows App SDK 2.2) and .NET 10" />
+                </StackPanel>
+                <HyperlinkButton
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    NavigateUri="https://github.com/AymericChaverot/devhub"
+                    Content="GitHub repository" />
+            </Grid>
+
+            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="16" Padding="0,12">
+                        <FontIcon VerticalAlignment="Center" Glyph="&#xE90F;" />
+                        <StackPanel Spacing="2">
+                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Open-source licenses" />
+                            <TextBlock
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Third-party components used by DevHub" />
+                        </StackPanel>
+                    </StackPanel>
+                </Expander.Header>
+                <StackPanel Spacing="8" Padding="8,4">
+                    <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Windows App SDK / WinUI 3" /><Run Text=" — MIT License, © Microsoft Corporation" /></TextBlock>
+                    <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="CommunityToolkit.Mvvm" /><Run Text=" — MIT License, © .NET Foundation" /></TextBlock>
+                    <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Microsoft.Extensions.DependencyInjection" /><Run Text=" — MIT License, © Microsoft Corporation" /></TextBlock>
+                    <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Serilog &amp; Serilog.Sinks.File" /><Run Text=" — Apache License 2.0" /></TextBlock>
+                    <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="LibGit2Sharp" /><Run Text=" — MIT License (links libgit2, GPLv2 with linking exception)" /></TextBlock>
+                    <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Microsoft.Data.Sqlite" /><Run Text=" — MIT License; SQLite itself is public domain" /></TextBlock>
+                    <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Markdig" /><Run Text=" — BSD 2-Clause License, © Alexandre Mutel" /></TextBlock>
+                    <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Win2D (Microsoft.Graphics.Win2D)" /><Run Text=" — MIT License, © Microsoft Corporation" /></TextBlock>
+                    <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Simple Icons" /><Run Text=" — CC0 1.0; all brand logos are trademarks of their respective owners" /></TextBlock>
+                    <TextBlock TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Devicon" /><Run Text=" — MIT License (Java logo)" /></TextBlock>
+                </StackPanel>
+            </Expander>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
