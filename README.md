@@ -99,8 +99,13 @@ Preview packages are signed with a self-signed certificate, so Windows needs to 
 it once:
 
 1. Download `DevHub-signing.cer` and the `.msix` from the release.
-2. Right-click the `.cer` → *Install Certificate* → **Local Machine** → *Place all
-   certificates in the following store* → **Trusted People**.
+2. In an **administrator** PowerShell (the store must be *Local Machine* — the
+   certificate wizard's "Current User" default will not work):
+
+   ```powershell
+   Import-Certificate -FilePath .\DevHub-signing.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+   ```
+
 3. Double-click the `.msix` — App Installer does the rest. Updates are offered
    in-app afterwards (the certificate step is one-time).
 
