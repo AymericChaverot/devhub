@@ -139,6 +139,35 @@
                 VerticalAlignment="Top"
                 Spacing="8">
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="4">
+                    <SplitButton
+                        x:Name="RunButton"
+                        Margin="0,0,4,0"
+                        Click="Run_Click"
+                        ToolTipService.ToolTip="Run this project in a terminal">
+                        <!-- Lightweight styling: repaint every SplitButton state with the
+                             accent-button brushes so hover/pressed stay on-brand. -->
+                        <SplitButton.Resources>
+                            <StaticResource x:Key="SplitButtonBackground" ResourceKey="AccentFillColorDefaultBrush" />
+                            <StaticResource x:Key="SplitButtonBackgroundPointerOver" ResourceKey="AccentFillColorSecondaryBrush" />
+                            <StaticResource x:Key="SplitButtonBackgroundPressed" ResourceKey="AccentFillColorTertiaryBrush" />
+                            <StaticResource x:Key="SplitButtonBackgroundDisabled" ResourceKey="AccentFillColorDisabledBrush" />
+                            <StaticResource x:Key="SplitButtonForeground" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                            <StaticResource x:Key="SplitButtonForegroundPointerOver" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                            <StaticResource x:Key="SplitButtonForegroundPressed" ResourceKey="TextOnAccentFillColorSecondaryBrush" />
+                            <StaticResource x:Key="SplitButtonForegroundDisabled" ResourceKey="TextOnAccentFillColorDisabledBrush" />
+                            <StaticResource x:Key="SplitButtonBorderBrush" ResourceKey="AccentControlElevationBorderBrush" />
+                            <StaticResource x:Key="SplitButtonBorderBrushPointerOver" ResourceKey="AccentControlElevationBorderBrush" />
+                            <StaticResource x:Key="SplitButtonBorderBrushPressed" ResourceKey="AccentFillColorTertiaryBrush" />
+                            <StaticResource x:Key="SplitButtonBorderBrushDisabled" ResourceKey="AccentFillColorDisabledBrush" />
+                        </SplitButton.Resources>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="13" Glyph="&#xE768;" />
+                            <TextBlock x:Name="RunButtonLabel" Text="Run" />
+                        </StackPanel>
+                        <SplitButton.Flyout>
+                            <MenuFlyout x:Name="RunFlyout" Placement="BottomEdgeAlignedRight" />
+                        </SplitButton.Flyout>
+                    </SplitButton>
                     <Button Click="ManageSubprojects_Click" ToolTipService.ToolTip="Manage subprojects">
                         <FontIcon FontSize="14" Glyph="&#xE71D;" />
                     </Button>
@@ -212,6 +241,8 @@
             <SelectorBarItem x:Name="ReadmeTab" Text="README" IsSelected="True" />
             <SelectorBarItem x:Name="GitTab" Text="Git" Visibility="Collapsed" />
             <SelectorBarItem x:Name="FilesTab" Text="Files" />
+            <!-- Text becomes "GitHub"/"GitLab"; only shown when the remote matches a connected account. -->
+            <SelectorBarItem x:Name="ForgeTab" Text="GitHub" Visibility="Collapsed" />
         </SelectorBar>
 
         <!-- README -->
@@ -487,6 +518,323 @@
                     </Grid>
                 </Grid>
             </Border>
+        </Grid>
+
+        <!-- Forge (GitHub / GitLab) -->
+        <Grid
+            x:Name="ForgeContainer"
+            Grid.Row="2"
+            Margin="0,12,0,24"
+            RowSpacing="12"
+            Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Repo header -->
+            <Border
+                Grid.Row="0"
+                Padding="16,12"
+                CornerRadius="{ThemeResource OverlayCornerRadius}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
+                        <TextBlock x:Name="ForgeRepoName" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock
+                            x:Name="ForgeRepoDescription"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            TextWrapping="Wrap"
+                            Visibility="Collapsed" />
+                    </StackPanel>
+
+                    <StackPanel
+                        Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="12"
+                        VerticalAlignment="Center">
+                        <ProgressRing x:Name="ForgeLoading" Width="16" Height="16" IsActive="False" />
+                        <TextBlock
+                            x:Name="ForgeRepoStats"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+
+                    <Button
+                        x:Name="ForgeOpenRepoButton"
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        Click="ForgeOpenRepo_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="13" Glyph="&#xE8A7;" />
+                            <TextBlock x:Name="ForgeOpenRepoLabel" Text="Open on GitHub" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- PRs / issues / CI runs, side by side -->
+            <Grid Grid.Row="1" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    Grid.Column="0"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock
+                            x:Name="ForgePrsHeader"
+                            Margin="16,12"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="Open pull requests" />
+                        <TextBlock
+                            x:Name="ForgePrsEmpty"
+                            Grid.Row="1"
+                            Margin="16,0,16,16"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Nothing open."
+                            Visibility="Collapsed" />
+                        <ScrollViewer Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="ForgePrList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ForgeItemViewModel">
+                                        <Button
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Stretch"
+                                            Padding="8"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Tag="{x:Bind WebUrl}"
+                                            Click="ForgeItem_Click"
+                                            ToolTipService.ToolTip="{x:Bind WebUrl}">
+                                            <Grid ColumnSpacing="10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <!-- Octicon: git-pull-request (MIT, © GitHub) -->
+                                                <Viewbox
+                                                    Grid.Column="0"
+                                                    Width="16"
+                                                    Height="16"
+                                                    VerticalAlignment="Center">
+                                                    <Path
+                                                        Fill="{x:Bind IconBrush}"
+                                                        Data="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z" />
+                                                </Viewbox>
+                                                <StackPanel Grid.Column="1" Spacing="2">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock
+                                                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                            Text="{x:Bind Title}"
+                                                            TextTrimming="CharacterEllipsis" />
+                                                        <Border
+                                                            Padding="6,1"
+                                                            VerticalAlignment="Center"
+                                                            CornerRadius="8"
+                                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                            Visibility="{x:Bind IsDraft}">
+                                                            <TextBlock
+                                                                FontSize="10"
+                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                Text="Draft" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{x:Bind MetaText}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Column="1"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock
+                            x:Name="ForgeIssuesHeader"
+                            Margin="16,12"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="Open issues" />
+                        <TextBlock
+                            x:Name="ForgeIssuesEmpty"
+                            Grid.Row="1"
+                            Margin="16,0,16,16"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Nothing open."
+                            Visibility="Collapsed" />
+                        <ScrollViewer Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="ForgeIssueList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ForgeItemViewModel">
+                                        <Button
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Stretch"
+                                            Padding="8"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Tag="{x:Bind WebUrl}"
+                                            Click="ForgeItem_Click"
+                                            ToolTipService.ToolTip="{x:Bind WebUrl}">
+                                            <Grid ColumnSpacing="10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <!-- Octicon: issue-opened (MIT, © GitHub) -->
+                                                <Viewbox
+                                                    Grid.Column="0"
+                                                    Width="16"
+                                                    Height="16"
+                                                    VerticalAlignment="Center">
+                                                    <Path
+                                                        Fill="{x:Bind IconBrush}"
+                                                        Data="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z" />
+                                                </Viewbox>
+                                                <StackPanel Grid.Column="1" Spacing="2">
+                                                    <TextBlock
+                                                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                        Text="{x:Bind Title}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{x:Bind MetaText}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Column="2"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock
+                            x:Name="ForgeRunsHeader"
+                            Margin="16,12"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="Workflow runs" />
+                        <TextBlock
+                            x:Name="ForgeRunsEmpty"
+                            Grid.Row="1"
+                            Margin="16,0,16,16"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="No runs yet."
+                            Visibility="Collapsed" />
+                        <ScrollViewer Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="ForgeRunList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ForgeRunViewModel">
+                                        <Button
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Stretch"
+                                            Padding="8"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Tag="{x:Bind WebUrl}"
+                                            Click="ForgeItem_Click"
+                                            ToolTipService.ToolTip="{x:Bind WebUrl}">
+                                            <Grid ColumnSpacing="10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="86" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Status pill -->
+                                                <Border
+                                                    Grid.Column="0"
+                                                    Padding="8,3"
+                                                    VerticalAlignment="Top"
+                                                    HorizontalAlignment="Left"
+                                                    CornerRadius="10"
+                                                    Background="{x:Bind StatusBackground}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                                        <FontIcon
+                                                            FontSize="11"
+                                                            Glyph="{x:Bind StatusGlyph}"
+                                                            Foreground="{x:Bind StatusBrush}" />
+                                                        <TextBlock
+                                                            FontSize="11"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{x:Bind StatusBrush}"
+                                                            Text="{x:Bind StatusLabel}" />
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <StackPanel Grid.Column="1" Spacing="2">
+                                                    <TextBlock TextTrimming="CharacterEllipsis">
+                                                        <Run FontWeight="SemiBold" Text="{x:Bind Name}" /><Run Text="  " /><Run Text="{x:Bind Title}" />
+                                                    </TextBlock>
+                                                    <TextBlock
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{x:Bind DetailText}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{x:Bind TimeText}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
         </Grid>
     </Grid>
 </Page>

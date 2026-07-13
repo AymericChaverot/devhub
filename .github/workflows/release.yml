@@ -17,35 +17,73 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - uses: microsoft/setup-msbuild@v2
-
-      - name: Build MSIX package (unsigned)
+      - name: Build MSIX package
         # WindowsPackageType/SelfContained overrides flip the project from its
-        # unpackaged dev default to a packaged MSIX build.
+        # unpackaged dev default to a packaged MSIX build. Signing happens in a
+        # separate SignTool step: the packaging targets silently skip signing
+        # when handed a password-protected PFX (APPX0105).
         run: >
-          msbuild src/DevHub.App/DevHub.App.csproj /restore
-          /p:Configuration=Release
-          /p:Platform=x64
-          /p:WindowsPackageType=MSIX
-          /p:WindowsAppSDKSelfContained=false
-          /p:GenerateAppxPackageOnBuild=true
-          /p:UapAppxPackageBuildMode=SideloadOnly
-          /p:AppxBundle=Never
-          /p:AppxPackageSigningEnabled=false
+          dotnet build src/DevHub.App/DevHub.App.csproj
+          -c Release
+          -p:Platform=x64
+          -p:WindowsPackageType=MSIX
+          -p:WindowsAppSDKSelfContained=false
+          -p:GenerateAppxPackageOnBuild=true
+          -p:UapAppxPackageBuildMode=SideloadOnly
+          -p:AppxBundle=Never
+          -p:AppxPackageSigningEnabled=false
 
-      - name: Collect package
+      - name: Sign package
         shell: pwsh
+        env:
+          SIGNING_CERT_PFX_BASE64: ${{ secrets.SIGNING_CERT_PFX_BASE64 }}
+          SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
         run: |
-          $msix = Get-ChildItem src/DevHub.App -Recurse -Filter *.msix | Select-Object -First 1
+          if (-not $env:SIGNING_CERT_PFX_BASE64) { throw "Missing SIGNING_CERT_PFX_BASE64 secret" }
+          if (-not $env:SIGNING_CERT_PASSWORD) { throw "Missing SIGNING_CERT_PASSWORD secret" }
+          $pfx = "$env:RUNNER_TEMP\signing.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:SIGNING_CERT_PFX_BASE64))
+
+          $msix = Get-ChildItem src/DevHub.App/AppPackages -Recurse -Filter *.msix | Select-Object -First 1
           if (-not $msix) { throw "No .msix produced" }
+
+          # SignTool ships in the Windows.SDK.BuildTools package the build restored.
+          $signtool = Get-ChildItem "$env:USERPROFILE\.nuget\packages\microsoft.windows.sdk.buildtools" -Recurse -Filter signtool.exe |
+            Where-Object { $_.FullName -match '\\x64\\' } | Select-Object -First 1 -ExpandProperty FullName
+          & $signtool sign /fd SHA256 /f $pfx /p $env:SIGNING_CERT_PASSWORD $msix.FullName
+          if ($LASTEXITCODE -ne 0) { throw "Signing failed" }
+
+          $signature = Get-AuthenticodeSignature $msix.FullName
+          if (-not $signature.SignerCertificate) { throw "Package is not signed" }
+          Write-Host "Signed by $($signature.SignerCertificate.Subject)"
+
           Copy-Item $msix.FullName "DevHub-$($env:GITHUB_REF_NAME)-x64.msix"
+
+          # The public .cer ships with the release so users can trust the package once.
+          $password = ConvertTo-SecureString $env:SIGNING_CERT_PASSWORD -AsPlainText -Force
+          $cert = Get-PfxCertificate -FilePath $pfx -Password $password
+          Export-Certificate -Cert $cert -FilePath "DevHub-signing.cer" | Out-Null
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
-          files: DevHub-*.msix
+          files: |
+            DevHub-*.msix
+            DevHub-signing.cer
           body: |
-            Unsigned sideload package. To install, enable Developer Mode and
-            trust the package, or sign it first (see DEVELOPMENT_PLAN.md open
-            questions — code signing is still to be decided).
+            ## Installation (first time)
+
+            The package is signed with a self-signed certificate; Windows must trust
+            it once before installing:
+
+            1. Download **DevHub-signing.cer** and **DevHub-…-x64.msix**.
+            2. Right-click the `.cer` → *Install Certificate* → **Local Machine** →
+               *Place all certificates in the following store* → **Trusted People**.
+            3. Double-click the `.msix` — App Installer takes it from there.
+
+            ## Updating
+
+            Nothing to do: DevHub checks this repository at startup and offers new
+            versions from its dashboard (Settings → About → *Check for updates* works
+            too). The certificate step is one-time only.

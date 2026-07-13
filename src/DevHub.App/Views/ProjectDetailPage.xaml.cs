@@ -25,6 +25,12 @@ public sealed partial class ProjectDetailPage : Page
     private readonly ISettingsService _settings;
     private readonly IIdeService _ides;
     private readonly IGitService _git;
+    private readonly ForgeAccountsViewModel _forgeAccounts;
+    private readonly ITerminalService _terminal;
+    private ForgeAccountViewModel? _forgeAccount;
+    private string? _forgeRepo;
+    private string? _forgeWebUrl;
+    private bool _forgeLoaded;
     private readonly System.Collections.ObjectModel.ObservableCollection<GraphCommitRow> _graphRows = [];
     private Project? _project;
     private bool _initializingBranches;
@@ -52,6 +58,8 @@ public sealed partial class ProjectDetailPage : Page
         _settings = App.Services.GetRequiredService<ISettingsService>();
         _ides = App.Services.GetRequiredService<IIdeService>();
         _git = App.Services.GetRequiredService<IGitService>();
+        _forgeAccounts = App.Services.GetRequiredService<ForgeAccountsViewModel>();
+        _terminal = App.Services.GetRequiredService<ITerminalService>();
         InitializeComponent();
 
         // Win2D canvases must be torn down explicitly or they leak their device.
@@ -77,6 +85,7 @@ public sealed partial class ProjectDetailPage : Page
         }
 
         _project = project;
+        await RecordProjectOpenedAsync(project);
         ProjectName.Text = project.Name;
         ProjectPath.Text = relativeDisplay ?? project.Path;
         RefreshSubprojectButtons();
@@ -89,10 +98,281 @@ public sealed partial class ProjectDetailPage : Page
 
         ShowTechDecoration(project);
         ShowRemoteButton(project.GitRemoteUrl);
+        SetupForgeTab(project);
+        RebuildRunMenu();
 
         await PopulateIdePickerAsync(project);
         await LoadGitAsync(project);
         await LoadReadmeAsync(project.Path);
+    }
+
+    /// <summary>Stamps the project as "last opened now"; the dashboard's recent list reads this.</summary>
+    private async Task RecordProjectOpenedAsync(Project project)
+    {
+        _settings.Settings.ProjectLastOpened[project.Path] = DateTime.UtcNow;
+        await _settings.SaveAsync();
+    }
+
+    // ============ Run configurations ============
+
+    private List<RunConfig> RunConfigs =>
+        _project is not null && _settings.Settings.ProjectRunConfigs.TryGetValue(_project.Path, out var configs)
+            ? configs
+            : [];
+
+    /// <summary>Rebuilds the Run split-button flyout from the project's saved configurations.</summary>
+    private void RebuildRunMenu()
+    {
+        RunFlyout.Items.Clear();
+
+        var configs = RunConfigs;
+        RunButtonLabel.Text = configs.Count > 0 ? $"Run · {configs[0].Name}" : "Run";
+
+        foreach (var config in configs)
+        {
+            var item = new MenuFlyoutItem
+            {
+                Text = config.Name,
+                Icon = new FontIcon { Glyph = "\uE768" },
+                Tag = config,
+            };
+            ToolTipService.SetToolTip(item, config.Command);
+            item.Click += (s, _) => RunConfiguration((RunConfig)((MenuFlyoutItem)s).Tag);
+            RunFlyout.Items.Add(item);
+        }
+
+        if (configs.Count > 0)
+        {
+            RunFlyout.Items.Add(new MenuFlyoutSeparator());
+        }
+
+        var add = new MenuFlyoutItem
+        {
+            Text = "Add configuration…",
+            Icon = new FontIcon { Glyph = "\uE710" },
+        };
+        add.Click += async (_, _) => await AddRunConfigAsync();
+        RunFlyout.Items.Add(add);
+
+        if (configs.Count > 0)
+        {
+            var remove = new MenuFlyoutSubItem
+            {
+                Text = "Remove configuration",
+                Icon = new FontIcon { Glyph = "\uE74D" },
+            };
+            foreach (var config in configs)
+            {
+                var item = new MenuFlyoutItem { Text = config.Name, Tag = config };
+                item.Click += async (s, _) => await RemoveRunConfigAsync((RunConfig)((MenuFlyoutItem)s).Tag);
+                remove.Items.Add(item);
+            }
+
+            RunFlyout.Items.Add(remove);
+        }
+    }
+
+    /// <summary>Main part of the split button: runs the default (first) configuration.</summary>
+    private async void Run_Click(SplitButton sender, SplitButtonClickEventArgs args)
+    {
+        var configs = RunConfigs;
+        if (configs.Count > 0)
+        {
+            RunConfiguration(configs[0]);
+        }
+        else
+        {
+            await AddRunConfigAsync(runAfterAdd: true);
+        }
+    }
+
+    private void RunConfiguration(RunConfig config)
+    {
+        if (_project is null)
+        {
+            return;
+        }
+
+        Log.Information("Running {Config} for {Project}: {Command}", config.Name, _project.Name, config.Command);
+        try
+        {
+            _terminal.OpenTerminal(_project.Path, config.Command);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to open a terminal for {Project}", _project.Name);
+        }
+    }
+
+    private async Task AddRunConfigAsync(bool runAfterAdd = false)
+    {
+        if (_project is null)
+        {
+            return;
+        }
+
+        var nameBox = new TextBox
+        {
+            Header = "Name",
+            PlaceholderText = "dev",
+        };
+        var commandBox = new TextBox
+        {
+            Header = "Command (runs in PowerShell, inside the project folder)",
+            PlaceholderText = "npm run dev",
+            AcceptsReturn = false,
+        };
+        var dialog = new ContentDialog
+        {
+            Title = "Add a run configuration",
+            PrimaryButtonText = "Add",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = XamlRoot,
+            Content = new StackPanel { Spacing = 12, Children = { nameBox, commandBox } },
+        };
+
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary
+            || commandBox.Text.Trim().Length == 0)
+        {
+            return;
+        }
+
+        var config = new RunConfig
+        {
+            Name = nameBox.Text.Trim().Length > 0 ? nameBox.Text.Trim() : "default",
+            Command = commandBox.Text.Trim(),
+        };
+
+        if (!_settings.Settings.ProjectRunConfigs.TryGetValue(_project.Path, out var configs))
+        {
+            configs = [];
+            _settings.Settings.ProjectRunConfigs[_project.Path] = configs;
+        }
+
+        configs.Add(config);
+        await _settings.SaveAsync();
+        RebuildRunMenu();
+
+        if (runAfterAdd)
+        {
+            RunConfiguration(config);
+        }
+    }
+
+    private async Task RemoveRunConfigAsync(RunConfig config)
+    {
+        if (_project is null)
+        {
+            return;
+        }
+
+        if (_settings.Settings.ProjectRunConfigs.TryGetValue(_project.Path, out var configs))
+        {
+            configs.Remove(config);
+            if (configs.Count == 0)
+            {
+                _settings.Settings.ProjectRunConfigs.Remove(_project.Path);
+            }
+
+            await _settings.SaveAsync();
+        }
+
+        RebuildRunMenu();
+    }
+
+    /// <summary>Shows the GitHub/GitLab tab when the remote belongs to a connected account.</summary>
+    private void SetupForgeTab(Project project)
+    {
+        _forgeAccount = null;
+        _forgeRepo = null;
+        _forgeWebUrl = null;
+        _forgeLoaded = false;
+        ForgeTab.Visibility = Visibility.Collapsed;
+
+        if (!ForgeUrls.TryParseRepo(project.GitRemoteUrl, out var host, out var repo))
+        {
+            return;
+        }
+
+        if (_forgeAccounts.ConnectedForHost(host) is not { } account)
+        {
+            return;
+        }
+
+        _forgeAccount = account;
+        _forgeRepo = repo;
+        ForgeTab.Text = account.DisplayName;
+        ForgeOpenRepoLabel.Text = $"Open on {account.DisplayName}";
+        ForgeTab.Visibility = Visibility.Visible;
+    }
+
+    private async Task LoadForgeAsync()
+    {
+        if (_forgeAccount is null || _forgeRepo is null)
+        {
+            return;
+        }
+
+        var isGitLab = _forgeAccount.Kind == Core.Models.ForgeKind.GitLab;
+        var prsLabel = isGitLab ? "Open merge requests" : "Open pull requests";
+        var runsLabel = isGitLab ? "Pipelines" : "Workflow runs";
+        ForgeRepoName.Text = _forgeRepo;
+        ForgePrsHeader.Text = prsLabel;
+        ForgeIssuesHeader.Text = "Open issues";
+        ForgeRunsHeader.Text = runsLabel;
+        ForgeLoading.IsActive = true;
+        try
+        {
+            var repoTask = _forgeAccount.GetRepositoryAsync(_forgeRepo);
+            var prsTask = _forgeAccount.GetRepoPullRequestsAsync(_forgeRepo);
+            var issuesTask = _forgeAccount.GetRepoIssuesAsync(_forgeRepo);
+            var runsTask = _forgeAccount.GetRepoWorkflowRunsAsync(_forgeRepo);
+            await Task.WhenAll(repoTask, prsTask, issuesTask, runsTask);
+
+            var info = await repoTask;
+            ForgeRepoDescription.Text = info?.Description ?? "";
+            ForgeRepoDescription.Visibility =
+                string.IsNullOrWhiteSpace(info?.Description) ? Visibility.Collapsed : Visibility.Visible;
+            ForgeRepoStats.Text = info is null ? "" : $"★ {info.Stars}   ⑂ {info.Forks}";
+            _forgeWebUrl = info?.WebUrl;
+
+            var prs = (await prsTask).Select(i => new ForgeItemViewModel(i, showRepo: false)).ToList();
+            ForgePrsHeader.Text = $"{prsLabel} ({prs.Count})";
+            ForgePrList.ItemsSource = prs;
+            ForgePrsEmpty.Visibility = prs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            var issues = (await issuesTask).Select(i => new ForgeItemViewModel(i, showRepo: false)).ToList();
+            ForgeIssuesHeader.Text = $"Open issues ({issues.Count})";
+            ForgeIssueList.ItemsSource = issues;
+            ForgeIssuesEmpty.Visibility = issues.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            var runs = (await runsTask).Select(r => new ForgeRunViewModel(r)).ToList();
+            ForgeRunsHeader.Text = $"{runsLabel} ({runs.Count})";
+            ForgeRunList.ItemsSource = runs;
+            ForgeRunsEmpty.Visibility = runs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+        finally
+        {
+            ForgeLoading.IsActive = false;
+        }
+    }
+
+    private void ForgeItem_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is string url && url.Length > 0)
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
+    }
+
+    private void ForgeOpenRepo_Click(object sender, RoutedEventArgs e)
+    {
+        var url = _forgeWebUrl ?? _remoteWebUrl?.ToString();
+        if (url is { Length: > 0 })
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
     }
 
     private void SectionBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
@@ -101,10 +381,17 @@ public sealed partial class ProjectDetailPage : Page
         ReadmeContainer.Visibility = selected == ReadmeTab ? Visibility.Visible : Visibility.Collapsed;
         GitContainer.Visibility = selected == GitTab ? Visibility.Visible : Visibility.Collapsed;
         FilesContainer.Visibility = selected == FilesTab ? Visibility.Visible : Visibility.Collapsed;
+        ForgeContainer.Visibility = selected == ForgeTab ? Visibility.Visible : Visibility.Collapsed;
 
         if (selected == FilesTab && !_filesLoaded)
         {
             PopulateFileTreeRoot();
+        }
+
+        if (selected == ForgeTab && !_forgeLoaded)
+        {
+            _forgeLoaded = true;
+            _ = LoadForgeAsync();
         }
 
         // The graph's ScrollViewer only exists once the Git tab has been realized.

@@ -28,12 +28,25 @@ public partial class App : Application
         var settings = Services.GetRequiredService<ISettingsService>();
         await settings.LoadAsync();
 
+        // Required before showing toast notifications (pomodoro completion).
+        try
+        {
+            Microsoft.Windows.AppNotifications.AppNotificationManager.Default.Register();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Toast notification registration failed; timers will finish silently");
+        }
+
         _window = new MainWindow();
         _mainWindow = _window;
         MainWindowHandle = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         ApplyTheme(settings.Settings.Theme);
         _window.Activate();
         Log.Information("DevHub started");
+
+        // Silent update check; the dashboard banner appears if a release is newer.
+        _ = Services.GetRequiredService<ViewModels.UpdateViewModel>().CheckSilentlyAsync();
     }
 
     private static Window? _mainWindow;
@@ -63,8 +76,19 @@ public partial class App : Application
         services.AddSingleton<IGitService, LibGit2GitService>();
         services.AddSingleton<IFileOperations, ShellFileOperations>();
         services.AddSingleton<IIdeService, InstalledIdeService>();
+        services.AddSingleton<ISystemInfoService, WmiSystemInfoService>();
+        services.AddSingleton<IWeatherService, OpenMeteoWeatherService>();
+        services.AddSingleton<ITokenStore, WindowsCredentialTokenStore>();
+        services.AddSingleton<ITerminalService, WindowsTerminalService>();
+        services.AddSingleton<IUpdateService, GitHubUpdateService>();
+        services.AddSingleton<ViewModels.UpdateViewModel>();
+        services.AddSingleton<ViewModels.PomodoroViewModel>();
+        services.AddSingleton<IForgeService, GitHubForgeService>();
+        services.AddSingleton<IForgeService, GitLabForgeService>();
+        services.AddSingleton<ViewModels.ForgeAccountsViewModel>();
         services.AddSingleton<ViewModels.EnvironmentsViewModel>();
         services.AddSingleton<ViewModels.ProjectsViewModel>();
+        services.AddSingleton<ViewModels.DashboardViewModel>();
         return services.BuildServiceProvider();
     }
 

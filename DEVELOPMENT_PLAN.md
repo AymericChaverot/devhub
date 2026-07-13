@@ -152,9 +152,14 @@ one's acceptance criteria pass.
 
 **Accept when:** a folder containing Node, Rust and .NET projects shows correct badges for each; "Open in VS Code" opens the right folder; all detection rules have passing tests.
 
-### 🏁 Release v0.1.0 — MVP
+### 🏁 Release v0.1.0 — in flight (2026-07-13)
 
-Tag, publish MSIX on GitHub Releases, write install instructions in the README.
+Decision: preview releases are **self-signed** (paid cert / Azure Trusted Signing
+deferred). release.yml signs the MSIX with a PFX from GitHub secrets
+(`SIGNING_CERT_PFX_BASE64` + `SIGNING_CERT_PASSWORD`) and attaches the public
+`DevHub-signing.cer` with one-time trust instructions; the README documents the
+install flow. Releases are drafted by CI, then published manually — the in-app
+updater only sees published releases. Remaining: push the `v0.1.0` tag, publish.
 **Everything below is post-MVP and intentionally not specified in detail yet** — each future
 phase gets its own design section in this file before work starts.
 
@@ -165,11 +170,57 @@ working-tree status, ahead/behind, and fetch/pull/push. Local operations use
 LibGit2Sharp; network operations shell out to the git CLI so Git Credential
 Manager handles authentication (like an IDE). Commit/stage UI: future work.
 
-### Phase 5 — GitHub/GitLab integration *(future)*
-OAuth device flow, PRs/MRs, issues, review threads. Tokens stored in **Windows Credential Manager**, never in settings.json.
+### 🚧 Phase 5 — GitHub/GitLab integration — started 2026-07-12
+Shipped so far: `IForgeService` abstraction with GitHub + GitLab REST implementations
+(personal access tokens; validated via `/user`), `ITokenStore` over the **Windows Credential
+Manager** (tokens never touch settings.json), account connect/disconnect UI in Settings,
+a three-feed "Your work" card on the dashboard (reviews requested / my PRs / assigned
+issues, aggregated across both forges), and a per-project GitHub/GitLab tab on the
+project detail page (repo description + stars/forks, open PRs/MRs, open issues, and
+CI runs — GitHub Actions / GitLab pipelines — with status icons; shown when the git
+remote matches a connected account). PR/issue rows carry Octicon glyphs. GitHub feeds
+use the /issues endpoint where possible (fine-grained-token friendly); review requests
+still need the search API. Remaining: review threads, PR detail view, OAuth device
+flow (needs a registered OAuth app client id), self-hosted GitLab base URL.
 
-### Phase 6 — Developer dashboard *(future)*
-Machine info (CPU/RAM/GPU/storage via WMI + performance counters), last opened projects, PR-awaiting-review feed (needs Phase 5), optional weather.
+### ✅ Phase 7 — Toolbox — done 2026-07-13
+"Toolbox" nav tab with everyday utilities, logic in `DevToolbox` (DevHub.Core, unit
+tested): text ⇄ Base64/hex/binary/URL converter, MD5/SHA-1/SHA-256/SHA-512 hashes,
+JWT decoder (no signature verification), JSON formatter/minifier, UUID generator,
+unix-timestamp inspector, regex tester (1 s timeout guard), line-based text diff
+(LCS), color converter (hex/RGB/HSL + swatch), password generator (crypto RNG),
+and a small API client (method/URL/headers/body → status, duration, response
+headers, pretty-printed JSON body).
+
+### ✅ Dashboard polish & Pomodoro — done 2026-07-13
+Weather location is user-configurable (Settings → General; empty = automatic IP
+lookup) via Open-Meteo geocoding, the card shows "City, Country" and grew a bit,
+and a blurred Win2D sun/moon + clouds/rain/snow decoration (driven by the WMO code
+and Open-Meteo's is_day) sits in the Home page's top-left background. A Pomodoro
+timer lives in the navigation pane footer — visible on every page while running —
+with Focus/Break presets, custom durations, pause/stop, and a toast notification
+(AppNotificationManager) when the countdown ends.
+
+### ✅ In-app updater — done 2026-07-13
+`GitHubUpdateService` polls the repo's latest GitHub Release at startup (silent, never
+blocks) and compares its tag to the package identity version. When newer: dashboard
+InfoBar with "Install now" (downloads the .msix/.msixbundle asset with progress, then
+hands off to Windows App Installer) and a release-notes link; Settings → About gets a
+manual "Check for updates" button. Requires releases tagged `v*` with an MSIX asset
+(release.yml already does this).
+
+### ✅ Run configurations — done 2026-07-13
+Accent "Run" split-button on the project hero: named launch commands per project
+(dev, test…) stored in settings, launched in Windows Terminal (PowerShell fallback)
+inside the project folder. Flyout to pick/add/remove configurations; the main button
+runs the first one.
+
+### ✅ Phase 6 — Developer dashboard — done 2026-07-12
+Home tab (default page): greeting with the user's first name, weather (ipwho.is +
+Open-Meteo, keyless, 20-min cache, hides offline), CPU/memory ring gauges refreshed
+every 5 s (WMI), GPU/OS cards, per-drive usage bars, tool-updates card wired to the
+Environments inventory, recently-opened projects (tracked in settings), and the Phase 5
+review feed.
 
 ---
 
@@ -187,5 +238,5 @@ Machine info (CPU/RAM/GPU/storage via WMI + performance counters), last opened p
 
 - Phase 1: exact contents of the curated catalog — pick the ~20 packages together.
 - Phase 2: monorepo handling — is one top-level folder always one project, or should nested git repos be split?
-- Release: code-signing certificate (paid) vs self-signed + install instructions vs Azure Trusted Signing.
+- ~~Release: code-signing certificate (paid) vs self-signed + install instructions vs Azure Trusted Signing.~~ → self-signed for previews (v0.1.0); revisit paid/Trusted Signing before a public launch.
 - Phase 5: GitHub first and GitLab later, or both at once?

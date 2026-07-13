@@ -18,17 +18,20 @@ public sealed partial class ToolVariantViewModel : ObservableObject
 {
     private readonly Func<ToolVariantViewModel, Task> _install;
     private readonly Func<ToolVariantViewModel, Task> _uninstall;
+    private readonly Func<ToolVariantViewModel, Task> _update;
 
     public ToolVariantViewModel(
         string toolName,
         ToolVariant variant,
         Func<ToolVariantViewModel, Task> install,
-        Func<ToolVariantViewModel, Task> uninstall)
+        Func<ToolVariantViewModel, Task> uninstall,
+        Func<ToolVariantViewModel, Task> update)
     {
         ToolName = toolName;
         Variant = variant;
         _install = install;
         _uninstall = uninstall;
+        _update = update;
     }
 
     public ToolVariant Variant { get; }
@@ -45,11 +48,18 @@ public sealed partial class ToolVariantViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsWorking))]
     [NotifyPropertyChangedFor(nameof(CanInstall))]
     [NotifyPropertyChangedFor(nameof(CanUninstall))]
+    [NotifyPropertyChangedFor(nameof(CanUpdate))]
     public partial PackageState State { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StatusText))]
     public partial string? InstalledVersion { get; set; }
+
+    /// <summary>Upgrade version winget advertises, or null when the package is up to date.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanUpdate))]
+    [NotifyPropertyChangedFor(nameof(UpdateHintText))]
+    public partial string? AvailableVersion { get; set; }
 
     /// <summary>Version-picker entry text; a check mark flags installed versions.</summary>
     public string DisplayLabel => State == PackageState.Installed ? $"{Label}  ✓" : Label;
@@ -59,6 +69,11 @@ public sealed partial class ToolVariantViewModel : ObservableObject
     public bool CanInstall => State == PackageState.NotInstalled;
 
     public bool CanUninstall => State == PackageState.Installed;
+
+    public bool CanUpdate => State == PackageState.Installed && AvailableVersion is not null;
+
+    /// <summary>Caption shown under the status line when an update is available.</summary>
+    public string UpdateHintText => AvailableVersion is null ? "" : $"Update available: {AvailableVersion}";
 
     public string StatusText => State switch
     {
@@ -75,4 +90,7 @@ public sealed partial class ToolVariantViewModel : ObservableObject
 
     [RelayCommand]
     private Task UninstallAsync() => _uninstall(this);
+
+    [RelayCommand]
+    private Task UpdateAsync() => _update(this);
 }

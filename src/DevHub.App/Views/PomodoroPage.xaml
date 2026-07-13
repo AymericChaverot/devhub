@@ -1,0 +1,114 @@
+<Page
+    x:Class="DevHub.App.Views.PomodoroPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="36,24,36,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Pomodoro" />
+            <TextBlock
+                Style="{StaticResource BodyTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="Focused work sessions with a notification when time is up. The timer keeps running while you use the rest of the app." />
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="28">
+
+            <!-- The dial -->
+            <Grid HorizontalAlignment="Center">
+                <ProgressRing
+                    Width="230"
+                    Height="230"
+                    IsIndeterminate="False"
+                    Maximum="100"
+                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                    Value="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}" />
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        FontSize="46"
+                        FontWeight="SemiBold"
+                        Text="{x:Bind ViewModel.TimeText, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.IsActive, Mode=OneWay}" />
+                    <FontIcon
+                        FontSize="46"
+                        Glyph="&#xE823;"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Visibility="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.SessionLabel, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.IsActive, Mode=OneWay}" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Active controls -->
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                Spacing="12"
+                Visibility="{x:Bind ViewModel.IsActive, Mode=OneWay}">
+                <Button
+                    MinWidth="120"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Command="{x:Bind ViewModel.TogglePauseCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="{x:Bind ViewModel.PauseGlyph, Mode=OneWay}" />
+                        <TextBlock Text="{x:Bind ViewModel.PauseTooltip, Mode=OneWay}" />
+                    </StackPanel>
+                </Button>
+                <Button MinWidth="120" Command="{x:Bind ViewModel.StopCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE71A;" />
+                        <TextBlock Text="Stop" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <!-- Idle: presets + custom -->
+            <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.IsIdle, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+                    <Button
+                        Style="{StaticResource AccentButtonStyle}"
+                        Content="Focus · 25 min"
+                        Tag="25|Focus"
+                        Click="Preset_Click" />
+                    <Button Content="Focus · 50 min" Tag="50|Focus" Click="Preset_Click" />
+                    <Button Content="Break · 5 min" Tag="5|Break" Click="Preset_Click" />
+                    <Button Content="Break · 15 min" Tag="15|Break" Click="Preset_Click" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+                    <NumberBox
+                        x:Name="CustomMinutes"
+                        Header="Minutes"
+                        Width="140"
+                        Minimum="1"
+                        Maximum="240"
+                        Value="25"
+                        SpinButtonPlacementMode="Compact" />
+                    <TextBox
+                        x:Name="CustomLabel"
+                        Header="Label"
+                        Width="160"
+                        Text="Focus" />
+                    <Button
+                        VerticalAlignment="Bottom"
+                        Content="Start"
+                        Click="CustomStart_Click" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Page>

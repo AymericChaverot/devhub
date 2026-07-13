@@ -1,0 +1,562 @@
+<Page
+    x:Class="DevHub.App.Views.DevToolsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Page.Resources>
+        <Style x:Key="ToolCard" TargetType="Border">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="CornerRadius" Value="{ThemeResource OverlayCornerRadius}" />
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style x:Key="MonoBox" TargetType="TextBox">
+            <Setter Property="FontFamily" Value="Cascadia Code, Consolas" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="AcceptsReturn" Value="True" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+        <Style x:Key="ErrorText" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+            <Setter Property="Foreground" Value="{ThemeResource SystemFillColorCriticalBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Visibility" Value="Collapsed" />
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="36,24,36,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Toolbox" />
+            <TextBlock
+                Style="{StaticResource BodyTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="Everyday developer utilities — everything runs locally except the API client." />
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="0,16,0,24" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ListView
+                x:Name="ToolsList"
+                Grid.Column="0"
+                SelectionMode="Single"
+                SelectionChanged="ToolsList_SelectionChanged">
+                <ListViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE8AB;" />
+                        <TextBlock Text="Converter" />
+                    </StackPanel>
+                </ListViewItem>
+                <ListViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE72E;" />
+                        <TextBlock Text="Hashes" />
+                    </StackPanel>
+                </ListViewItem>
+                <ListViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE77B;" />
+                        <TextBlock Text="JWT decoder" />
+                    </StackPanel>
+                </ListViewItem>
+                <ListViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE943;" />
+                        <TextBlock Text="JSON formatter" />
+                    </StackPanel>
+                </ListViewItem>
+                <ListViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE823;" />
+                        <TextBlock Text="UUID &amp; time" />
+                    </StackPanel>
+                </ListViewItem>
+                <ListViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE721;" />
+                        <TextBlock Text="Regex tester" />
+                    </StackPanel>
+                </ListViewItem>
+                <ListViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE7C3;" />
+                        <TextBlock Text="Text diff" />
+                    </StackPanel>
+                </ListViewItem>
+                <ListViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE790;" />
+                        <TextBlock Text="Color converter" />
+                    </StackPanel>
+                </ListViewItem>
+                <ListViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE8D7;" />
+                        <TextBlock Text="Password generator" />
+                    </StackPanel>
+                </ListViewItem>
+                <ListViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE774;" />
+                        <TextBlock Text="API client" />
+                    </StackPanel>
+                </ListViewItem>
+            </ListView>
+
+            <!-- ============ Converter ============ -->
+            <ScrollViewer x:Name="ConverterPanel" Grid.Column="1">
+                <StackPanel Spacing="12">
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ComboBox x:Name="ConvertFrom" MinWidth="130" SelectedIndex="0" SelectionChanged="Converter_Changed">
+                                    <ComboBoxItem Content="Text" />
+                                    <ComboBoxItem Content="Base64" />
+                                    <ComboBoxItem Content="Hex" />
+                                    <ComboBoxItem Content="Binary" />
+                                    <ComboBoxItem Content="URL-encoded" />
+                                </ComboBox>
+                                <Button Click="ConverterSwap_Click" ToolTipService.ToolTip="Swap directions">
+                                    <FontIcon FontSize="14" Glyph="&#xE8AB;" />
+                                </Button>
+                                <ComboBox x:Name="ConvertTo" MinWidth="130" SelectedIndex="1" SelectionChanged="Converter_Changed">
+                                    <ComboBoxItem Content="Text" />
+                                    <ComboBoxItem Content="Base64" />
+                                    <ComboBoxItem Content="Hex" />
+                                    <ComboBoxItem Content="Binary" />
+                                    <ComboBoxItem Content="URL-encoded" />
+                                </ComboBox>
+                            </StackPanel>
+                            <TextBox
+                                x:Name="ConvertInput"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="140"
+                                PlaceholderText="Type or paste the input here"
+                                TextChanged="Converter_Changed" />
+                            <TextBlock x:Name="ConvertError" Style="{StaticResource ErrorText}" />
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox
+                                    x:Name="ConvertOutput"
+                                    Style="{StaticResource MonoBox}"
+                                    MinHeight="140"
+                                    IsReadOnly="True"
+                                    PlaceholderText="Result" />
+                                <Button
+                                    Grid.Column="1"
+                                    VerticalAlignment="Top"
+                                    Click="CopyConvertOutput_Click"
+                                    ToolTipService.ToolTip="Copy result">
+                                    <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============ Hashes ============ -->
+            <ScrollViewer x:Name="HashesPanel" Grid.Column="1" Visibility="Collapsed">
+                <StackPanel Spacing="12">
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <TextBox
+                                x:Name="HashInput"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="120"
+                                PlaceholderText="Text to hash (UTF-8)"
+                                TextChanged="HashInput_TextChanged" />
+                            <ItemsControl x:Name="HashList">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="8" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============ JWT ============ -->
+            <ScrollViewer x:Name="JwtPanel" Grid.Column="1" Visibility="Collapsed">
+                <StackPanel Spacing="12">
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <TextBox
+                                x:Name="JwtInput"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="100"
+                                PlaceholderText="Paste a JWT (header.payload.signature)"
+                                TextChanged="JwtInput_TextChanged" />
+                            <TextBlock x:Name="JwtError" Style="{StaticResource ErrorText}" />
+                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Header" />
+                            <TextBox
+                                x:Name="JwtHeader"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="80"
+                                IsReadOnly="True" />
+                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Payload" />
+                            <TextBox
+                                x:Name="JwtPayload"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="140"
+                                IsReadOnly="True" />
+                            <TextBlock
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="The signature is not verified — this is a decoder, not a validator." />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============ JSON ============ -->
+            <ScrollViewer x:Name="JsonPanel" Grid.Column="1" Visibility="Collapsed">
+                <StackPanel Spacing="12">
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <TextBox
+                                x:Name="JsonInput"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="160"
+                                PlaceholderText="Paste JSON here" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Style="{StaticResource AccentButtonStyle}" Content="Format" Click="JsonFormat_Click" />
+                                <Button Content="Minify" Click="JsonMinify_Click" />
+                                <Button Click="CopyJsonOutput_Click" ToolTipService.ToolTip="Copy result">
+                                    <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+                                </Button>
+                            </StackPanel>
+                            <TextBlock x:Name="JsonError" Style="{StaticResource ErrorText}" />
+                            <TextBox
+                                x:Name="JsonOutput"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="200"
+                                IsReadOnly="True"
+                                PlaceholderText="Result" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============ UUID & time ============ -->
+            <ScrollViewer x:Name="UuidPanel" Grid.Column="1" Visibility="Collapsed">
+                <StackPanel Spacing="12">
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="UUID generator" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ComboBox x:Name="UuidCount" MinWidth="90" SelectedIndex="1">
+                                    <ComboBoxItem Content="1" />
+                                    <ComboBoxItem Content="5" />
+                                    <ComboBoxItem Content="10" />
+                                </ComboBox>
+                                <ToggleButton x:Name="UuidUppercase" Content="Uppercase" />
+                                <Button Style="{StaticResource AccentButtonStyle}" Content="Generate" Click="GenerateUuids_Click" />
+                                <Button Click="CopyUuids_Click" ToolTipService.ToolTip="Copy">
+                                    <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+                                </Button>
+                            </StackPanel>
+                            <TextBox
+                                x:Name="UuidOutput"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="120"
+                                IsReadOnly="True" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Unix timestamp" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBox
+                                    x:Name="TimestampInput"
+                                    Width="220"
+                                    FontFamily="Cascadia Code, Consolas"
+                                    PlaceholderText="e.g. 1752000000"
+                                    TextChanged="TimestampInput_TextChanged" />
+                                <Button Content="Now" Click="TimestampNow_Click" />
+                            </StackPanel>
+                            <TextBlock x:Name="TimestampError" Style="{StaticResource ErrorText}" />
+                            <TextBlock
+                                x:Name="TimestampOutput"
+                                FontFamily="Cascadia Code, Consolas"
+                                FontSize="12.5"
+                                IsTextSelectionEnabled="True" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============ Regex tester ============ -->
+            <ScrollViewer x:Name="RegexPanel" Grid.Column="1" Visibility="Collapsed">
+                <StackPanel Spacing="12">
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox
+                                    x:Name="RegexPattern"
+                                    FontFamily="Cascadia Code, Consolas"
+                                    PlaceholderText="Pattern, e.g. (\w+)@(\w+)\.com"
+                                    TextChanged="Regex_Changed" />
+                                <ToggleButton
+                                    x:Name="RegexIgnoreCase"
+                                    Grid.Column="1"
+                                    Content="Aa"
+                                    ToolTipService.ToolTip="Ignore case"
+                                    Click="Regex_Changed" />
+                                <ToggleButton
+                                    x:Name="RegexMultiline"
+                                    Grid.Column="2"
+                                    Content="¶"
+                                    ToolTipService.ToolTip="Multiline (^ and $ match line boundaries)"
+                                    Click="Regex_Changed" />
+                            </Grid>
+                            <TextBox
+                                x:Name="RegexInput"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="140"
+                                PlaceholderText="Text to search"
+                                TextChanged="Regex_Changed" />
+                            <TextBlock x:Name="RegexError" Style="{StaticResource ErrorText}" />
+                            <TextBlock
+                                x:Name="RegexSummary"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBox
+                                x:Name="RegexOutput"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="160"
+                                IsReadOnly="True"
+                                PlaceholderText="Matches appear here" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============ Text diff ============ -->
+            <ScrollViewer x:Name="DiffPanel" Grid.Column="1" Visibility="Collapsed">
+                <StackPanel Spacing="12">
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox
+                                    x:Name="DiffLeft"
+                                    Style="{StaticResource MonoBox}"
+                                    MinHeight="160"
+                                    PlaceholderText="Original text" />
+                                <TextBox
+                                    x:Name="DiffRight"
+                                    Grid.Column="1"
+                                    Style="{StaticResource MonoBox}"
+                                    MinHeight="160"
+                                    PlaceholderText="Modified text" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Style="{StaticResource AccentButtonStyle}" Content="Compare" Click="DiffCompare_Click" />
+                                <TextBlock
+                                    x:Name="DiffSummary"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                            <TextBlock x:Name="DiffError" Style="{StaticResource ErrorText}" />
+                            <Border
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
+                                Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
+                                Padding="12">
+                                <RichTextBlock
+                                    x:Name="DiffOutput"
+                                    FontFamily="Cascadia Code, Consolas"
+                                    FontSize="12.5"
+                                    IsTextSelectionEnabled="True" />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============ Color converter ============ -->
+            <ScrollViewer x:Name="ColorPanel" Grid.Column="1" Visibility="Collapsed">
+                <StackPanel Spacing="12">
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <TextBox
+                                x:Name="ColorInput"
+                                FontFamily="Cascadia Code, Consolas"
+                                PlaceholderText="#336699, rgb(51, 102, 153) or hsl(210, 50%, 40%)"
+                                TextChanged="ColorInput_TextChanged" />
+                            <TextBlock x:Name="ColorError" Style="{StaticResource ErrorText}" />
+                            <Grid ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border
+                                    x:Name="ColorSwatch"
+                                    Width="72"
+                                    Height="72"
+                                    CornerRadius="{ThemeResource ControlCornerRadius}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" />
+                                <StackPanel Grid.Column="1" Spacing="8">
+                                    <TextBox x:Name="ColorHex" FontFamily="Cascadia Code, Consolas" IsReadOnly="True" Header="Hex" />
+                                    <TextBox x:Name="ColorRgb" FontFamily="Cascadia Code, Consolas" IsReadOnly="True" Header="RGB" />
+                                    <TextBox x:Name="ColorHsl" FontFamily="Cascadia Code, Consolas" IsReadOnly="True" Header="HSL" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============ Password generator ============ -->
+            <ScrollViewer x:Name="PasswordPanel" Grid.Column="1" Visibility="Collapsed">
+                <StackPanel Spacing="12">
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Slider
+                                    x:Name="PasswordLength"
+                                    Width="240"
+                                    Minimum="8"
+                                    Maximum="64"
+                                    Value="20"
+                                    StepFrequency="1" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Text="{Binding ElementName=PasswordLength, Path=Value}" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="characters" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ToggleButton x:Name="PasswordUpper" Content="A-Z" IsChecked="True" />
+                                <ToggleButton x:Name="PasswordLower" Content="a-z" IsChecked="True" />
+                                <ToggleButton x:Name="PasswordDigits" Content="0-9" IsChecked="True" />
+                                <ToggleButton x:Name="PasswordSymbols" Content="!@#" IsChecked="True" />
+                                <Button Style="{StaticResource AccentButtonStyle}" Content="Generate" Click="GeneratePassword_Click" />
+                                <Button Click="CopyPassword_Click" ToolTipService.ToolTip="Copy">
+                                    <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+                                </Button>
+                            </StackPanel>
+                            <TextBlock x:Name="PasswordError" Style="{StaticResource ErrorText}" />
+                            <TextBox
+                                x:Name="PasswordOutput"
+                                Style="{StaticResource MonoBox}"
+                                FontSize="16"
+                                IsReadOnly="True" />
+                            <TextBlock
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Ambiguous characters (I, l, 0, O, 1) are excluded. Generated with a cryptographic RNG, never stored." />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ============ API client ============ -->
+            <ScrollViewer x:Name="ApiPanel" Grid.Column="1" Visibility="Collapsed">
+                <StackPanel Spacing="12">
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="ApiMethod" MinWidth="110" SelectedIndex="0">
+                                    <ComboBoxItem Content="GET" />
+                                    <ComboBoxItem Content="POST" />
+                                    <ComboBoxItem Content="PUT" />
+                                    <ComboBoxItem Content="PATCH" />
+                                    <ComboBoxItem Content="DELETE" />
+                                    <ComboBoxItem Content="HEAD" />
+                                </ComboBox>
+                                <TextBox
+                                    x:Name="ApiUrl"
+                                    Grid.Column="1"
+                                    FontFamily="Cascadia Code, Consolas"
+                                    PlaceholderText="https://api.example.com/resource"
+                                    KeyDown="ApiUrl_KeyDown" />
+                                <Button
+                                    x:Name="ApiSendButton"
+                                    Grid.Column="2"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Content="Send"
+                                    Click="ApiSend_Click" />
+                            </Grid>
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Header="Request headers &amp; body">
+                                <StackPanel Spacing="8" Padding="0,8,0,0">
+                                    <TextBox
+                                        x:Name="ApiHeaders"
+                                        Style="{StaticResource MonoBox}"
+                                        MinHeight="80"
+                                        PlaceholderText="One header per line, e.g.&#x0a;Authorization: Bearer TOKEN&#x0a;Accept: application/json" />
+                                    <TextBox
+                                        x:Name="ApiBody"
+                                        Style="{StaticResource MonoBox}"
+                                        MinHeight="120"
+                                        PlaceholderText="Request body (sent for POST/PUT/PATCH/DELETE; Content-Type defaults to application/json)" />
+                                </StackPanel>
+                            </Expander>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource ToolCard}">
+                        <StackPanel Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <ProgressRing x:Name="ApiProgress" Width="16" Height="16" IsActive="False" />
+                                <TextBlock
+                                    x:Name="ApiStatus"
+                                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                                    Text="Response" />
+                            </StackPanel>
+                            <Expander
+                                x:Name="ApiResponseHeadersExpander"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                Header="Response headers"
+                                Visibility="Collapsed">
+                                <TextBox
+                                    x:Name="ApiResponseHeaders"
+                                    Style="{StaticResource MonoBox}"
+                                    IsReadOnly="True"
+                                    MaxHeight="200" />
+                            </Expander>
+                            <TextBox
+                                x:Name="ApiResponseBody"
+                                Style="{StaticResource MonoBox}"
+                                MinHeight="220"
+                                IsReadOnly="True"
+                                PlaceholderText="Send a request to see the response here" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Page>

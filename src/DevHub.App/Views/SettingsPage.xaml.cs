@@ -22,17 +22,24 @@ public sealed partial class SettingsPage : Page
     {
         _settings = App.Services.GetRequiredService<ISettingsService>();
         _projects = App.Services.GetRequiredService<ProjectsViewModel>();
+        Accounts = App.Services.GetRequiredService<ForgeAccountsViewModel>();
+        Updates = App.Services.GetRequiredService<UpdateViewModel>();
         InitializeComponent();
         Loaded += (_, _) => Populate();
     }
 
+    public ForgeAccountsViewModel Accounts { get; }
+
+    public UpdateViewModel Updates { get; }
+
     private void Populate()
     {
         FolderPathText.Text = _settings.Settings.ProjectsFolderPath ?? "Not set";
+        WeatherLocationBox.Text = _settings.Settings.WeatherLocation ?? "";
         DataFolderText.Text = DataFolder;
 
-        var version = Assembly.GetExecutingAssembly().GetName().Version;
-        VersionText.Text = $"Version {version?.ToString(3) ?? "?"} (preview)";
+        // Package identity version — what the updater compares against releases.
+        VersionText.Text = $"{Updates.CurrentVersionText} (preview)";
 
         _initializingTheme = true;
         ThemePicker.SelectedIndex = _settings.Settings.Theme switch
@@ -72,6 +79,31 @@ public sealed partial class SettingsPage : Page
         _settings.Settings.Theme = theme;
         await _settings.SaveAsync();
         App.ApplyTheme(theme);
+    }
+
+    private async void WeatherLocation_LostFocus(object sender, RoutedEventArgs e) =>
+        await SaveWeatherLocationAsync();
+
+    private async void WeatherLocation_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Enter)
+        {
+            await SaveWeatherLocationAsync();
+        }
+    }
+
+    private async Task SaveWeatherLocationAsync()
+    {
+        var value = WeatherLocationBox.Text.Trim();
+        var normalized = value.Length == 0 ? null : value;
+        if (_settings.Settings.WeatherLocation == normalized)
+        {
+            return;
+        }
+
+        // The weather cache is keyed by this value; the dashboard refetches on its next load.
+        _settings.Settings.WeatherLocation = normalized;
+        await _settings.SaveAsync();
     }
 
     private void OpenLogs_Click(object sender, RoutedEventArgs e) =>

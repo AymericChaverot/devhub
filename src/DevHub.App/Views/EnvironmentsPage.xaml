@@ -45,6 +45,12 @@
                 VerticalAlignment="Center"
                 ItemsSource="{x:Bind ViewModel.StatusOptions}"
                 SelectedItem="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}" />
+            <Button
+                VerticalAlignment="Center"
+                Style="{StaticResource AccentButtonStyle}"
+                Content="{x:Bind ViewModel.UpdateAllLabel, Mode=OneWay}"
+                Command="{x:Bind ViewModel.UpdateAllCommand}"
+                Visibility="{x:Bind ViewModel.HasUpdates, Mode=OneWay}" />
             <ProgressRing
                 Margin="8,0,0,0"
                 VerticalAlignment="Center"
@@ -78,6 +84,14 @@
             SelectionMode="None"
             IsItemClickEnabled="False">
 
+            <!-- Margin lives on the container so the hover/press chrome hugs the card exactly. -->
+            <GridView.ItemContainerStyle>
+                <Style TargetType="GridViewItem">
+                    <Setter Property="Margin" Value="0,4,8,4" />
+                    <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+                </Style>
+            </GridView.ItemContainerStyle>
+
             <GridView.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.HeaderTemplate>
@@ -96,7 +110,6 @@
                     <Grid
                         Width="320"
                         Height="200"
-                        Margin="0,4,8,4"
                         Padding="16"
                         CornerRadius="{ThemeResource ControlCornerRadius}"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -113,6 +126,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
                             <Border
@@ -145,6 +159,16 @@
                                 VerticalAlignment="Center"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="{x:Bind DisplayName}" />
+
+                            <Button
+                                Grid.Column="2"
+                                VerticalAlignment="Top"
+                                Padding="10,4"
+                                Content="Update"
+                                Style="{StaticResource AccentButtonStyle}"
+                                ToolTipService.ToolTip="{x:Bind SelectedVariant.UpdateHintText, Mode=OneWay}"
+                                Command="{x:Bind SelectedVariant.UpdateCommand, Mode=OneWay}"
+                                Visibility="{x:Bind SelectedVariant.CanUpdate, Mode=OneWay}" />
                         </Grid>
 
                         <TextBlock
@@ -182,6 +206,11 @@
                                     Style="{StaticResource CaptionTextBlockStyle}"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                     Text="{x:Bind SelectedVariant.StatusText, Mode=OneWay}" />
+                                <TextBlock
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                    Text="{x:Bind SelectedVariant.UpdateHintText, Mode=OneWay}"
+                                    Visibility="{x:Bind SelectedVariant.CanUpdate, Mode=OneWay}" />
                                 <ProgressBar
                                     IsIndeterminate="True"
                                     Visibility="{x:Bind SelectedVariant.IsWorking, Mode=OneWay}" />

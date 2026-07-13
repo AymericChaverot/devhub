@@ -1,7 +1,7 @@
 namespace DevHub.Core.Services;
 
-/// <summary>One row of a `winget list` table.</summary>
-public sealed record WingetListEntry(string Name, string Id, string Version);
+/// <summary>One row of a `winget list` table. Available is the upgrade version, when winget shows one.</summary>
+public sealed record WingetListEntry(string Name, string Id, string Version, string? Available = null);
 
 /// <summary>
 /// Parses the fixed-width table that `winget list` prints.
@@ -50,11 +50,13 @@ public static class WingetListParser
             return entries;
         }
 
-        // Column order is fixed: 0=Name, 1=Id, 2=Version.
+        // Column order is fixed: 0=Name, 1=Id, 2=Version. A 5-column table also has
+        // 3=Available, 4=Source; a 4-column one ends with Source and has no Available.
         int nameStart = columnOffsets[0], nameEnd = columnOffsets[1];
         int idStart = columnOffsets[1], idEnd = columnOffsets[2];
         int versionStart = columnOffsets[2];
         int versionEnd = columnOffsets.Count > 3 ? columnOffsets[3] : int.MaxValue;
+        var hasAvailableColumn = columnOffsets.Count > 4;
 
         foreach (var line in lines.Skip(separatorIndex + 1))
         {
@@ -66,9 +68,17 @@ public static class WingetListParser
             var name = Slice(line, nameStart, nameEnd).Trim();
             var id = Slice(line, idStart, idEnd).Trim();
             var version = Slice(line, versionStart, versionEnd).Trim();
+
+            string? available = null;
+            if (hasAvailableColumn && line.Length > columnOffsets[3])
+            {
+                var value = Slice(line, columnOffsets[3], columnOffsets[4]).Trim();
+                available = value.Length > 0 ? value : null;
+            }
+
             if (id.Length > 0 && version.Length > 0 && !id.Contains('…'))
             {
-                entries.Add(new WingetListEntry(name, id, version));
+                entries.Add(new WingetListEntry(name, id, version, available));
             }
         }
 

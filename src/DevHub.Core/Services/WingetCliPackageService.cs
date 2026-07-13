@@ -5,7 +5,7 @@ namespace DevHub.Core.Services;
 
 public sealed class WingetCliPackageService : IPackageService
 {
-    public async Task<IReadOnlyDictionary<string, string>> GetInstalledVersionsAsync(
+    public async Task<IReadOnlyDictionary<string, InstalledPackage>> GetInstalledPackagesAsync(
         CancellationToken cancellationToken = default)
     {
         var (_, output) = await RunWingetAsync(
@@ -13,10 +13,10 @@ public sealed class WingetCliPackageService : IPackageService
             cancellationToken);
         var entries = WingetListParser.ParseEntries(output);
 
-        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var result = new Dictionary<string, InstalledPackage>(StringComparer.OrdinalIgnoreCase);
         foreach (var entry in entries.Where(e => !WingetListParser.IsSyntheticId(e.Id)))
         {
-            result[entry.Id] = entry.Version;
+            result[entry.Id] = new InstalledPackage(entry.Version, entry.Available);
         }
 
         // Packages installed outside winget (e.g. the official Node.js installer) get a
@@ -24,7 +24,7 @@ public sealed class WingetCliPackageService : IPackageService
         // them fine; fall back to matching by display name for those.
         foreach (var entry in entries.Where(e => WingetListParser.IsSyntheticId(e.Id)))
         {
-            result.TryAdd(IPackageService.NameKey(entry.Name), entry.Version);
+            result.TryAdd(IPackageService.NameKey(entry.Name), new InstalledPackage(entry.Version, entry.Available));
         }
 
         return result;
@@ -60,6 +60,17 @@ public sealed class WingetCliPackageService : IPackageService
     {
         var (exitCode, output) = await RunWingetAsync(
             ["uninstall", "--id", wingetId, "--exact", "--silent", "--disable-interactivity"],
+            cancellationToken);
+        return ToResult(exitCode, output);
+    }
+
+    public async Task<PackageOperationResult> UpgradeAsync(string wingetId, CancellationToken cancellationToken = default)
+    {
+        var (exitCode, output) = await RunWingetAsync(
+            [
+                "upgrade", "--id", wingetId, "--exact", "--silent",
+                "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity",
+            ],
             cancellationToken);
         return ToResult(exitCode, output);
     }

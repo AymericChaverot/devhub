@@ -8,8 +8,8 @@ Install language runtimes and dev tools in one click, and browse every project o
 machine with automatic language & framework detection, README preview and
 open-in-your-favorite-IDE — all in a fast, Fluent-design app.
 
-> 🚧 DevHub is in active development (v0.1.0 preview). The MVP is complete;
-> see the [roadmap](#roadmap) for what is coming next.
+> 🚧 DevHub is in active development (v0.1.0 preview).
+> See the [roadmap](#roadmap) for what is coming next.
 
 ---
 
@@ -45,10 +45,42 @@ open-in-your-favorite-IDE — all in a fast, Fluent-design app.
 - Add projects by **cloning from a Git URL**; remove them from the list or send the
   folder to the Recycle Bin (never a permanent delete).
 
+### 🏠 Dashboard
+
+- **System at a glance**: live CPU and memory ring gauges, GPU and OS cards, per-drive
+  usage bars — refreshed every few seconds.
+- **Weather** with a dynamic sky: gradient backdrop that follows the real conditions
+  (starry at night, animated rain, snow and lightning), automatic IP location or a
+  city of your choice.
+- **Your work across forges**: reviews requested, your open PRs and assigned issues,
+  aggregated from GitHub and GitLab.
+- Recently opened projects and a tool-updates card with one-click *Update all*.
+
+### 🔀 Git, GitHub & GitLab
+
+- **Git tab on every project**: commit graph with branch lanes, branch switch/create,
+  working-tree status, ahead/behind, fetch/pull/push (credentials via Git Credential
+  Manager).
+- **Connect GitHub and GitLab** with personal access tokens — stored in the Windows
+  Credential Manager, never in a file. Repo pages show description, stars/forks, open
+  PRs/MRs, open issues and CI runs (GitHub Actions / GitLab pipelines) with live
+  status colors.
+- **Run configurations**: define named launch commands per project (dev, test...) and
+  start them in Windows Terminal from the accent Run button.
+
+### 🧪 Toolbox & Pomodoro
+
+- Everyday utilities, all offline: Base64/hex/binary/URL converter, hash generator,
+  JWT decoder, JSON formatter, UUIDs, unix timestamps, regex tester, text diff, color
+  converter, password generator — plus a small API client.
+- A **Pomodoro timer** with its own page, a remaining-minutes badge in the sidebar and
+  a toast notification when time is up.
+
 ### ⚙️ A real settings page
 
-Projects folder, live light/dark theme, quick access to logs and app data, version
-info and open-source licenses.
+Projects folder, weather location, GitHub/GitLab accounts, live light/dark theme,
+in-app updates, quick access to logs and app data, version info and open-source
+licenses.
 
 ---
 
@@ -62,8 +94,17 @@ info and open-source licenses.
 
 ### Install
 
-Grab the MSIX from the [latest release](https://github.com/AymericChaverot/devhub/releases)
-(unsigned preview packages: enable Developer Mode to sideload), or build from source:
+Grab the MSIX from the [latest release](https://github.com/AymericChaverot/devhub/releases).
+Preview packages are signed with a self-signed certificate, so Windows needs to trust
+it once:
+
+1. Download `DevHub-signing.cer` and the `.msix` from the release.
+2. Right-click the `.cer` → *Install Certificate* → **Local Machine** → *Place all
+   certificates in the following store* → **Trusted People**.
+3. Double-click the `.msix` — App Installer does the rest. Updates are offered
+   in-app afterwards (the certificate step is one-time).
+
+Or build from source:
 
 ```powershell
 git clone https://github.com/AymericChaverot/devhub.git
@@ -98,10 +139,10 @@ Design decisions, phase history and conventions live in
 
 ## Roadmap
 
-- **Git integration** — commit history, branches and working-tree status per project.
-- **GitHub / GitLab integration** — pull requests, issues and review threads.
-- **Developer dashboard** — machine stats, PRs awaiting review, recent projects.
-- Code signing and distribution through winget itself.
+- **Deeper forge integration** — PR detail view with review threads, CI checks on PR
+  rows, OAuth device flow instead of tokens, self-hosted GitLab.
+- **Commit & stage from the Git tab.**
+- Trusted code signing and distribution through winget itself.
 
 ---
 

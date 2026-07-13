@@ -99,6 +99,41 @@ public sealed class WingetListParserTests
         Assert.False(WingetListParser.IsSyntheticId(git.Id));
     }
 
+    [Fact]
+    public void ParseEntries_FiveColumnTable_CapturesAvailableVersion()
+    {
+        const string output = """
+            Name                     Id                        Version      Available    Source
+            --------------------------------------------------------------------------------------
+            Git                      Git.Git                   2.50.0       2.50.1       winget
+            Node.js LTS              OpenJS.NodeJS.LTS         22.16.0                   winget
+            """;
+
+        var entries = WingetListParser.ParseEntries(output);
+
+        var git = Assert.Single(entries, e => e.Id == "Git.Git");
+        Assert.Equal("2.50.1", git.Available);
+
+        var node = Assert.Single(entries, e => e.Id == "OpenJS.NodeJS.LTS");
+        Assert.Null(node.Available);
+    }
+
+    [Fact]
+    public void ParseEntries_FourColumnTable_HasNoAvailableVersion()
+    {
+        // With four columns the last one is Source, not Available.
+        const string output = """
+            Name                     Id                        Version      Source
+            ------------------------------------------------------------------------
+            Git                      Git.Git                   2.50.0       winget
+            """;
+
+        var entries = WingetListParser.ParseEntries(output);
+
+        var git = Assert.Single(entries);
+        Assert.Null(git.Available);
+    }
+
     [Theory]
     [InlineData(@"ARP\Machine\X64\{123}", true)]
     [InlineData(@"MSIX\SomePackage", true)]
