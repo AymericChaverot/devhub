@@ -10,7 +10,19 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        AppWindow.Resize(new Windows.Graphics.SizeInt32(1200, 800));
+
+        // Open at 85% of the screen's work area, centered. Sizes are physical pixels,
+        // so a fixed value would shrink with display scaling — this stays proportional.
+        var workArea = Microsoft.UI.Windowing.DisplayArea
+            .GetFromWindowId(AppWindow.Id, Microsoft.UI.Windowing.DisplayAreaFallback.Nearest)
+            .WorkArea;
+        var width = (int)(workArea.Width * 0.85);
+        var height = (int)(workArea.Height * 0.85);
+        AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(
+            workArea.X + (workArea.Width - width) / 2,
+            workArea.Y + (workArea.Height - height) / 2,
+            width,
+            height));
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
