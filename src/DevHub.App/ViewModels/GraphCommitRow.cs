@@ -37,12 +37,12 @@ public sealed class GraphCommitRow
         var age = DateTimeOffset.Now - when;
         return age switch
         {
-            { TotalMinutes: < 1 } => "just now",
-            { TotalHours: < 1 } => $"{(int)age.TotalMinutes} min ago",
-            { TotalDays: < 1 } => $"{(int)age.TotalHours} h ago",
-            { TotalDays: < 2 } => "yesterday",
-            { TotalDays: < 30 } => $"{(int)age.TotalDays} days ago",
-            _ => when.ToString("d MMM yyyy"),
+            { TotalMinutes: < 1 } => Loc.T("Forge_JustNow", "just now"),
+            { TotalHours: < 1 } => Loc.F("Forge_MinutesAgo", "{0} min ago", (int)age.TotalMinutes),
+            { TotalDays: < 1 } => Loc.F("Forge_HoursAgo", "{0} h ago", (int)age.TotalHours),
+            { TotalDays: < 2 } => Loc.T("Forge_Yesterday", "yesterday"),
+            { TotalDays: < 30 } => Loc.F("Forge_DaysAgoLong", "{0} days ago", (int)age.TotalDays),
+            _ => when.ToString("d MMM yyyy", Loc.Culture),
         };
     }
 }

@@ -24,7 +24,7 @@ public sealed partial class UpdateViewModel : ObservableObject
 
     public Version CurrentVersion { get; } = GetCurrentVersion();
 
-    public string CurrentVersionText => $"Version {CurrentVersion.ToString(3)}";
+    public string CurrentVersionText => Loc.F("Update_Version", "Version {0}", CurrentVersion.ToString(3));
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUpdate))]
@@ -39,7 +39,7 @@ public sealed partial class UpdateViewModel : ObservableObject
     public bool CanInstall => Available is { AssetUrl: not null };
 
     public string BannerTitle =>
-        Available is null ? "" : $"DevHub {Available.Version.ToString(3)} is available";
+        Available is null ? "" : Loc.F("Update_BannerTitle", "DevHub {0} is available", Available.Version.ToString(3));
 
     [ObservableProperty]
     public partial bool IsChecking { get; set; }
@@ -65,7 +65,7 @@ public sealed partial class UpdateViewModel : ObservableObject
         if (Available is not null)
         {
             Log.Information("Update available: {Version}", Available.Version);
-            StatusText = $"{Available.Version.ToString(3)} is available.";
+            StatusText = Loc.F("Update_Available", "{0} is available.", Available.Version.ToString(3));
         }
     }
 
@@ -73,13 +73,13 @@ public sealed partial class UpdateViewModel : ObservableObject
     private async Task CheckAsync()
     {
         IsChecking = true;
-        StatusText = "Checking…";
+        StatusText = Loc.T("Update_Checking", "Checking…");
         try
         {
             Available = await _updates.CheckForUpdateAsync(CurrentVersion);
             StatusText = Available is null
-                ? "You're up to date."
-                : $"{Available.Version.ToString(3)} is available.";
+                ? Loc.T("Update_UpToDate", "You're up to date.")
+                : Loc.F("Update_Available", "{0} is available.", Available.Version.ToString(3));
         }
         finally
         {
@@ -97,17 +97,17 @@ public sealed partial class UpdateViewModel : ObservableObject
 
         IsDownloading = true;
         DownloadPercent = 0;
-        StatusText = "Downloading…";
+        StatusText = Loc.T("Update_Downloading", "Downloading…");
         try
         {
             var progress = new Progress<double>(p =>
             {
                 DownloadPercent = p * 100;
-                StatusText = $"Downloading… {p * 100:0}%";
+                StatusText = Loc.F("Update_DownloadingPercent", "Downloading… {0:0}%", p * 100);
             });
             var installerPath = await _updates.DownloadUpdateAsync(update, progress);
 
-            StatusText = "Launching the installer…";
+            StatusText = Loc.T("Update_Launching", "Launching the installer…");
             Log.Information("Launching update installer {Path}", installerPath);
 
             // App Installer takes over: it shows the update UI and asks to close DevHub.
@@ -116,7 +116,7 @@ public sealed partial class UpdateViewModel : ObservableObject
         catch (Exception ex)
         {
             Log.Error(ex, "Downloading the update failed");
-            StatusText = $"Update failed: {ex.Message}";
+            StatusText = Loc.F("Update_Failed", "Update failed: {0}", ex.Message);
         }
         finally
         {

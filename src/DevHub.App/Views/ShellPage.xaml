@@ -11,27 +11,27 @@
         SelectionChanged="Nav_SelectionChanged"
         Loaded="Nav_Loaded">
         <NavigationView.MenuItems>
-            <NavigationViewItem Content="Home" Tag="home">
+            <NavigationViewItem x:Uid="Shell_NavHome" Content="Home" Tag="home">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE80F;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="Environments" Tag="environments">
+            <NavigationViewItem x:Uid="Shell_NavEnvironments" Content="Environments" Tag="environments">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE7B8;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="Projects" Tag="projects">
+            <NavigationViewItem x:Uid="Shell_NavProjects" Content="Projects" Tag="projects">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE8B7;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="Toolbox" Tag="toolbox">
+            <NavigationViewItem x:Uid="Shell_NavToolbox" Content="Toolbox" Tag="toolbox">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xEC7A;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="Pomodoro" Tag="pomodoro">
+            <NavigationViewItem x:Uid="Shell_NavPomodoro" Content="Pomodoro" Tag="pomodoro">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE823;" />
                 </NavigationViewItem.Icon>

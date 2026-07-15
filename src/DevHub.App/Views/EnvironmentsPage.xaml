@@ -17,8 +17,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="4">
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Environments" />
+            <TextBlock x:Uid="Env_Title" Style="{StaticResource TitleTextBlockStyle}" Text="Environments" />
             <TextBlock
+                x:Uid="Env_Subtitle"
                 Style="{StaticResource BodyTextBlockStyle}"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Text="Install development environments with one click. Installations run through winget." />
@@ -30,6 +31,7 @@
             Orientation="Horizontal"
             Spacing="8">
             <AutoSuggestBox
+                x:Uid="Env_Search"
                 Width="320"
                 VerticalAlignment="Center"
                 PlaceholderText="Search tools"
@@ -67,6 +69,7 @@
             CloseButtonClick="ErrorInfoBar_CloseButtonClick" />
 
         <TextBlock
+            x:Uid="Env_NoResults"
             Grid.Row="3"
             Margin="0,24,0,0"
             HorizontalAlignment="Center"
@@ -161,6 +164,7 @@
                                 Text="{x:Bind DisplayName}" />
 
                             <Button
+                                x:Uid="Common_UpdateButton"
                                 Grid.Column="2"
                                 VerticalAlignment="Top"
                                 Padding="10,4"
@@ -217,12 +221,14 @@
                             </StackPanel>
 
                             <Button
+                                x:Uid="Common_InstallButton"
                                 Grid.Column="1"
                                 Content="Install"
                                 Style="{StaticResource AccentButtonStyle}"
                                 Command="{x:Bind SelectedVariant.InstallCommand, Mode=OneWay}"
                                 Visibility="{x:Bind SelectedVariant.CanInstall, Mode=OneWay}" />
                             <Button
+                                x:Uid="Common_UninstallButton"
                                 Grid.Column="1"
                                 Content="Uninstall"
                                 Command="{x:Bind SelectedVariant.UninstallCommand, Mode=OneWay}"

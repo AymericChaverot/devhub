@@ -85,7 +85,7 @@ public sealed partial class ProjectsViewModel : ObservableObject
         }
 
         IsBusy = true;
-        BusyMessage = "Scanning projects…";
+        BusyMessage = Loc.T("Proj_Scanning", "Scanning projects…");
         try
         {
             var scanned = await _scanner.ScanAsync(ProjectsFolderPath);
@@ -95,7 +95,7 @@ public sealed partial class ProjectsViewModel : ObservableObject
         catch (Exception ex)
         {
             Log.Error(ex, "Project scan failed");
-            ErrorMessage = $"Scan failed: {ex.Message}";
+            ErrorMessage = Loc.F("Proj_ScanFailed", "Scan failed: {0}", ex.Message);
         }
         finally
         {
@@ -112,7 +112,7 @@ public sealed partial class ProjectsViewModel : ObservableObject
         }
 
         IsBusy = true;
-        BusyMessage = $"Cloning {url.Trim()}…";
+        BusyMessage = Loc.F("Proj_Cloning", "Cloning {0}…", url.Trim());
         try
         {
             await _git.CloneAsync(url.Trim(), ProjectsFolderPath);
@@ -120,7 +120,7 @@ public sealed partial class ProjectsViewModel : ObservableObject
         catch (Exception ex)
         {
             Log.Error(ex, "Clone of {Url} failed", url);
-            ErrorMessage = $"Clone failed: {ex.Message}";
+            ErrorMessage = Loc.F("Proj_CloneFailed", "Clone failed: {0}", ex.Message);
         }
         finally
         {
@@ -147,7 +147,7 @@ public sealed partial class ProjectsViewModel : ObservableObject
     public async Task DeleteToRecycleBinAsync(ProjectViewModel project)
     {
         IsBusy = true;
-        BusyMessage = $"Moving {project.Name} to the Recycle Bin…";
+        BusyMessage = Loc.F("Proj_Recycling", "Moving {0} to the Recycle Bin…", project.Name);
         try
         {
             await _fileOperations.RecycleAsync(project.Path);
@@ -156,7 +156,7 @@ public sealed partial class ProjectsViewModel : ObservableObject
         catch (Exception ex)
         {
             Log.Error(ex, "Recycle of {Path} failed", project.Path);
-            ErrorMessage = $"Delete failed: {ex.Message}";
+            ErrorMessage = Loc.F("Proj_DeleteFailed", "Delete failed: {0}", ex.Message);
         }
         finally
         {

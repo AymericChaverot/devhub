@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Common_Add" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>Annuler</value></data>
+  <data name="Common_Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="Common_Save" xml:space="preserve"><value>Enregistrer</value></data>
+  <data name="Core_GitHubScopeHint" xml:space="preserve"><value>Token classique avec le scope &quot;repo&quot; recommandé. Les tokens fine-grained nécessitent l&apos;accès en lecture aux Issues + Pull requests sur tous vos dépôts (le flux des revues peut rester vide avec eux).</value></data>
+  <data name="Core_GitLabScopeHint" xml:space="preserve"><value>Token d&apos;accès personnel avec le scope &quot;read_api&quot;.</value></data>
+  <data name="Core_WeatherClear" xml:space="preserve"><value>Ciel dégagé</value></data>
+  <data name="Core_WeatherMainlyClear" xml:space="preserve"><value>Plutôt dégagé</value></data>
+  <data name="Core_WeatherPartlyCloudy" xml:space="preserve"><value>Partiellement nuageux</value></data>
+  <data name="Core_WeatherOvercast" xml:space="preserve"><value>Couvert</value></data>
+  <data name="Core_WeatherFog" xml:space="preserve"><value>Brouillard</value></data>
+  <data name="Core_WeatherDrizzle" xml:space="preserve"><value>Bruine</value></data>
+  <data name="Core_WeatherRain" xml:space="preserve"><value>Pluie</value></data>
+  <data name="Core_WeatherSnow" xml:space="preserve"><value>Neige</value></data>
+  <data name="Core_WeatherRainShowers" xml:space="preserve"><value>Averses</value></data>
+  <data name="Core_WeatherSnowShowers" xml:space="preserve"><value>Averses de neige</value></data>
+  <data name="Core_WeatherThunderstorm" xml:space="preserve"><value>Orage</value></data>
+  <data name="Core_InvalidBase64" xml:space="preserve"><value>Ce n&apos;est pas du Base64 valide.</value></data>
+  <data name="Core_InvalidHex" xml:space="preserve"><value>L&apos;entrée hexadécimale nécessite un nombre pair de chiffres hexadécimaux.</value></data>
+  <data name="Core_InvalidBinary" xml:space="preserve"><value>L&apos;entrée binaire nécessite un multiple de 8 bits (des 0 et des 1).</value></data>
+  <data name="Core_InvalidJwt" xml:space="preserve"><value>Un JWT comporte 3 parties séparées par des points (header.payload.signature).</value></data>
+  <data name="Core_InvalidJwtSegment" xml:space="preserve"><value>Ceci ne ressemble pas à un segment JWT valide.</value></data>
+  <data name="Core_InvalidJson" xml:space="preserve"><value>JSON invalide : {0}</value></data>
+  <data name="Core_InvalidPattern" xml:space="preserve"><value>Motif invalide : {0}</value></data>
+  <data name="Core_PatternTimeout" xml:space="preserve"><value>Le motif a expiré après 1 s — probablement un retour sur trace catastrophique.</value></data>
+  <data name="Core_DiffTooLarge" xml:space="preserve"><value>Le diff prend en charge jusqu&apos;à 2000 lignes par côté.</value></data>
+  <data name="Core_InvalidHexColor" xml:space="preserve"><value>Les couleurs hexadécimales sont #RGB ou #RRGGBB.</value></data>
+  <data name="Core_InvalidHsl" xml:space="preserve"><value>hsl(h, s%, l%) nécessite trois nombres.</value></data>
+  <data name="Core_InvalidRgb" xml:space="preserve"><value>Les couleurs RGB nécessitent trois nombres, ex. rgb(51, 102, 153).</value></data>
+  <data name="Core_RgbRange" xml:space="preserve"><value>Les canaux RGB vont de 0 à 255.</value></data>
+  <data name="Core_NoCharSet" xml:space="preserve"><value>Choisissez au moins un jeu de caractères.</value></data>
+  <data name="Core_PasswordLength" xml:space="preserve"><value>La longueur doit être comprise entre {0} et 256.</value></data>
+  <data name="Core_Milliseconds" xml:space="preserve"><value>millisecondes</value></data>
+  <data name="Core_Seconds" xml:space="preserve"><value>secondes</value></data>
+  <data name="Core_InterpretedAs" xml:space="preserve"><value>Interprété comme des {0}</value></data>
+  <data name="Core_LocalTime" xml:space="preserve"><value>Locale :</value></data>
+  <data name="Dash_InstallNow.Content" xml:space="preserve"><value>Installer maintenant</value></data>
+  <data name="Dash_ReleaseNotes.Content" xml:space="preserve"><value>Notes de version</value></data>
+  <data name="Dash_SystemHeader.Text" xml:space="preserve"><value>Système</value></data>
+  <data name="Dash_MemoryLabel.Text" xml:space="preserve"><value>MÉMOIRE</value></data>
+  <data name="Dash_OsLabel.Text" xml:space="preserve"><value>SYSTÈME</value></data>
+  <data name="Dash_ToolsHeader.Text" xml:space="preserve"><value>Outils</value></data>
+  <data name="Dash_CheckingTools.Text" xml:space="preserve"><value>Recherche de mises à jour des outils…</value></data>
+  <data name="Dash_ToolsUpToDate.Text" xml:space="preserve"><value>Tous les outils sont à jour</value></data>
+  <data name="Dash_OpenEnvironments.Content" xml:space="preserve"><value>Ouvrir Environnements</value></data>
+  <data name="Dash_WorkHeader.Text" xml:space="preserve"><value>Votre activité</value></data>
+  <data name="Dash_ConnectHint.Text" xml:space="preserve"><value>Connectez votre compte GitHub ou GitLab pour voir les pull requests en attente de votre revue.</value></data>
+  <data name="Dash_OpenSettings.Content" xml:space="preserve"><value>Ouvrir les paramètres</value></data>
+  <data name="Dash_CheckingWork.Text" xml:space="preserve"><value>Vérification de votre activité sur les forges…</value></data>
+  <data name="Common_DraftBadge.Text" xml:space="preserve"><value>Brouillon</value></data>
+  <data name="Dash_RecentHeader.Text" xml:space="preserve"><value>Projets récents</value></data>
+  <data name="Dash_RecentEmpty.Text" xml:space="preserve"><value>Les projets que vous ouvrez apparaîtront ici.</value></data>
+  <data name="Dash_GreetingNight" xml:space="preserve"><value>Bonne nuit</value></data>
+  <data name="Dash_GreetingMorning" xml:space="preserve"><value>Bonjour</value></data>
+  <data name="Dash_GreetingAfternoon" xml:space="preserve"><value>Bon après-midi</value></data>
+  <data name="Dash_GreetingEvening" xml:space="preserve"><value>Bonsoir</value></data>
+  <data name="Dash_CpuDetail" xml:space="preserve"><value>{0} cœurs · {1} threads</value></data>
+  <data name="Dash_MemoryDetail" xml:space="preserve"><value>{0:0.0} / {1:0.0} Go</value></data>
+  <data name="Dash_UptimeHours" xml:space="preserve"><value>Allumé depuis {0} h {1:00} min</value></data>
+  <data name="Dash_UptimeMinutes" xml:space="preserve"><value>Allumé depuis {0} min</value></data>
+  <data name="Dash_DriveFree" xml:space="preserve"><value>{0:0} Go libres sur {1:0} Go</value></data>
+  <data name="Dash_WeatherRange" xml:space="preserve"><value>{0:0}° / {1:0}° · Ressenti {2:0}°</value></data>
+  <data name="Dash_WeatherDetail" xml:space="preserve"><value>Vent {0:0} km/h · Humidité {1} %</value></data>
+  <data name="Dash_FeedReviews" xml:space="preserve"><value>Revues</value></data>
+  <data name="Dash_FeedMyPrs" xml:space="preserve"><value>Mes pull requests</value></data>
+  <data name="Dash_FeedIssues" xml:space="preserve"><value>Issues</value></data>
+  <data name="Dash_NoReviews" xml:space="preserve"><value>Aucune revue en attente. Parfait.</value></data>
+  <data name="Dash_NoPrs" xml:space="preserve"><value>Vous n&apos;avez aucune pull request ouverte.</value></data>
+  <data name="Dash_NoIssues" xml:space="preserve"><value>Aucune issue ne vous est assignée.</value></data>
+  <data name="Detail_BackTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Retour aux projets</value></data>
+  <data name="Detail_Open.Text" xml:space="preserve"><value>Ouvrir</value></data>
+  <data name="Detail_Explorer.Content" xml:space="preserve"><value>Explorateur</value></data>
+  <data name="Detail_RunTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Exécuter ce projet dans un terminal</value></data>
+  <data name="Detail_ManageSubprojectsTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Gérer les sous-projets</value></data>
+  <data name="Detail_RenameTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Renommer le projet</value></data>
+  <data name="Detail_FilesTab.Text" xml:space="preserve"><value>Fichiers</value></data>
+  <data name="Detail_NoReadme.Text" xml:space="preserve"><value>Aucun README trouvé dans ce projet.</value></data>
+  <data name="Detail_NewBranchTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Créer une branche sur HEAD et basculer dessus</value></data>
+  <data name="Detail_Branch.Text" xml:space="preserve"><value>Branche</value></data>
+  <data name="Detail_FilePreviewHint.Text" xml:space="preserve"><value>Sélectionnez un fichier pour l&apos;afficher</value></data>
+  <data name="Detail_NothingOpen.Text" xml:space="preserve"><value>Rien d&apos;ouvert.</value></data>
+  <data name="Detail_NoRuns.Text" xml:space="preserve"><value>Aucune exécution pour le moment.</value></data>
+  <data name="Detail_Draft.Text" xml:space="preserve"><value>Brouillon</value></data>
+  <data name="Detail_Run" xml:space="preserve"><value>Exécuter</value></data>
+  <data name="Detail_AddConfig" xml:space="preserve"><value>Ajouter une configuration…</value></data>
+  <data name="Detail_RemoveConfig" xml:space="preserve"><value>Supprimer une configuration</value></data>
+  <data name="Detail_ConfigName" xml:space="preserve"><value>Nom</value></data>
+  <data name="Detail_ConfigCommand" xml:space="preserve"><value>Commande (exécutée dans PowerShell, dans le dossier du projet)</value></data>
+  <data name="Detail_AddConfigTitle" xml:space="preserve"><value>Ajouter une configuration d&apos;exécution</value></data>
+  <data name="Detail_OpenOnForge" xml:space="preserve"><value>Ouvrir sur {0}</value></data>
+  <data name="Detail_OpenMrs" xml:space="preserve"><value>Merge requests ouvertes</value></data>
+  <data name="Detail_OpenPrs" xml:space="preserve"><value>Pull requests ouvertes</value></data>
+  <data name="Detail_Pipelines" xml:space="preserve"><value>Pipelines</value></data>
+  <data name="Detail_WorkflowRuns" xml:space="preserve"><value>Exécutions de workflows</value></data>
+  <data name="Detail_OpenIssues" xml:space="preserve"><value>Issues ouvertes</value></data>
+  <data name="Detail_BranchWord" xml:space="preserve"><value>branche</value></data>
+  <data name="Detail_BranchesWord" xml:space="preserve"><value>branches</value></data>
+  <data name="Detail_CommitWord" xml:space="preserve"><value>commit</value></data>
+  <data name="Detail_CommitsWord" xml:space="preserve"><value>commits</value></data>
+  <data name="Detail_GitModified" xml:space="preserve"><value>{0} modifié(s)</value></data>
+  <data name="Detail_GitAdded" xml:space="preserve"><value>{0} ajouté(s)</value></data>
+  <data name="Detail_GitRemoved" xml:space="preserve"><value>{0} supprimé(s)</value></data>
+  <data name="Detail_GitUntracked" xml:space="preserve"><value>{0} non suivi(s)</value></data>
+  <data name="Detail_CleanTree" xml:space="preserve"><value>Arbre de travail propre</value></data>
+  <data name="Detail_NoGitCli" xml:space="preserve"><value>CLI git introuvable — fetch/pull/push indisponibles</value></data>
+  <data name="Detail_SwitchedBranch" xml:space="preserve"><value>Basculé sur la branche &apos;{0}&apos;.</value></data>
+  <data name="Detail_CreateBranchTitle" xml:space="preserve"><value>Créer une branche</value></data>
+  <data name="Detail_CreateSwitch" xml:space="preserve"><value>Créer et basculer</value></data>
+  <data name="Detail_CreatedBranch" xml:space="preserve"><value>Branche &apos;{0}&apos; créée et activée.</value></data>
+  <data name="Detail_GitOpDone" xml:space="preserve"><value>{0} terminé. {1}</value></data>
+  <data name="Detail_FileTooLarge" xml:space="preserve"><value>Fichier trop volumineux pour l&apos;aperçu ({0:N0} Ko).</value></data>
+  <data name="Detail_BinaryFile" xml:space="preserve"><value>Fichier binaire — pas d&apos;aperçu.</value></data>
+  <data name="Detail_FileReadError" xml:space="preserve"><value>Impossible de lire le fichier : {0}</value></data>
+  <data name="Detail_NoIde" xml:space="preserve"><value>Aucun IDE détecté</value></data>
+  <data name="Detail_NoSubfoldersTitle" xml:space="preserve"><value>Aucun sous-dossier</value></data>
+  <data name="Detail_NoSubfoldersText" xml:space="preserve"><value>Ce projet n&apos;a aucun sous-dossier pouvant devenir un sous-projet.</value></data>
+  <data name="Detail_SubprojectsTitle" xml:space="preserve"><value>Sous-projets</value></data>
+  <data name="Detail_RenameTitle" xml:space="preserve"><value>Renommer le projet</value></data>
+  <data name="Detail_RenameButton" xml:space="preserve"><value>Renommer</value></data>
+  <data name="Detail_RenameFailed" xml:space="preserve"><value>Impossible de renommer le projet</value></data>
+  <data name="Detail_ReadmeError" xml:space="preserve"><value>Le README n&apos;a pas pu être affiché.</value></data>
+  <data name="Env_Title.Text" xml:space="preserve"><value>Environnements</value></data>
+  <data name="Env_Subtitle.Text" xml:space="preserve"><value>Installez vos environnements de développement en un clic. Les installations passent par winget.</value></data>
+  <data name="Env_Search.PlaceholderText" xml:space="preserve"><value>Rechercher un outil</value></data>
+  <data name="Env_NoResults.Text" xml:space="preserve"><value>Aucun outil ne correspond à la recherche ou aux filtres.</value></data>
+  <data name="Common_UpdateButton.Content" xml:space="preserve"><value>Mettre à jour</value></data>
+  <data name="Common_InstallButton.Content" xml:space="preserve"><value>Installer</value></data>
+  <data name="Common_UninstallButton.Content" xml:space="preserve"><value>Désinstaller</value></data>
+  <data name="Env_AllCategories" xml:space="preserve"><value>Toutes les catégories</value></data>
+  <data name="Env_StatusAll" xml:space="preserve"><value>Tous les statuts</value></data>
+  <data name="Env_StatusInstalled" xml:space="preserve"><value>Installé</value></data>
+  <data name="Env_StatusUpdateAvailable" xml:space="preserve"><value>Mise à jour disponible</value></data>
+  <data name="Env_StatusNotInstalled" xml:space="preserve"><value>Non installé</value></data>
+  <data name="Env_StatusQueued" xml:space="preserve"><value>En attente…</value></data>
+  <data name="Env_StatusWorking" xml:space="preserve"><value>En cours…</value></data>
+  <data name="Env_UpdateAll" xml:space="preserve"><value>Tout mettre à jour ({0})</value></data>
+  <data name="Env_UpdateHint" xml:space="preserve"><value>Mise à jour disponible : {0}</value></data>
+  <data name="Env_WingetError" xml:space="preserve"><value>Impossible d&apos;interroger winget pour les paquets installés : {0}</value></data>
+  <data name="Forge_ItemMeta" xml:space="preserve"><value>{0} · par {1} · mis à jour {2}</value></data>
+  <data name="Forge_JustNow" xml:space="preserve"><value>à l&apos;instant</value></data>
+  <data name="Forge_MinutesAgo" xml:space="preserve"><value>il y a {0} min</value></data>
+  <data name="Forge_HoursAgo" xml:space="preserve"><value>il y a {0} h</value></data>
+  <data name="Forge_DaysAgo" xml:space="preserve"><value>il y a {0} j</value></data>
+  <data name="Forge_RunSuccess" xml:space="preserve"><value>Succès</value></data>
+  <data name="Forge_RunFailed" xml:space="preserve"><value>Échec</value></data>
+  <data name="Forge_RunRunning" xml:space="preserve"><value>En cours</value></data>
+  <data name="Forge_RunCancelled" xml:space="preserve"><value>Annulé</value></data>
+  <data name="Forge_RunDone" xml:space="preserve"><value>Terminé</value></data>
+  <data name="Forge_ConnectedAs" xml:space="preserve"><value>Connecté en tant que {0}</value></data>
+  <data name="Forge_ConnectHint" xml:space="preserve"><value>Connectez-vous avec un token d&apos;accès personnel</value></data>
+  <data name="Forge_EmptyToken" xml:space="preserve"><value>Collez d&apos;abord un token d&apos;accès personnel.</value></data>
+  <data name="Forge_TokenRejected" xml:space="preserve"><value>{0} a rejeté ce token. {1}</value></data>
+  <data name="Forge_Unreachable" xml:space="preserve"><value>Impossible de joindre {0} : {1}</value></data>
+  <data name="Forge_Yesterday" xml:space="preserve"><value>hier</value></data>
+  <data name="Forge_DaysAgoLong" xml:space="preserve"><value>il y a {0} jours</value></data>
+  <data name="Pomo_Subtitle.Text" xml:space="preserve"><value>Des sessions de travail concentré avec une notification à la fin. Le minuteur continue pendant que vous utilisez le reste de l&apos;application.</value></data>
+  <data name="Pomo_Stop.Text" xml:space="preserve"><value>Arrêter</value></data>
+  <data name="Pomo_Focus25.Content" xml:space="preserve"><value>Concentration · 25 min</value></data>
+  <data name="Pomo_Focus50.Content" xml:space="preserve"><value>Concentration · 50 min</value></data>
+  <data name="Pomo_Break5.Content" xml:space="preserve"><value>Pause · 5 min</value></data>
+  <data name="Pomo_Break15.Content" xml:space="preserve"><value>Pause · 15 min</value></data>
+  <data name="Pomo_CustomMinutes.Header" xml:space="preserve"><value>Minutes</value></data>
+  <data name="Pomo_CustomLabel.Header" xml:space="preserve"><value>Libellé</value></data>
+  <data name="Pomo_Start.Content" xml:space="preserve"><value>Démarrer</value></data>
+  <data name="Pomo_CustomLabel.Text" xml:space="preserve"><value>Concentration</value></data>
+  <data name="Pomo_Resume" xml:space="preserve"><value>Reprendre</value></data>
+  <data name="Pomo_Pause" xml:space="preserve"><value>Pause</value></data>
+  <data name="Pomo_FocusLabel" xml:space="preserve"><value>Concentration</value></data>
+  <data name="Pomo_BreakLabel" xml:space="preserve"><value>Pause</value></data>
+  <data name="Pomo_ToastFinished" xml:space="preserve"><value>Session {0} terminée</value></data>
+  <data name="Pomo_ToastBreakOver" xml:space="preserve"><value>La pause est finie — au travail !</value></data>
+  <data name="Pomo_ToastFocusDone" xml:space="preserve"><value>Bien joué ! C&apos;est l&apos;heure d&apos;une pause.</value></data>
+  <data name="Proj_Title.Text" xml:space="preserve"><value>Projets</value></data>
+  <data name="Proj_AddFromGit.Text" xml:space="preserve"><value>Ajouter depuis Git</value></data>
+  <data name="Proj_Rescan.Text" xml:space="preserve"><value>Rescanner</value></data>
+  <data name="Proj_ChangeFolder.Content" xml:space="preserve"><value>Changer de dossier…</value></data>
+  <data name="Proj_EmptyTitle.Text" xml:space="preserve"><value>Choisissez votre dossier Projets</value></data>
+  <data name="Proj_EmptySubtitle.Text" xml:space="preserve"><value>DevHub le scannera et listera tous les projets qu&apos;il contient.</value></data>
+  <data name="Proj_ChooseFolder.Content" xml:space="preserve"><value>Choisir un dossier</value></data>
+  <data name="Proj_OpenExplorerButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Ouvrir dans l&apos;Explorateur</value></data>
+  <data name="Proj_MoreOptionsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Plus d&apos;options</value></data>
+  <data name="Proj_RemoveFromList.Text" xml:space="preserve"><value>Retirer de la liste</value></data>
+  <data name="Proj_DeleteFolder.Text" xml:space="preserve"><value>Supprimer le dossier…</value></data>
+  <data name="Proj_AddFromGitTitle" xml:space="preserve"><value>Ajouter un projet depuis Git</value></data>
+  <data name="Proj_Clone" xml:space="preserve"><value>Cloner</value></data>
+  <data name="Proj_DeleteTitle" xml:space="preserve"><value>Supprimer « {0} » ?</value></data>
+  <data name="Proj_DeleteText" xml:space="preserve"><value>Le dossier sera déplacé vers la Corbeille ; vous pourrez le restaurer depuis celle-ci si besoin.</value></data>
+  <data name="Proj_MoveToBin" xml:space="preserve"><value>Déplacer vers la Corbeille</value></data>
+  <data name="Proj_Scanning" xml:space="preserve"><value>Analyse des projets…</value></data>
+  <data name="Proj_ScanFailed" xml:space="preserve"><value>Échec de l&apos;analyse : {0}</value></data>
+  <data name="Proj_Cloning" xml:space="preserve"><value>Clonage de {0}…</value></data>
+  <data name="Proj_CloneFailed" xml:space="preserve"><value>Échec du clonage : {0}</value></data>
+  <data name="Proj_Recycling" xml:space="preserve"><value>Déplacement de {0} vers la Corbeille…</value></data>
+  <data name="Proj_DeleteFailed" xml:space="preserve"><value>Échec de la suppression : {0}</value></data>
+  <data name="Settings_Title.Text" xml:space="preserve"><value>Paramètres</value></data>
+  <data name="Settings_GeneralHeader.Text" xml:space="preserve"><value>Général</value></data>
+  <data name="Settings_ProjectsFolderTitle.Text" xml:space="preserve"><value>Dossier des projets</value></data>
+  <data name="Settings_ChangeButton.Content" xml:space="preserve"><value>Changer…</value></data>
+  <data name="Settings_WeatherTitle.Text" xml:space="preserve"><value>Localisation météo</value></data>
+  <data name="Settings_WeatherHint.Text" xml:space="preserve"><value>Ville affichée sur l&apos;accueil. Laissez vide pour une localisation automatique par IP.</value></data>
+  <data name="Settings_WeatherBox.PlaceholderText" xml:space="preserve"><value>Automatique</value></data>
+  <data name="Settings_AppearanceHeader.Text" xml:space="preserve"><value>Apparence</value></data>
+  <data name="Settings_ThemeTitle.Text" xml:space="preserve"><value>Thème</value></data>
+  <data name="Settings_ThemeHint.Text" xml:space="preserve"><value>Choisissez l&apos;apparence de DevHub</value></data>
+  <data name="Settings_AccountsHeader.Text" xml:space="preserve"><value>Comptes</value></data>
+  <data name="Settings_CreateToken.Content" xml:space="preserve"><value>Créer un token</value></data>
+  <data name="Settings_TokenBox.PlaceholderText" xml:space="preserve"><value>Token d&apos;accès personnel</value></data>
+  <data name="Settings_ConnectButton.Content" xml:space="preserve"><value>Connecter</value></data>
+  <data name="Settings_DisconnectButton.Content" xml:space="preserve"><value>Déconnecter</value></data>
+  <data name="Settings_DataHeader.Text" xml:space="preserve"><value>Données</value></data>
+  <data name="Settings_AppDataTitle.Text" xml:space="preserve"><value>Données de l&apos;application</value></data>
+  <data name="Settings_OpenLogs.Content" xml:space="preserve"><value>Ouvrir les journaux</value></data>
+  <data name="Settings_OpenFolder.Content" xml:space="preserve"><value>Ouvrir le dossier</value></data>
+  <data name="Settings_AboutHeader.Text" xml:space="preserve"><value>À propos</value></data>
+  <data name="Settings_CheckUpdates.Content" xml:space="preserve"><value>Rechercher des mises à jour</value></data>
+  <data name="Settings_InstallUpdate.Content" xml:space="preserve"><value>Installer la mise à jour</value></data>
+  <data name="Settings_GitHubRepo.Content" xml:space="preserve"><value>Dépôt GitHub</value></data>
+  <data name="Settings_LicensesTitle.Text" xml:space="preserve"><value>Licences open source</value></data>
+  <data name="Settings_LicensesHint.Text" xml:space="preserve"><value>Composants tiers utilisés par DevHub</value></data>
+  <data name="Settings_NotSet" xml:space="preserve"><value>Non défini</value></data>
+  <data name="Shell_NavHome.Content" xml:space="preserve"><value>Accueil</value></data>
+  <data name="Shell_NavEnvironments.Content" xml:space="preserve"><value>Environnements</value></data>
+  <data name="Shell_NavProjects.Content" xml:space="preserve"><value>Projets</value></data>
+  <data name="Shell_NavToolbox.Content" xml:space="preserve"><value>Boîte à outils</value></data>
+  <data name="Settings_ThemeSystem.Content" xml:space="preserve"><value>Paramètre du système</value></data>
+  <data name="Settings_ThemeLight.Content" xml:space="preserve"><value>Clair</value></data>
+  <data name="Settings_ThemeDark.Content" xml:space="preserve"><value>Sombre</value></data>
+  <data name="Settings_LanguageTitle.Text" xml:space="preserve"><value>Langue</value></data>
+  <data name="Settings_LanguageHint.Text" xml:space="preserve"><value>Prend effet après redémarrage de DevHub</value></data>
+  <data name="Settings_LanguageSystem.Content" xml:space="preserve"><value>Paramètre du système</value></data>
+  <data name="Tools_Title.Text" xml:space="preserve"><value>Boîte à outils</value></data>
+  <data name="Tools_Subtitle.Text" xml:space="preserve"><value>Des utilitaires du quotidien — tout s&apos;exécute en local, sauf le client API.</value></data>
+  <data name="Tools_NavConverter.Text" xml:space="preserve"><value>Convertisseur</value></data>
+  <data name="Tools_NavHashes.Text" xml:space="preserve"><value>Hachages</value></data>
+  <data name="Tools_NavJwt.Text" xml:space="preserve"><value>Décodeur JWT</value></data>
+  <data name="Tools_NavJson.Text" xml:space="preserve"><value>Formateur JSON</value></data>
+  <data name="Tools_NavUuid.Text" xml:space="preserve"><value>UUID &amp; temps</value></data>
+  <data name="Tools_NavRegex.Text" xml:space="preserve"><value>Testeur de regex</value></data>
+  <data name="Tools_NavDiff.Text" xml:space="preserve"><value>Comparateur de texte</value></data>
+  <data name="Tools_NavColor.Text" xml:space="preserve"><value>Convertisseur de couleurs</value></data>
+  <data name="Tools_NavPassword.Text" xml:space="preserve"><value>Générateur de mots de passe</value></data>
+  <data name="Tools_NavApi.Text" xml:space="preserve"><value>Client API</value></data>
+  <data name="Tools_FmtText.Content" xml:space="preserve"><value>Texte</value></data>
+  <data name="Tools_FmtBinary.Content" xml:space="preserve"><value>Binaire</value></data>
+  <data name="Tools_FmtUrl.Content" xml:space="preserve"><value>Encodage URL</value></data>
+  <data name="Tools_SwapTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Inverser le sens</value></data>
+  <data name="Tools_ConvertInput.PlaceholderText" xml:space="preserve"><value>Saisissez ou collez le texte ici</value></data>
+  <data name="Tools_ResultBox.PlaceholderText" xml:space="preserve"><value>Résultat</value></data>
+  <data name="Tools_CopyResultTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copier le résultat</value></data>
+  <data name="Tools_CopyTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copier</value></data>
+  <data name="Tools_HashInput.PlaceholderText" xml:space="preserve"><value>Texte à hacher (UTF-8)</value></data>
+  <data name="Tools_JwtInput.PlaceholderText" xml:space="preserve"><value>Collez un JWT (header.payload.signature)</value></data>
+  <data name="Tools_JwtHeader.Text" xml:space="preserve"><value>En-tête</value></data>
+  <data name="Tools_JwtPayload.Text" xml:space="preserve"><value>Payload</value></data>
+  <data name="Tools_JwtNote.Text" xml:space="preserve"><value>La signature n&apos;est pas vérifiée — c&apos;est un décodeur, pas un validateur.</value></data>
+  <data name="Tools_JsonInput.PlaceholderText" xml:space="preserve"><value>Collez du JSON ici</value></data>
+  <data name="Tools_JsonFormat.Content" xml:space="preserve"><value>Formater</value></data>
+  <data name="Tools_JsonMinify.Content" xml:space="preserve"><value>Minifier</value></data>
+  <data name="Tools_UuidHeader.Text" xml:space="preserve"><value>Générateur d&apos;UUID</value></data>
+  <data name="Tools_UuidUppercase.Content" xml:space="preserve"><value>Majuscules</value></data>
+  <data name="Tools_Generate.Content" xml:space="preserve"><value>Générer</value></data>
+  <data name="Tools_TimestampHeader.Text" xml:space="preserve"><value>Horodatage Unix</value></data>
+  <data name="Tools_Now.Content" xml:space="preserve"><value>Maintenant</value></data>
+  <data name="Tools_RegexPattern.PlaceholderText" xml:space="preserve"><value>Motif, ex. (\w+)@(\w+)\.com</value></data>
+  <data name="Tools_RegexIgnoreCase.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Ignorer la casse</value></data>
+  <data name="Tools_RegexMultiline.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Multiligne (^ et $ correspondent aux limites de ligne)</value></data>
+  <data name="Tools_RegexInput.PlaceholderText" xml:space="preserve"><value>Texte à analyser</value></data>
+  <data name="Tools_RegexOutput.PlaceholderText" xml:space="preserve"><value>Les correspondances s&apos;affichent ici</value></data>
+  <data name="Tools_DiffLeft.PlaceholderText" xml:space="preserve"><value>Texte original</value></data>
+  <data name="Tools_DiffRight.PlaceholderText" xml:space="preserve"><value>Texte modifié</value></data>
+  <data name="Tools_Compare.Content" xml:space="preserve"><value>Comparer</value></data>
+  <data name="Tools_ColorInput.PlaceholderText" xml:space="preserve"><value>#336699, rgb(51, 102, 153) ou hsl(210, 50%, 40%)</value></data>
+  <data name="Tools_Characters.Text" xml:space="preserve"><value>caractères</value></data>
+  <data name="Tools_PasswordNote.Text" xml:space="preserve"><value>Les caractères ambigus (I, l, 0, O, 1) sont exclus. Généré avec un RNG cryptographique, jamais stocké.</value></data>
+  <data name="Tools_ApiSend.Content" xml:space="preserve"><value>Envoyer</value></data>
+  <data name="Tools_ApiRequestExpander.Header" xml:space="preserve"><value>En-têtes et corps de la requête</value></data>
+  <data name="Tools_ApiResponse.Text" xml:space="preserve"><value>Réponse</value></data>
+  <data name="Tools_ApiResponseHeaders.Header" xml:space="preserve"><value>En-têtes de la réponse</value></data>
+  <data name="Tools_ApiResponseBody.PlaceholderText" xml:space="preserve"><value>Envoyez une requête pour voir la réponse ici</value></data>
+  <data name="Tools_CopyAlgoTip" xml:space="preserve"><value>Copier {0}</value></data>
+  <data name="Tools_TimestampNotANumber" xml:space="preserve"><value>Saisissez un nombre entier de secondes (ou de millisecondes).</value></data>
+  <data name="Tools_TimestampOutOfRange" xml:space="preserve"><value>Cet horodatage est hors de la plage représentable.</value></data>
+  <data name="Tools_RegexNoMatch" xml:space="preserve"><value>Aucune correspondance.</value></data>
+  <data name="Tools_RegexOneMatch" xml:space="preserve"><value>1 correspondance.</value></data>
+  <data name="Tools_RegexMatches" xml:space="preserve"><value>{0} correspondances.</value></data>
+  <data name="Tools_ApiInvalidUrl" xml:space="preserve"><value>URL invalide</value></data>
+  <data name="Tools_ApiSending" xml:space="preserve"><value>Envoi…</value></data>
+  <data name="Tools_ApiFailed" xml:space="preserve"><value>Échec de la requête · {0} ms</value></data>
+  <data name="Update_Version" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="Update_BannerTitle" xml:space="preserve"><value>DevHub {0} est disponible</value></data>
+  <data name="Update_Available" xml:space="preserve"><value>La version {0} est disponible.</value></data>
+  <data name="Update_Checking" xml:space="preserve"><value>Vérification…</value></data>
+  <data name="Update_UpToDate" xml:space="preserve"><value>Vous êtes à jour.</value></data>
+  <data name="Update_Downloading" xml:space="preserve"><value>Téléchargement…</value></data>
+  <data name="Update_DownloadingPercent" xml:space="preserve"><value>Téléchargement… {0:0} %</value></data>
+  <data name="Update_Launching" xml:space="preserve"><value>Lancement de l&apos;installateur…</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>Échec de la mise à jour : {0}</value></data>
+</root>

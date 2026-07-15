@@ -34,7 +34,7 @@ public sealed partial class SettingsPage : Page
 
     private void Populate()
     {
-        FolderPathText.Text = _settings.Settings.ProjectsFolderPath ?? "Not set";
+        FolderPathText.Text = _settings.Settings.ProjectsFolderPath ?? Loc.T("Settings_NotSet", "Not set");
         WeatherLocationBox.Text = _settings.Settings.WeatherLocation ?? "";
         DataFolderText.Text = DataFolder;
 
@@ -48,7 +48,25 @@ public sealed partial class SettingsPage : Page
             "Dark" => 2,
             _ => 0,
         };
+        LanguagePicker.SelectedIndex = _settings.Settings.Language switch
+        {
+            "en-US" => 1,
+            "fr-FR" => 2,
+            _ => 0,
+        };
         _initializingTheme = false;
+    }
+
+    private async void LanguagePicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initializingTheme || (LanguagePicker.SelectedItem as ComboBoxItem)?.Tag is not string language)
+        {
+            return;
+        }
+
+        // Applied on the next launch; MRT can't reload live XAML resources.
+        _settings.Settings.Language = language;
+        await _settings.SaveAsync();
     }
 
     private async void ChangeFolder_Click(object sender, RoutedEventArgs e)

@@ -115,7 +115,7 @@ public sealed partial class DevToolsPage : Page
                 Content = new FontIcon { FontSize = 14, Glyph = "\uE8C8" },
                 Tag = digest,
             };
-            ToolTipService.SetToolTip(copy, $"Copy {algorithm}");
+            ToolTipService.SetToolTip(copy, Loc.F("Tools_CopyAlgoTip", "Copy {0}", algorithm));
             copy.Click += (s, _) => CopyToClipboard((string)((Button)s).Tag);
             Grid.SetColumn(copy, 2);
 
@@ -203,7 +203,7 @@ public sealed partial class DevToolsPage : Page
 
         if (!long.TryParse(text, out var value))
         {
-            TimestampError.Text = "Enter a whole number of seconds (or milliseconds).";
+            TimestampError.Text = Loc.T("Tools_TimestampNotANumber", "Enter a whole number of seconds (or milliseconds).");
             TimestampError.Visibility = Visibility.Visible;
             return;
         }
@@ -214,7 +214,7 @@ public sealed partial class DevToolsPage : Page
         }
         catch (ArgumentOutOfRangeException)
         {
-            TimestampError.Text = "This timestamp is out of the representable range.";
+            TimestampError.Text = Loc.T("Tools_TimestampOutOfRange", "This timestamp is out of the representable range.");
             TimestampError.Visibility = Visibility.Visible;
         }
     }
@@ -246,9 +246,9 @@ public sealed partial class DevToolsPage : Page
 
             RegexSummary.Text = matches.Count switch
             {
-                0 => "No match.",
-                1 => "1 match.",
-                _ => $"{matches.Count} matches.",
+                0 => Loc.T("Tools_RegexNoMatch", "No match."),
+                1 => Loc.T("Tools_RegexOneMatch", "1 match."),
+                _ => Loc.F("Tools_RegexMatches", "{0} matches.", matches.Count),
             };
 
             var lines = matches.Select(m =>
@@ -387,7 +387,7 @@ public sealed partial class DevToolsPage : Page
 
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
         {
-            ApiStatus.Text = "Invalid URL";
+            ApiStatus.Text = Loc.T("Tools_ApiInvalidUrl", "Invalid URL");
             return;
         }
 
@@ -423,7 +423,7 @@ public sealed partial class DevToolsPage : Page
 
         ApiSendButton.IsEnabled = false;
         ApiProgress.IsActive = true;
-        ApiStatus.Text = "Sending…";
+        ApiStatus.Text = Loc.T("Tools_ApiSending", "Sending…");
         ApiResponseBody.Text = "";
         ApiResponseHeadersExpander.Visibility = Visibility.Collapsed;
         var stopwatch = Stopwatch.StartNew();
@@ -454,7 +454,7 @@ public sealed partial class DevToolsPage : Page
         catch (Exception ex)
         {
             stopwatch.Stop();
-            ApiStatus.Text = $"Request failed · {stopwatch.ElapsedMilliseconds} ms";
+            ApiStatus.Text = Loc.F("Tools_ApiFailed", "Request failed · {0} ms", stopwatch.ElapsedMilliseconds);
             ApiResponseBody.Text = ex.Message;
         }
         finally

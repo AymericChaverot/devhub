@@ -42,20 +42,20 @@ public sealed class ForgeItemViewModel
             var symbol = _item is { Forge: ForgeKind.GitLab, Kind: ForgeItemKind.PullRequest } ? "!" : "#";
             var reference = $"{symbol}{_item.Number}";
             var prefix = ShowRepo ? $"{_item.RepoFullName} {reference}" : reference;
-            return $"{prefix} · by {_item.Author} · updated {RelativeTime(_item.UpdatedAt)}";
+            return Loc.F("Forge_ItemMeta", "{0} · by {1} · updated {2}", prefix, _item.Author, RelativeTime(_item.UpdatedAt));
         }
     }
 
-    private static string RelativeTime(DateTime utc)
+    internal static string RelativeTime(DateTime utc)
     {
         var age = DateTime.UtcNow - utc.ToUniversalTime();
         return age switch
         {
-            { TotalMinutes: < 1 } => "just now",
-            { TotalHours: < 1 } => $"{(int)age.TotalMinutes} min ago",
-            { TotalDays: < 1 } => $"{(int)age.TotalHours} h ago",
-            { TotalDays: < 30 } => $"{(int)age.TotalDays} d ago",
-            _ => utc.ToLocalTime().ToString("d MMM yyyy"),
+            { TotalMinutes: < 1 } => Loc.T("Forge_JustNow", "just now"),
+            { TotalHours: < 1 } => Loc.F("Forge_MinutesAgo", "{0} min ago", (int)age.TotalMinutes),
+            { TotalDays: < 1 } => Loc.F("Forge_HoursAgo", "{0} h ago", (int)age.TotalHours),
+            { TotalDays: < 30 } => Loc.F("Forge_DaysAgo", "{0} d ago", (int)age.TotalDays),
+            _ => utc.ToLocalTime().ToString("d MMM yyyy", Loc.Culture),
         };
     }
 }

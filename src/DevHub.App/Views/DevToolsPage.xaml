@@ -32,8 +32,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="4">
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Toolbox" />
+            <TextBlock x:Uid="Tools_Title" Style="{StaticResource TitleTextBlockStyle}" Text="Toolbox" />
             <TextBlock
+                x:Uid="Tools_Subtitle"
                 Style="{StaticResource BodyTextBlockStyle}"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Text="Everyday developer utilities — everything runs locally except the API client." />
@@ -53,61 +54,61 @@
                 <ListViewItem>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE8AB;" />
-                        <TextBlock Text="Converter" />
+                        <TextBlock x:Uid="Tools_NavConverter" Text="Converter" />
                     </StackPanel>
                 </ListViewItem>
                 <ListViewItem>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE72E;" />
-                        <TextBlock Text="Hashes" />
+                        <TextBlock x:Uid="Tools_NavHashes" Text="Hashes" />
                     </StackPanel>
                 </ListViewItem>
                 <ListViewItem>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE77B;" />
-                        <TextBlock Text="JWT decoder" />
+                        <TextBlock x:Uid="Tools_NavJwt" Text="JWT decoder" />
                     </StackPanel>
                 </ListViewItem>
                 <ListViewItem>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE943;" />
-                        <TextBlock Text="JSON formatter" />
+                        <TextBlock x:Uid="Tools_NavJson" Text="JSON formatter" />
                     </StackPanel>
                 </ListViewItem>
                 <ListViewItem>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE823;" />
-                        <TextBlock Text="UUID &amp; time" />
+                        <TextBlock x:Uid="Tools_NavUuid" Text="UUID &amp; time" />
                     </StackPanel>
                 </ListViewItem>
                 <ListViewItem>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE721;" />
-                        <TextBlock Text="Regex tester" />
+                        <TextBlock x:Uid="Tools_NavRegex" Text="Regex tester" />
                     </StackPanel>
                 </ListViewItem>
                 <ListViewItem>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE7C3;" />
-                        <TextBlock Text="Text diff" />
+                        <TextBlock x:Uid="Tools_NavDiff" Text="Text diff" />
                     </StackPanel>
                 </ListViewItem>
                 <ListViewItem>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE790;" />
-                        <TextBlock Text="Color converter" />
+                        <TextBlock x:Uid="Tools_NavColor" Text="Color converter" />
                     </StackPanel>
                 </ListViewItem>
                 <ListViewItem>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE8D7;" />
-                        <TextBlock Text="Password generator" />
+                        <TextBlock x:Uid="Tools_NavPassword" Text="Password generator" />
                     </StackPanel>
                 </ListViewItem>
                 <ListViewItem>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE774;" />
-                        <TextBlock Text="API client" />
+                        <TextBlock x:Uid="Tools_NavApi" Text="API client" />
                     </StackPanel>
                 </ListViewItem>
             </ListView>
@@ -119,24 +120,25 @@
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <ComboBox x:Name="ConvertFrom" MinWidth="130" SelectedIndex="0" SelectionChanged="Converter_Changed">
-                                    <ComboBoxItem Content="Text" />
+                                    <ComboBoxItem x:Uid="Tools_FmtText" Content="Text" />
                                     <ComboBoxItem Content="Base64" />
                                     <ComboBoxItem Content="Hex" />
-                                    <ComboBoxItem Content="Binary" />
-                                    <ComboBoxItem Content="URL-encoded" />
+                                    <ComboBoxItem x:Uid="Tools_FmtBinary" Content="Binary" />
+                                    <ComboBoxItem x:Uid="Tools_FmtUrl" Content="URL-encoded" />
                                 </ComboBox>
-                                <Button Click="ConverterSwap_Click" ToolTipService.ToolTip="Swap directions">
+                                <Button x:Uid="Tools_SwapTip" Click="ConverterSwap_Click" ToolTipService.ToolTip="Swap directions">
                                     <FontIcon FontSize="14" Glyph="&#xE8AB;" />
                                 </Button>
                                 <ComboBox x:Name="ConvertTo" MinWidth="130" SelectedIndex="1" SelectionChanged="Converter_Changed">
-                                    <ComboBoxItem Content="Text" />
+                                    <ComboBoxItem x:Uid="Tools_FmtText" Content="Text" />
                                     <ComboBoxItem Content="Base64" />
                                     <ComboBoxItem Content="Hex" />
-                                    <ComboBoxItem Content="Binary" />
-                                    <ComboBoxItem Content="URL-encoded" />
+                                    <ComboBoxItem x:Uid="Tools_FmtBinary" Content="Binary" />
+                                    <ComboBoxItem x:Uid="Tools_FmtUrl" Content="URL-encoded" />
                                 </ComboBox>
                             </StackPanel>
                             <TextBox
+                                x:Uid="Tools_ConvertInput"
                                 x:Name="ConvertInput"
                                 Style="{StaticResource MonoBox}"
                                 MinHeight="140"
@@ -149,12 +151,14 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBox
+                                    x:Uid="Tools_ResultBox"
                                     x:Name="ConvertOutput"
                                     Style="{StaticResource MonoBox}"
                                     MinHeight="140"
                                     IsReadOnly="True"
                                     PlaceholderText="Result" />
                                 <Button
+                                    x:Uid="Tools_CopyResultTip"
                                     Grid.Column="1"
                                     VerticalAlignment="Top"
                                     Click="CopyConvertOutput_Click"
@@ -173,6 +177,7 @@
                     <Border Style="{StaticResource ToolCard}">
                         <StackPanel Spacing="12">
                             <TextBox
+                                x:Uid="Tools_HashInput"
                                 x:Name="HashInput"
                                 Style="{StaticResource MonoBox}"
                                 MinHeight="120"
@@ -196,25 +201,27 @@
                     <Border Style="{StaticResource ToolCard}">
                         <StackPanel Spacing="12">
                             <TextBox
+                                x:Uid="Tools_JwtInput"
                                 x:Name="JwtInput"
                                 Style="{StaticResource MonoBox}"
                                 MinHeight="100"
                                 PlaceholderText="Paste a JWT (header.payload.signature)"
                                 TextChanged="JwtInput_TextChanged" />
                             <TextBlock x:Name="JwtError" Style="{StaticResource ErrorText}" />
-                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Header" />
+                            <TextBlock x:Uid="Tools_JwtHeader" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Header" />
                             <TextBox
                                 x:Name="JwtHeader"
                                 Style="{StaticResource MonoBox}"
                                 MinHeight="80"
                                 IsReadOnly="True" />
-                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Payload" />
+                            <TextBlock x:Uid="Tools_JwtPayload" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Payload" />
                             <TextBox
                                 x:Name="JwtPayload"
                                 Style="{StaticResource MonoBox}"
                                 MinHeight="140"
                                 IsReadOnly="True" />
                             <TextBlock
+                                x:Uid="Tools_JwtNote"
                                 Style="{StaticResource CaptionTextBlockStyle}"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 Text="The signature is not verified — this is a decoder, not a validator." />
@@ -229,19 +236,21 @@
                     <Border Style="{StaticResource ToolCard}">
                         <StackPanel Spacing="12">
                             <TextBox
+                                x:Uid="Tools_JsonInput"
                                 x:Name="JsonInput"
                                 Style="{StaticResource MonoBox}"
                                 MinHeight="160"
                                 PlaceholderText="Paste JSON here" />
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Button Style="{StaticResource AccentButtonStyle}" Content="Format" Click="JsonFormat_Click" />
-                                <Button Content="Minify" Click="JsonMinify_Click" />
-                                <Button Click="CopyJsonOutput_Click" ToolTipService.ToolTip="Copy result">
+                                <Button x:Uid="Tools_JsonFormat" Style="{StaticResource AccentButtonStyle}" Content="Format" Click="JsonFormat_Click" />
+                                <Button x:Uid="Tools_JsonMinify" Content="Minify" Click="JsonMinify_Click" />
+                                <Button x:Uid="Tools_CopyResultTip" Click="CopyJsonOutput_Click" ToolTipService.ToolTip="Copy result">
                                     <FontIcon FontSize="14" Glyph="&#xE8C8;" />
                                 </Button>
                             </StackPanel>
                             <TextBlock x:Name="JsonError" Style="{StaticResource ErrorText}" />
                             <TextBox
+                                x:Uid="Tools_ResultBox"
                                 x:Name="JsonOutput"
                                 Style="{StaticResource MonoBox}"
                                 MinHeight="200"
@@ -257,16 +266,16 @@
                 <StackPanel Spacing="12">
                     <Border Style="{StaticResource ToolCard}">
                         <StackPanel Spacing="12">
-                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="UUID generator" />
+                            <TextBlock x:Uid="Tools_UuidHeader" Style="{StaticResource BodyStrongTextBlockStyle}" Text="UUID generator" />
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <ComboBox x:Name="UuidCount" MinWidth="90" SelectedIndex="1">
                                     <ComboBoxItem Content="1" />
                                     <ComboBoxItem Content="5" />
                                     <ComboBoxItem Content="10" />
                                 </ComboBox>
-                                <ToggleButton x:Name="UuidUppercase" Content="Uppercase" />
-                                <Button Style="{StaticResource AccentButtonStyle}" Content="Generate" Click="GenerateUuids_Click" />
-                                <Button Click="CopyUuids_Click" ToolTipService.ToolTip="Copy">
+                                <ToggleButton x:Uid="Tools_UuidUppercase" x:Name="UuidUppercase" Content="Uppercase" />
+                                <Button x:Uid="Tools_Generate" Style="{StaticResource AccentButtonStyle}" Content="Generate" Click="GenerateUuids_Click" />
+                                <Button x:Uid="Tools_CopyTip" Click="CopyUuids_Click" ToolTipService.ToolTip="Copy">
                                     <FontIcon FontSize="14" Glyph="&#xE8C8;" />
                                 </Button>
                             </StackPanel>
@@ -279,7 +288,7 @@
                     </Border>
                     <Border Style="{StaticResource ToolCard}">
                         <StackPanel Spacing="12">
-                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Unix timestamp" />
+                            <TextBlock x:Uid="Tools_TimestampHeader" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Unix timestamp" />
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBox
                                     x:Name="TimestampInput"
@@ -287,7 +296,7 @@
                                     FontFamily="Cascadia Code, Consolas"
                                     PlaceholderText="e.g. 1752000000"
                                     TextChanged="TimestampInput_TextChanged" />
-                                <Button Content="Now" Click="TimestampNow_Click" />
+                                <Button x:Uid="Tools_Now" Content="Now" Click="TimestampNow_Click" />
                             </StackPanel>
                             <TextBlock x:Name="TimestampError" Style="{StaticResource ErrorText}" />
                             <TextBlock
@@ -312,17 +321,20 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBox
+                                    x:Uid="Tools_RegexPattern"
                                     x:Name="RegexPattern"
                                     FontFamily="Cascadia Code, Consolas"
                                     PlaceholderText="Pattern, e.g. (\w+)@(\w+)\.com"
                                     TextChanged="Regex_Changed" />
                                 <ToggleButton
+                                    x:Uid="Tools_RegexIgnoreCase"
                                     x:Name="RegexIgnoreCase"
                                     Grid.Column="1"
                                     Content="Aa"
                                     ToolTipService.ToolTip="Ignore case"
                                     Click="Regex_Changed" />
                                 <ToggleButton
+                                    x:Uid="Tools_RegexMultiline"
                                     x:Name="RegexMultiline"
                                     Grid.Column="2"
                                     Content="¶"
@@ -330,6 +342,7 @@
                                     Click="Regex_Changed" />
                             </Grid>
                             <TextBox
+                                x:Uid="Tools_RegexInput"
                                 x:Name="RegexInput"
                                 Style="{StaticResource MonoBox}"
                                 MinHeight="140"
@@ -341,6 +354,7 @@
                                 Style="{StaticResource CaptionTextBlockStyle}"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBox
+                                x:Uid="Tools_RegexOutput"
                                 x:Name="RegexOutput"
                                 Style="{StaticResource MonoBox}"
                                 MinHeight="160"
@@ -362,11 +376,13 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <TextBox
+                                    x:Uid="Tools_DiffLeft"
                                     x:Name="DiffLeft"
                                     Style="{StaticResource MonoBox}"
                                     MinHeight="160"
                                     PlaceholderText="Original text" />
                                 <TextBox
+                                    x:Uid="Tools_DiffRight"
                                     x:Name="DiffRight"
                                     Grid.Column="1"
                                     Style="{StaticResource MonoBox}"
@@ -374,7 +390,7 @@
                                     PlaceholderText="Modified text" />
                             </Grid>
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Button Style="{StaticResource AccentButtonStyle}" Content="Compare" Click="DiffCompare_Click" />
+                                <Button x:Uid="Tools_Compare" Style="{StaticResource AccentButtonStyle}" Content="Compare" Click="DiffCompare_Click" />
                                 <TextBlock
                                     x:Name="DiffSummary"
                                     VerticalAlignment="Center"
@@ -403,6 +419,7 @@
                     <Border Style="{StaticResource ToolCard}">
                         <StackPanel Spacing="12">
                             <TextBox
+                                x:Uid="Tools_ColorInput"
                                 x:Name="ColorInput"
                                 FontFamily="Cascadia Code, Consolas"
                                 PlaceholderText="#336699, rgb(51, 102, 153) or hsl(210, 50%, 40%)"
@@ -448,6 +465,7 @@
                                     VerticalAlignment="Center"
                                     Text="{Binding ElementName=PasswordLength, Path=Value}" />
                                 <TextBlock
+                                    x:Uid="Tools_Characters"
                                     VerticalAlignment="Center"
                                     Style="{StaticResource CaptionTextBlockStyle}"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -458,8 +476,8 @@
                                 <ToggleButton x:Name="PasswordLower" Content="a-z" IsChecked="True" />
                                 <ToggleButton x:Name="PasswordDigits" Content="0-9" IsChecked="True" />
                                 <ToggleButton x:Name="PasswordSymbols" Content="!@#" IsChecked="True" />
-                                <Button Style="{StaticResource AccentButtonStyle}" Content="Generate" Click="GeneratePassword_Click" />
-                                <Button Click="CopyPassword_Click" ToolTipService.ToolTip="Copy">
+                                <Button x:Uid="Tools_Generate" Style="{StaticResource AccentButtonStyle}" Content="Generate" Click="GeneratePassword_Click" />
+                                <Button x:Uid="Tools_CopyTip" Click="CopyPassword_Click" ToolTipService.ToolTip="Copy">
                                     <FontIcon FontSize="14" Glyph="&#xE8C8;" />
                                 </Button>
                             </StackPanel>
@@ -470,6 +488,7 @@
                                 FontSize="16"
                                 IsReadOnly="True" />
                             <TextBlock
+                                x:Uid="Tools_PasswordNote"
                                 Style="{StaticResource CaptionTextBlockStyle}"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 Text="Ambiguous characters (I, l, 0, O, 1) are excluded. Generated with a cryptographic RNG, never stored." />
@@ -504,13 +523,14 @@
                                     PlaceholderText="https://api.example.com/resource"
                                     KeyDown="ApiUrl_KeyDown" />
                                 <Button
+                                    x:Uid="Tools_ApiSend"
                                     x:Name="ApiSendButton"
                                     Grid.Column="2"
                                     Style="{StaticResource AccentButtonStyle}"
                                     Content="Send"
                                     Click="ApiSend_Click" />
                             </Grid>
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Header="Request headers &amp; body">
+                            <Expander x:Uid="Tools_ApiRequestExpander" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Header="Request headers &amp; body">
                                 <StackPanel Spacing="8" Padding="0,8,0,0">
                                     <TextBox
                                         x:Name="ApiHeaders"
@@ -531,11 +551,13 @@
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <ProgressRing x:Name="ApiProgress" Width="16" Height="16" IsActive="False" />
                                 <TextBlock
+                                    x:Uid="Tools_ApiResponse"
                                     x:Name="ApiStatus"
                                     Style="{StaticResource BodyStrongTextBlockStyle}"
                                     Text="Response" />
                             </StackPanel>
                             <Expander
+                                x:Uid="Tools_ApiResponseHeaders"
                                 x:Name="ApiResponseHeadersExpander"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
@@ -548,6 +570,7 @@
                                     MaxHeight="200" />
                             </Expander>
                             <TextBox
+                                x:Uid="Tools_ApiResponseBody"
                                 x:Name="ApiResponseBody"
                                 Style="{StaticResource MonoBox}"
                                 MinHeight="220"

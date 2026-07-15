@@ -18,6 +18,7 @@ public sealed partial class PomodoroViewModel : ObservableObject
     private DateTime _endsAtUtc;
     private TimeSpan _total;
     private TimeSpan _pausedRemaining;
+    private bool _isBreak;
 
     public PomodoroViewModel()
     {
@@ -42,7 +43,9 @@ public sealed partial class PomodoroViewModel : ObservableObject
 
     public string PauseGlyph => IsPaused ? "\uE768" : "\uE769"; // play / pause
 
-    public string PauseTooltip => IsPaused ? "Resume" : "Pause";
+    public string PauseTooltip => IsPaused
+        ? Loc.T("Pomo_Resume", "Resume")
+        : Loc.T("Pomo_Pause", "Pause");
 
     [ObservableProperty]
     public partial string TimeText { get; set; }
@@ -57,10 +60,11 @@ public sealed partial class PomodoroViewModel : ObservableObject
     [ObservableProperty]
     public partial double ProgressPercent { get; set; }
 
-    public void Start(int minutes, string label)
+    public void Start(int minutes, string label, bool isBreak = false)
     {
         _total = TimeSpan.FromMinutes(minutes);
         _endsAtUtc = DateTime.UtcNow + _total;
+        _isBreak = isBreak;
         SessionLabel = label;
         IsPaused = false;
         IsActive = true;
@@ -126,12 +130,12 @@ public sealed partial class PomodoroViewModel : ObservableObject
 
         try
         {
-            var message = SessionLabel.Contains("break", StringComparison.OrdinalIgnoreCase)
-                ? "Break's over — back to it!"
-                : "Nice work! Time for a break.";
+            var message = _isBreak
+                ? Loc.T("Pomo_ToastBreakOver", "Break's over — back to it!")
+                : Loc.T("Pomo_ToastFocusDone", "Nice work! Time for a break.");
             AppNotificationManager.Default.Show(
                 new AppNotificationBuilder()
-                    .AddText($"{SessionLabel} session finished")
+                    .AddText(Loc.F("Pomo_ToastFinished", "{0} session finished", SessionLabel))
                     .AddText(message)
                     .BuildNotification());
         }

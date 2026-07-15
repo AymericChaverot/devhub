@@ -14,6 +14,9 @@ public sealed class AppSettings
     /// <summary>"System", "Light" or "Dark".</summary>
     public string Theme { get; set; } = "System";
 
+    /// <summary>UI language: "System" or a BCP-47 tag ("en-US", "fr-FR"). Applied at startup.</summary>
+    public string Language { get; set; } = "System";
+
     /// <summary>Folders the user removed from the Projects list; the scanner skips them.</summary>
     public List<string> IgnoredProjectPaths { get; set; } = [];
 

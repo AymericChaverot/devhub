@@ -125,17 +125,17 @@ public sealed class OpenMeteoWeatherService : IWeatherService
     /// <summary>Maps a WMO weather code (Open-Meteo's format) to display text + emoji.</summary>
     public static (string Text, string Emoji) DescribeWeatherCode(int code, bool isDay = true) => code switch
     {
-        0 => ("Clear sky", isDay ? "☀️" : "🌙"),
-        1 => ("Mainly clear", isDay ? "🌤️" : "🌙"),
-        2 => ("Partly cloudy", "⛅"),
-        3 => ("Overcast", "☁️"),
-        45 or 48 => ("Fog", "🌫️"),
-        >= 51 and <= 57 => ("Drizzle", "🌦️"),
-        >= 61 and <= 67 => ("Rain", "🌧️"),
-        >= 71 and <= 77 => ("Snow", "🌨️"),
-        80 or 81 or 82 => ("Rain showers", "🌧️"),
-        85 or 86 => ("Snow showers", "🌨️"),
-        95 or 96 or 99 => ("Thunderstorm", "⛈️"),
+        0 => (CoreStrings.Get("Core_WeatherClear", "Clear sky"), isDay ? "☀️" : "🌙"),
+        1 => (CoreStrings.Get("Core_WeatherMainlyClear", "Mainly clear"), isDay ? "🌤️" : "🌙"),
+        2 => (CoreStrings.Get("Core_WeatherPartlyCloudy", "Partly cloudy"), "⛅"),
+        3 => (CoreStrings.Get("Core_WeatherOvercast", "Overcast"), "☁️"),
+        45 or 48 => (CoreStrings.Get("Core_WeatherFog", "Fog"), "🌫️"),
+        >= 51 and <= 57 => (CoreStrings.Get("Core_WeatherDrizzle", "Drizzle"), "🌦️"),
+        >= 61 and <= 67 => (CoreStrings.Get("Core_WeatherRain", "Rain"), "🌧️"),
+        >= 71 and <= 77 => (CoreStrings.Get("Core_WeatherSnow", "Snow"), "🌨️"),
+        80 or 81 or 82 => (CoreStrings.Get("Core_WeatherRainShowers", "Rain showers"), "🌧️"),
+        85 or 86 => (CoreStrings.Get("Core_WeatherSnowShowers", "Snow showers"), "🌨️"),
+        95 or 96 or 99 => (CoreStrings.Get("Core_WeatherThunderstorm", "Thunderstorm"), "⛈️"),
         _ => ("—", "🌡️"),
     };
 }

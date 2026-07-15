@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="4">
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Projects" />
+            <TextBlock x:Uid="Proj_Title" Style="{StaticResource TitleTextBlockStyle}" Text="Projects" />
             <TextBlock
                 Style="{StaticResource BodyTextBlockStyle}"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -31,16 +31,16 @@
             <Button Style="{StaticResource AccentButtonStyle}" Click="AddFromGit_Click">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon FontSize="14" Glyph="&#xE710;" />
-                    <TextBlock Text="Add from Git" />
+                    <TextBlock x:Uid="Proj_AddFromGit" Text="Add from Git" />
                 </StackPanel>
             </Button>
             <Button Command="{x:Bind ViewModel.RescanCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon FontSize="14" Glyph="&#xE72C;" />
-                    <TextBlock Text="Rescan" />
+                    <TextBlock x:Uid="Proj_Rescan" Text="Rescan" />
                 </StackPanel>
             </Button>
-            <Button Click="ChangeFolder_Click" Content="Change folder…" />
+            <Button x:Uid="Proj_ChangeFolder" Click="ChangeFolder_Click" Content="Change folder…" />
             <StackPanel
                 Margin="8,0,0,0"
                 Orientation="Horizontal"
@@ -76,15 +76,18 @@
                 Glyph="&#xE8B7;"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             <TextBlock
+                x:Uid="Proj_EmptyTitle"
                 HorizontalAlignment="Center"
                 Style="{StaticResource SubtitleTextBlockStyle}"
                 Text="Choose your Projects folder" />
             <TextBlock
+                x:Uid="Proj_EmptySubtitle"
                 HorizontalAlignment="Center"
                 Style="{StaticResource BodyTextBlockStyle}"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Text="DevHub will scan it and list every project inside." />
             <Button
+                x:Uid="Proj_ChooseFolder"
                 HorizontalAlignment="Center"
                 Style="{StaticResource AccentButtonStyle}"
                 Click="ChangeFolder_Click"
@@ -178,6 +181,7 @@
 
                         <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4">
                             <Button
+                                x:Uid="Proj_OpenExplorerButton"
                                 VerticalAlignment="Center"
                                 Click="OpenInExplorer_Click"
                                 Tag="{x:Bind}"
@@ -185,12 +189,14 @@
                                 <FontIcon FontSize="14" Glyph="&#xE838;" />
                             </Button>
                             <Button
+                                x:Uid="Proj_MoreOptionsButton"
                                 VerticalAlignment="Center"
                                 ToolTipService.ToolTip="More options">
                                 <FontIcon FontSize="14" Glyph="&#xE712;" />
                                 <Button.Flyout>
                                     <MenuFlyout>
                                         <MenuFlyoutItem
+                                            x:Uid="Proj_RemoveFromList"
                                             Click="RemoveFromList_Click"
                                             Tag="{x:Bind}"
                                             Text="Remove from list">
@@ -199,6 +205,7 @@
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
                                         <MenuFlyoutItem
+                                            x:Uid="Proj_DeleteFolder"
                                             Click="DeleteFolder_Click"
                                             Tag="{x:Bind}"
                                             Text="Delete folder…">

@@ -73,15 +73,18 @@ public sealed partial class ToolVariantViewModel : ObservableObject
     public bool CanUpdate => State == PackageState.Installed && AvailableVersion is not null;
 
     /// <summary>Caption shown under the status line when an update is available.</summary>
-    public string UpdateHintText => AvailableVersion is null ? "" : $"Update available: {AvailableVersion}";
+    public string UpdateHintText => AvailableVersion is null
+        ? ""
+        : Loc.F("Env_UpdateHint", "Update available: {0}", AvailableVersion);
 
     public string StatusText => State switch
     {
-        PackageState.Installed when InstalledVersion is not null => $"Installed · {InstalledVersion}",
-        PackageState.Installed => "Installed",
-        PackageState.NotInstalled => "Not installed",
-        PackageState.Queued => "Queued…",
-        PackageState.Working => "Working…",
+        PackageState.Installed when InstalledVersion is not null =>
+            $"{Loc.T("Env_StatusInstalled", "Installed")} · {InstalledVersion}",
+        PackageState.Installed => Loc.T("Env_StatusInstalled", "Installed"),
+        PackageState.NotInstalled => Loc.T("Env_StatusNotInstalled", "Not installed"),
+        PackageState.Queued => Loc.T("Env_StatusQueued", "Queued…"),
+        PackageState.Working => Loc.T("Env_StatusWorking", "Working…"),
         _ => "",
     };
 

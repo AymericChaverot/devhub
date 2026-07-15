@@ -8,7 +8,7 @@ namespace DevHub.App.ViewModels;
 
 public sealed partial class EnvironmentsViewModel : ObservableObject
 {
-    public const string AllCategories = "All categories";
+    public static string AllCategories { get; } = Loc.T("Env_AllCategories", "All categories");
 
     private readonly ICatalogService _catalog;
     private readonly IPackageService _packages;
@@ -34,7 +34,13 @@ public sealed partial class EnvironmentsViewModel : ObservableObject
 
     public ObservableCollection<string> CategoryOptions { get; } = [AllCategories];
 
-    public IReadOnlyList<string> StatusOptions { get; } = ["All statuses", "Installed", "Update available", "Not installed"];
+    public IReadOnlyList<string> StatusOptions { get; } =
+    [
+        Loc.T("Env_StatusAll", "All statuses"),
+        Loc.T("Env_StatusInstalled", "Installed"),
+        Loc.T("Env_StatusUpdateAvailable", "Update available"),
+        Loc.T("Env_StatusNotInstalled", "Not installed"),
+    ];
 
     [ObservableProperty]
     public partial string SearchText { get; set; }
@@ -65,7 +71,7 @@ public sealed partial class EnvironmentsViewModel : ObservableObject
 
     public int UpdateCount => _allCards.SelectMany(c => c.Variants).Count(v => v.AvailableVersion is not null);
 
-    public string UpdateAllLabel => $"Update all ({UpdateCount})";
+    public string UpdateAllLabel => Loc.F("Env_UpdateAll", "Update all ({0})", UpdateCount);
 
     public void ClearError() => ErrorMessage = null;
 
@@ -132,7 +138,7 @@ public sealed partial class EnvironmentsViewModel : ObservableObject
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to load the environments catalog");
-            ErrorMessage = $"Could not query winget for installed packages: {ex.Message}";
+            ErrorMessage = Loc.F("Env_WingetError", "Could not query winget for installed packages: {0}", ex.Message);
         }
         finally
         {
@@ -158,13 +164,26 @@ public sealed partial class EnvironmentsViewModel : ObservableObject
         GroupsChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private bool MatchesStatusFilter(ToolCardViewModel card) => SelectedStatus switch
+    // Filter on the option's position, not its (localized) display text.
+    private bool MatchesStatusFilter(ToolCardViewModel card)
     {
-        "Installed" => card.Variants.Any(v => v.State == PackageState.Installed),
-        "Update available" => card.Variants.Any(v => v.AvailableVersion is not null),
-        "Not installed" => card.Variants.All(v => v.State != PackageState.Installed),
-        _ => true,
-    };
+        if (SelectedStatus == StatusOptions[1])
+        {
+            return card.Variants.Any(v => v.State == PackageState.Installed);
+        }
+
+        if (SelectedStatus == StatusOptions[2])
+        {
+            return card.Variants.Any(v => v.AvailableVersion is not null);
+        }
+
+        if (SelectedStatus == StatusOptions[3])
+        {
+            return card.Variants.All(v => v.State != PackageState.Installed);
+        }
+
+        return true;
+    }
 
     private void NotifyUpdateSummaryChanged()
     {

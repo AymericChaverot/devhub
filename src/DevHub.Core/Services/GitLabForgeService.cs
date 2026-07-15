@@ -19,7 +19,9 @@ public sealed class GitLabForgeService : IForgeService
 
     public string TokenHelpUrl => "https://gitlab.com/-/user_settings/personal_access_tokens";
 
-    public string TokenScopeHint => "Personal access token with the \"read_api\" scope.";
+    public string TokenScopeHint => CoreStrings.Get(
+        "Core_GitLabScopeHint",
+        "Personal access token with the \"read_api\" scope.");
 
     public async Task<ForgeUser?> GetCurrentUserAsync(string token, CancellationToken cancellationToken = default)
     {

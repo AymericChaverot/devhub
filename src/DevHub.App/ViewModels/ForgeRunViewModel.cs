@@ -56,15 +56,15 @@ public sealed class ForgeRunViewModel
     }
 
     public string TimeText =>
-        $"{_run.UpdatedAt.ToLocalTime():d MMM HH:mm} · {RelativeTime(_run.UpdatedAt)}";
+        $"{_run.UpdatedAt.ToLocalTime().ToString("d MMM HH:mm", Loc.Culture)} · {ForgeItemViewModel.RelativeTime(_run.UpdatedAt)}";
 
     public string StatusLabel => _run.Status switch
     {
-        ForgeRunStatus.Success => "Success",
-        ForgeRunStatus.Failed => "Failed",
-        ForgeRunStatus.Running => "Running",
-        ForgeRunStatus.Cancelled => "Cancelled",
-        _ => "Done",
+        ForgeRunStatus.Success => Loc.T("Forge_RunSuccess", "Success"),
+        ForgeRunStatus.Failed => Loc.T("Forge_RunFailed", "Failed"),
+        ForgeRunStatus.Running => Loc.T("Forge_RunRunning", "Running"),
+        ForgeRunStatus.Cancelled => Loc.T("Forge_RunCancelled", "Cancelled"),
+        _ => Loc.T("Forge_RunDone", "Done"),
     };
 
     public string StatusGlyph => _run.Status switch
@@ -95,17 +95,4 @@ public sealed class ForgeRunViewModel
         { TotalHours: < 1 } => $"{(int)duration.TotalMinutes} min {duration.Seconds:00} s",
         _ => $"{(int)duration.TotalHours} h {duration.Minutes:00} min",
     };
-
-    private static string RelativeTime(DateTime utc)
-    {
-        var age = DateTime.UtcNow - utc.ToUniversalTime();
-        return age switch
-        {
-            { TotalMinutes: < 1 } => "just now",
-            { TotalHours: < 1 } => $"{(int)age.TotalMinutes} min ago",
-            { TotalDays: < 1 } => $"{(int)age.TotalHours} h ago",
-            { TotalDays: < 30 } => $"{(int)age.TotalDays} d ago",
-            _ => utc.ToLocalTime().ToString("d MMM yyyy"),
-        };
-    }
 }

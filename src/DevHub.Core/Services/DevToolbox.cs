@@ -52,7 +52,7 @@ public static class DevToolbox
                 }
                 catch (FormatException)
                 {
-                    throw new FormatException("This is not valid Base64.");
+                    throw new FormatException(CoreStrings.Get("Core_InvalidBase64", "This is not valid Base64."));
                 }
 
             case ToolTextFormat.Hex:
@@ -60,7 +60,7 @@ public static class DevToolbox
                 var clean = new string([.. input.Where(Uri.IsHexDigit)]);
                 if (clean.Length == 0 || clean.Length % 2 != 0)
                 {
-                    throw new FormatException("Hex input needs an even number of hex digits.");
+                    throw new FormatException(CoreStrings.Get("Core_InvalidHex", "Hex input needs an even number of hex digits."));
                 }
 
                 var bytes = new byte[clean.Length / 2];
@@ -77,7 +77,7 @@ public static class DevToolbox
                 var clean = new string([.. input.Where(c => c is '0' or '1')]);
                 if (clean.Length == 0 || clean.Length % 8 != 0)
                 {
-                    throw new FormatException("Binary input needs a multiple of 8 bits (0s and 1s).");
+                    throw new FormatException(CoreStrings.Get("Core_InvalidBinary", "Binary input needs a multiple of 8 bits (0s and 1s)."));
                 }
 
                 var bytes = new byte[clean.Length / 8];
@@ -123,7 +123,7 @@ public static class DevToolbox
         var parts = token.Trim().Split('.');
         if (parts.Length is not (2 or 3))
         {
-            throw new FormatException("A JWT has 3 dot-separated parts (header.payload.signature).");
+            throw new FormatException(CoreStrings.Get("Core_InvalidJwt", "A JWT has 3 dot-separated parts (header.payload.signature)."));
         }
 
         return (FormatJson(DecodeBase64Url(parts[0]), indent: true),
@@ -140,7 +140,7 @@ public static class DevToolbox
         }
         catch (FormatException)
         {
-            throw new FormatException("This does not look like a valid JWT segment.");
+            throw new FormatException(CoreStrings.Get("Core_InvalidJwtSegment", "This does not look like a valid JWT segment."));
         }
     }
 
@@ -158,7 +158,7 @@ public static class DevToolbox
         }
         catch (JsonException ex)
         {
-            throw new FormatException($"Invalid JSON: {ex.Message}");
+            throw new FormatException(CoreStrings.Format("Core_InvalidJson", "Invalid JSON: {0}", ex.Message));
         }
     }
 
@@ -184,7 +184,7 @@ public static class DevToolbox
         }
         catch (ArgumentException ex)
         {
-            throw new FormatException($"Invalid pattern: {ex.Message}");
+            throw new FormatException(CoreStrings.Format("Core_InvalidPattern", "Invalid pattern: {0}", ex.Message));
         }
 
         try
@@ -196,7 +196,7 @@ public static class DevToolbox
         }
         catch (RegexMatchTimeoutException)
         {
-            throw new FormatException("The pattern timed out after 1 s — likely catastrophic backtracking.");
+            throw new FormatException(CoreStrings.Get("Core_PatternTimeout", "The pattern timed out after 1 s — likely catastrophic backtracking."));
         }
     }
 
@@ -207,7 +207,7 @@ public static class DevToolbox
         var b = right.Replace("\r\n", "\n").Split('\n');
         if (a.Length > 2000 || b.Length > 2000)
         {
-            throw new FormatException("The diff supports up to 2000 lines per side.");
+            throw new FormatException(CoreStrings.Get("Core_DiffTooLarge", "The diff supports up to 2000 lines per side."));
         }
 
         // Longest-common-subsequence table, then a backwards walk emits the lines.
@@ -273,7 +273,7 @@ public static class DevToolbox
 
             if (hex.Length != 6 || !hex.All(Uri.IsHexDigit))
             {
-                throw new FormatException("Hex colors are #RGB or #RRGGBB.");
+                throw new FormatException(CoreStrings.Get("Core_InvalidHexColor", "Hex colors are #RGB or #RRGGBB."));
             }
 
             r = System.Convert.ToByte(hex[..2], 16);
@@ -282,15 +282,15 @@ public static class DevToolbox
         }
         else if (text.StartsWith("hsl"))
         {
-            var numbers = ExtractNumbers(text, 3, "hsl(h, s%, l%) needs three numbers.");
+            var numbers = ExtractNumbers(text, 3, CoreStrings.Get("Core_InvalidHsl", "hsl(h, s%, l%) needs three numbers."));
             (r, g, b) = HslToRgb(numbers[0], numbers[1] / 100, numbers[2] / 100);
         }
         else
         {
-            var numbers = ExtractNumbers(text, 3, "RGB colors need three numbers, e.g. rgb(51, 102, 153).");
+            var numbers = ExtractNumbers(text, 3, CoreStrings.Get("Core_InvalidRgb", "RGB colors need three numbers, e.g. rgb(51, 102, 153)."));
             if (numbers.Any(n => n is < 0 or > 255))
             {
-                throw new FormatException("RGB channels go from 0 to 255.");
+                throw new FormatException(CoreStrings.Get("Core_RgbRange", "RGB channels go from 0 to 255."));
             }
 
             (r, g, b) = ((byte)numbers[0], (byte)numbers[1], (byte)numbers[2]);
@@ -380,12 +380,12 @@ public static class DevToolbox
 
         if (sets.Count == 0)
         {
-            throw new FormatException("Pick at least one character set.");
+            throw new FormatException(CoreStrings.Get("Core_NoCharSet", "Pick at least one character set."));
         }
 
         if (length < sets.Count || length > 256)
         {
-            throw new FormatException($"Length must be between {Math.Max(sets.Count, 4)} and 256.");
+            throw new FormatException(CoreStrings.Format("Core_PasswordLength", "Length must be between {0} and 256.", Math.Max(sets.Count, 4)));
         }
 
         var pool = string.Concat(sets);
@@ -417,7 +417,11 @@ public static class DevToolbox
             ? DateTimeOffset.FromUnixTimeMilliseconds(value)
             : DateTimeOffset.FromUnixTimeSeconds(value);
 
-        var unit = isMilliseconds ? "milliseconds" : "seconds";
-        return $"Interpreted as {unit}\nUTC:   {moment.UtcDateTime:yyyy-MM-dd HH:mm:ss} UTC\nLocal: {moment.ToLocalTime():yyyy-MM-dd HH:mm:ss zzz}";
+        var unit = isMilliseconds
+            ? CoreStrings.Get("Core_Milliseconds", "milliseconds")
+            : CoreStrings.Get("Core_Seconds", "seconds");
+        var interpreted = CoreStrings.Format("Core_InterpretedAs", "Interpreted as {0}", unit);
+        var localLabel = CoreStrings.Get("Core_LocalTime", "Local:");
+        return $"{interpreted}\nUTC:   {moment.UtcDateTime:yyyy-MM-dd HH:mm:ss} UTC\n{localLabel} {moment.ToLocalTime():yyyy-MM-dd HH:mm:ss zzz}";
     }
 }

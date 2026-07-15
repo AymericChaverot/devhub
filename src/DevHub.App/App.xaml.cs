@@ -28,6 +28,22 @@ public partial class App : Application
         var settings = Services.GetRequiredService<ISettingsService>();
         await settings.LoadAsync();
 
+        // Language must be set before the first ResourceLoader/XAML resource lookup.
+        if (settings.Settings.Language is { Length: > 0 } language && language != "System")
+        {
+            try
+            {
+                Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = language;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Could not apply the language override {Language}", language);
+            }
+        }
+
+        // DevHub.Core has no UI dependency; hand it a resource lookup for its user-facing strings.
+        DevHub.Core.Services.CoreStrings.Lookup = Loc.GetOrNull;
+
         // Required before showing toast notifications (pomodoro completion).
         try
         {

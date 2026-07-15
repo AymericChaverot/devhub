@@ -78,8 +78,8 @@ public sealed partial class ForgeAccountViewModel : ObservableObject
     public bool HasError => ErrorMessage is not null;
 
     public string StatusText => IsConnected
-        ? $"Connected as {Login}"
-        : "Connect with a personal access token";
+        ? Loc.F("Forge_ConnectedAs", "Connected as {0}", Login ?? "")
+        : Loc.T("Forge_ConnectHint", "Connect with a personal access token");
 
     [RelayCommand]
     private async Task SubmitTokenAsync()
@@ -96,7 +96,7 @@ public sealed partial class ForgeAccountViewModel : ObservableObject
         token = token.Trim();
         if (token.Length == 0)
         {
-            ErrorMessage = "Paste a personal access token first.";
+            ErrorMessage = Loc.T("Forge_EmptyToken", "Paste a personal access token first.");
             return false;
         }
 
@@ -107,7 +107,7 @@ public sealed partial class ForgeAccountViewModel : ObservableObject
             var user = await _service.GetCurrentUserAsync(token);
             if (user is null)
             {
-                ErrorMessage = $"{DisplayName} rejected this token. {TokenScopeHint}";
+                ErrorMessage = Loc.F("Forge_TokenRejected", "{0} rejected this token. {1}", DisplayName, TokenScopeHint);
                 return false;
             }
 
@@ -124,7 +124,7 @@ public sealed partial class ForgeAccountViewModel : ObservableObject
         catch (Exception ex)
         {
             Log.Error(ex, "Connecting the {Forge} account failed", DisplayName);
-            ErrorMessage = $"Could not reach {DisplayName}: {ex.Message}";
+            ErrorMessage = Loc.F("Forge_Unreachable", "Could not reach {0}: {1}", DisplayName, ex.Message);
             return false;
         }
         finally

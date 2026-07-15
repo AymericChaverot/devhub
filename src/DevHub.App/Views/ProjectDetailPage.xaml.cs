@@ -126,7 +126,8 @@ public sealed partial class ProjectDetailPage : Page
         RunFlyout.Items.Clear();
 
         var configs = RunConfigs;
-        RunButtonLabel.Text = configs.Count > 0 ? $"Run · {configs[0].Name}" : "Run";
+        var runLabel = Loc.T("Detail_Run", "Run");
+        RunButtonLabel.Text = configs.Count > 0 ? $"{runLabel} · {configs[0].Name}" : runLabel;
 
         foreach (var config in configs)
         {
@@ -148,7 +149,7 @@ public sealed partial class ProjectDetailPage : Page
 
         var add = new MenuFlyoutItem
         {
-            Text = "Add configuration…",
+            Text = Loc.T("Detail_AddConfig", "Add configuration…"),
             Icon = new FontIcon { Glyph = "\uE710" },
         };
         add.Click += async (_, _) => await AddRunConfigAsync();
@@ -158,7 +159,7 @@ public sealed partial class ProjectDetailPage : Page
         {
             var remove = new MenuFlyoutSubItem
             {
-                Text = "Remove configuration",
+                Text = Loc.T("Detail_RemoveConfig", "Remove configuration"),
                 Icon = new FontIcon { Glyph = "\uE74D" },
             };
             foreach (var config in configs)
@@ -213,20 +214,20 @@ public sealed partial class ProjectDetailPage : Page
 
         var nameBox = new TextBox
         {
-            Header = "Name",
+            Header = Loc.T("Detail_ConfigName", "Name"),
             PlaceholderText = "dev",
         };
         var commandBox = new TextBox
         {
-            Header = "Command (runs in PowerShell, inside the project folder)",
+            Header = Loc.T("Detail_ConfigCommand", "Command (runs in PowerShell, inside the project folder)"),
             PlaceholderText = "npm run dev",
             AcceptsReturn = false,
         };
         var dialog = new ContentDialog
         {
-            Title = "Add a run configuration",
-            PrimaryButtonText = "Add",
-            CloseButtonText = "Cancel",
+            Title = Loc.T("Detail_AddConfigTitle", "Add a run configuration"),
+            PrimaryButtonText = Loc.T("Common_Add", "Add"),
+            CloseButtonText = Loc.T("Common_Cancel", "Cancel"),
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = XamlRoot,
             Content = new StackPanel { Spacing = 12, Children = { nameBox, commandBox } },
@@ -303,7 +304,7 @@ public sealed partial class ProjectDetailPage : Page
         _forgeAccount = account;
         _forgeRepo = repo;
         ForgeTab.Text = account.DisplayName;
-        ForgeOpenRepoLabel.Text = $"Open on {account.DisplayName}";
+        ForgeOpenRepoLabel.Text = Loc.F("Detail_OpenOnForge", "Open on {0}", account.DisplayName);
         ForgeTab.Visibility = Visibility.Visible;
     }
 
@@ -315,11 +316,16 @@ public sealed partial class ProjectDetailPage : Page
         }
 
         var isGitLab = _forgeAccount.Kind == Core.Models.ForgeKind.GitLab;
-        var prsLabel = isGitLab ? "Open merge requests" : "Open pull requests";
-        var runsLabel = isGitLab ? "Pipelines" : "Workflow runs";
+        var prsLabel = isGitLab
+            ? Loc.T("Detail_OpenMrs", "Open merge requests")
+            : Loc.T("Detail_OpenPrs", "Open pull requests");
+        var runsLabel = isGitLab
+            ? Loc.T("Detail_Pipelines", "Pipelines")
+            : Loc.T("Detail_WorkflowRuns", "Workflow runs");
+        var issuesLabel = Loc.T("Detail_OpenIssues", "Open issues");
         ForgeRepoName.Text = _forgeRepo;
         ForgePrsHeader.Text = prsLabel;
-        ForgeIssuesHeader.Text = "Open issues";
+        ForgeIssuesHeader.Text = issuesLabel;
         ForgeRunsHeader.Text = runsLabel;
         ForgeLoading.IsActive = true;
         try
@@ -343,7 +349,7 @@ public sealed partial class ProjectDetailPage : Page
             ForgePrsEmpty.Visibility = prs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
             var issues = (await issuesTask).Select(i => new ForgeItemViewModel(i, showRepo: false)).ToList();
-            ForgeIssuesHeader.Text = $"Open issues ({issues.Count})";
+            ForgeIssuesHeader.Text = $"{issuesLabel} ({issues.Count})";
             ForgeIssueList.ItemsSource = issues;
             ForgeIssuesEmpty.Visibility = issues.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -563,24 +569,28 @@ public sealed partial class ProjectDetailPage : Page
             var (a, b) => $"↑{a} ↓{b}",
         };
 
-        var branchWord = info.Branches.Count == 1 ? "branch" : "branches";
-        var commitWord = info.TotalCommits == 1 ? "commit" : "commits";
+        var branchWord = info.Branches.Count == 1
+            ? Loc.T("Detail_BranchWord", "branch")
+            : Loc.T("Detail_BranchesWord", "branches");
+        var commitWord = info.TotalCommits == 1
+            ? Loc.T("Detail_CommitWord", "commit")
+            : Loc.T("Detail_CommitsWord", "commits");
         GitCountsText.Text = $"{info.TotalCommits:N0} {commitWord} · {info.Branches.Count} {branchWord}";
 
         if (info.IsDirty)
         {
             string[] parts =
             [
-                info.Modified > 0 ? $"{info.Modified} modified" : "",
-                info.Added > 0 ? $"{info.Added} added" : "",
-                info.Removed > 0 ? $"{info.Removed} removed" : "",
-                info.Untracked > 0 ? $"{info.Untracked} untracked" : "",
+                info.Modified > 0 ? Loc.F("Detail_GitModified", "{0} modified", info.Modified) : "",
+                info.Added > 0 ? Loc.F("Detail_GitAdded", "{0} added", info.Added) : "",
+                info.Removed > 0 ? Loc.F("Detail_GitRemoved", "{0} removed", info.Removed) : "",
+                info.Untracked > 0 ? Loc.F("Detail_GitUntracked", "{0} untracked", info.Untracked) : "",
             ];
             GitStatusText.Text = string.Join(" · ", parts.Where(p => p.Length > 0));
         }
         else
         {
-            GitStatusText.Text = "Clean working tree";
+            GitStatusText.Text = Loc.T("Detail_CleanTree", "Clean working tree");
         }
 
         _graphCount = GraphPageSize;
@@ -600,7 +610,7 @@ public sealed partial class ProjectDetailPage : Page
         FetchButton.IsEnabled = PullButton.IsEnabled = PushButton.IsEnabled = cliAvailable;
         if (!cliAvailable)
         {
-            GitStatusText.Text += "  ·  git CLI not found — fetch/pull/push unavailable";
+            GitStatusText.Text += "  ·  " + Loc.T("Detail_NoGitCli", "git CLI not found — fetch/pull/push unavailable");
         }
     }
 
@@ -721,7 +731,7 @@ public sealed partial class ProjectDetailPage : Page
         {
             Log.Information("Checking out {Branch} in {Path}", branch, _project.Path);
             await _git.CheckoutAsync(_project.Path, branch);
-            ShowGitResult($"Switched to branch '{branch}'.", success: true);
+            ShowGitResult(Loc.F("Detail_SwitchedBranch", "Switched to branch '{0}'.", branch), success: true);
         }
         catch (Exception ex)
         {
@@ -744,10 +754,10 @@ public sealed partial class ProjectDetailPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Create branch",
+            Title = Loc.T("Detail_CreateBranchTitle", "Create branch"),
             Content = nameBox,
-            PrimaryButtonText = "Create & switch",
-            CloseButtonText = "Cancel",
+            PrimaryButtonText = Loc.T("Detail_CreateSwitch", "Create & switch"),
+            CloseButtonText = Loc.T("Common_Cancel", "Cancel"),
             DefaultButton = ContentDialogButton.Primary,
         };
 
@@ -760,7 +770,7 @@ public sealed partial class ProjectDetailPage : Page
         try
         {
             await _git.CreateBranchAsync(_project.Path, name);
-            ShowGitResult($"Created and switched to '{name}'.", success: true);
+            ShowGitResult(Loc.F("Detail_CreatedBranch", "Created and switched to '{0}'.", name), success: true);
         }
         catch (Exception ex)
         {
@@ -793,7 +803,7 @@ public sealed partial class ProjectDetailPage : Page
             var output = await operation(_project.Path, CancellationToken.None);
             var lastLine = output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .LastOrDefault();
-            ShowGitResult($"{operationName} done. {lastLine}".Trim(), success: true);
+            ShowGitResult(Loc.F("Detail_GitOpDone", "{0} done. {1}", operationName, lastLine ?? "").Trim(), success: true);
         }
         catch (Exception ex)
         {
@@ -907,14 +917,14 @@ public sealed partial class ProjectDetailPage : Page
             var info = new FileInfo(file.Path);
             if (info.Length > 768 * 1024)
             {
-                ShowFileMessage($"File is too large to preview ({info.Length / 1024:N0} KB).");
+                ShowFileMessage(Loc.F("Detail_FileTooLarge", "File is too large to preview ({0:N0} KB).", info.Length / 1024));
                 return;
             }
 
             var bytes = await File.ReadAllBytesAsync(file.Path);
             if (bytes.Take(8000).Contains((byte)0))
             {
-                ShowFileMessage("Binary file — no preview.");
+                ShowFileMessage(Loc.T("Detail_BinaryFile", "Binary file — no preview."));
                 return;
             }
 
@@ -925,7 +935,7 @@ public sealed partial class ProjectDetailPage : Page
         catch (Exception ex)
         {
             Log.Error(ex, "File preview failed for {Path}", file.Path);
-            ShowFileMessage($"Could not read the file: {ex.Message}");
+            ShowFileMessage(Loc.F("Detail_FileReadError", "Could not read the file: {0}", ex.Message));
         }
     }
 
@@ -1110,7 +1120,7 @@ public sealed partial class ProjectDetailPage : Page
 
         if (ides.Count == 0)
         {
-            IdePicker.PlaceholderText = "No IDE detected";
+            IdePicker.PlaceholderText = Loc.T("Detail_NoIde", "No IDE detected");
             OpenInIdeButton.IsEnabled = false;
             _initializingIdePicker = false;
             return;
@@ -1255,9 +1265,9 @@ public sealed partial class ProjectDetailPage : Page
             await new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = "No subfolders",
-                Content = "This project has no subfolders that could become subprojects.",
-                CloseButtonText = "OK",
+                Title = Loc.T("Detail_NoSubfoldersTitle", "No subfolders"),
+                Content = Loc.T("Detail_NoSubfoldersText", "This project has no subfolders that could become subprojects."),
+                CloseButtonText = Loc.T("Common_Ok", "OK"),
             }.ShowAsync();
             return;
         }
@@ -1271,10 +1281,10 @@ public sealed partial class ProjectDetailPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Subprojects",
+            Title = Loc.T("Detail_SubprojectsTitle", "Subprojects"),
             Content = new ScrollViewer { Content = panel, MaxHeight = 420, MinWidth = 360 },
-            PrimaryButtonText = "Save",
-            CloseButtonText = "Cancel",
+            PrimaryButtonText = Loc.T("Common_Save", "Save"),
+            CloseButtonText = Loc.T("Common_Cancel", "Cancel"),
             DefaultButton = ContentDialogButton.Primary,
         };
 
@@ -1353,10 +1363,10 @@ public sealed partial class ProjectDetailPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Rename project",
+            Title = Loc.T("Detail_RenameTitle", "Rename project"),
             Content = nameBox,
-            PrimaryButtonText = "Rename",
-            CloseButtonText = "Cancel",
+            PrimaryButtonText = Loc.T("Detail_RenameButton", "Rename"),
+            CloseButtonText = Loc.T("Common_Cancel", "Cancel"),
             DefaultButton = ContentDialogButton.Primary,
         };
 
@@ -1405,9 +1415,9 @@ public sealed partial class ProjectDetailPage : Page
             await new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = "Could not rename the project",
+                Title = Loc.T("Detail_RenameFailed", "Could not rename the project"),
                 Content = ex.Message,
-                CloseButtonText = "OK",
+                CloseButtonText = Loc.T("Common_Ok", "OK"),
             }.ShowAsync();
         }
     }
@@ -1479,7 +1489,7 @@ public sealed partial class ProjectDetailPage : Page
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to render README {Path}", readmePath);
-            NoReadmeText.Text = "The README could not be displayed.";
+            NoReadmeText.Text = Loc.T("Detail_ReadmeError", "The README could not be displayed.");
         }
     }
 

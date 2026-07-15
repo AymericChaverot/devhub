@@ -20,10 +20,10 @@
 
     <ScrollViewer>
         <StackPanel Margin="36,24,36,36" Spacing="8" MaxWidth="920" HorizontalAlignment="Left">
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Settings" />
+            <TextBlock x:Uid="Settings_Title" Style="{StaticResource TitleTextBlockStyle}" Text="Settings" />
 
             <!-- ============ General ============ -->
-            <TextBlock Style="{StaticResource SectionHeader}" Text="General" />
+            <TextBlock x:Uid="Settings_GeneralHeader" Style="{StaticResource SectionHeader}" Text="General" />
 
             <Grid Style="{StaticResource SettingsCard}">
                 <Grid.ColumnDefinitions>
@@ -33,14 +33,14 @@
                 </Grid.ColumnDefinitions>
                 <FontIcon Grid.Column="0" VerticalAlignment="Center" Glyph="&#xE8B7;" />
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Projects folder" />
+                    <TextBlock x:Uid="Settings_ProjectsFolderTitle" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Projects folder" />
                     <TextBlock
                         x:Name="FolderPathText"
                         Style="{StaticResource CaptionTextBlockStyle}"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         Text="Not set" />
                 </StackPanel>
-                <Button Grid.Column="2" VerticalAlignment="Center" Click="ChangeFolder_Click" Content="Change…" />
+                <Button x:Uid="Settings_ChangeButton" Grid.Column="2" VerticalAlignment="Center" Click="ChangeFolder_Click" Content="Change…" />
             </Grid>
 
             <Grid Style="{StaticResource SettingsCard}">
@@ -51,13 +51,15 @@
                 </Grid.ColumnDefinitions>
                 <FontIcon Grid.Column="0" VerticalAlignment="Center" Glyph="&#xE753;" />
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Weather location" />
+                    <TextBlock x:Uid="Settings_WeatherTitle" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Weather location" />
                     <TextBlock
+                        x:Uid="Settings_WeatherHint"
                         Style="{StaticResource CaptionTextBlockStyle}"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         Text="City shown on the dashboard. Leave empty to locate automatically from your IP." />
                 </StackPanel>
                 <TextBox
+                    x:Uid="Settings_WeatherBox"
                     x:Name="WeatherLocationBox"
                     Grid.Column="2"
                     Width="220"
@@ -68,7 +70,7 @@
             </Grid>
 
             <!-- ============ Appearance ============ -->
-            <TextBlock Style="{StaticResource SectionHeader}" Text="Appearance" />
+            <TextBlock x:Uid="Settings_AppearanceHeader" Style="{StaticResource SectionHeader}" Text="Appearance" />
 
             <Grid Style="{StaticResource SettingsCard}">
                 <Grid.ColumnDefinitions>
@@ -78,8 +80,9 @@
                 </Grid.ColumnDefinitions>
                 <FontIcon Grid.Column="0" VerticalAlignment="Center" Glyph="&#xE790;" />
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Theme" />
+                    <TextBlock x:Uid="Settings_ThemeTitle" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Theme" />
                     <TextBlock
+                        x:Uid="Settings_ThemeHint"
                         Style="{StaticResource CaptionTextBlockStyle}"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         Text="Choose how DevHub looks" />
@@ -90,14 +93,41 @@
                     MinWidth="140"
                     VerticalAlignment="Center"
                     SelectionChanged="ThemePicker_SelectionChanged">
-                    <ComboBoxItem Content="Use system setting" Tag="System" />
-                    <ComboBoxItem Content="Light" Tag="Light" />
-                    <ComboBoxItem Content="Dark" Tag="Dark" />
+                    <ComboBoxItem x:Uid="Settings_ThemeSystem" Content="Use system setting" Tag="System" />
+                    <ComboBoxItem x:Uid="Settings_ThemeLight" Content="Light" Tag="Light" />
+                    <ComboBoxItem x:Uid="Settings_ThemeDark" Content="Dark" Tag="Dark" />
+                </ComboBox>
+            </Grid>
+
+            <Grid Style="{StaticResource SettingsCard}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon Grid.Column="0" VerticalAlignment="Center" Glyph="&#xF2B7;" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock x:Uid="Settings_LanguageTitle" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Language" />
+                    <TextBlock
+                        x:Uid="Settings_LanguageHint"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="Takes effect after restarting DevHub" />
+                </StackPanel>
+                <ComboBox
+                    x:Name="LanguagePicker"
+                    Grid.Column="2"
+                    MinWidth="140"
+                    VerticalAlignment="Center"
+                    SelectionChanged="LanguagePicker_SelectionChanged">
+                    <ComboBoxItem x:Uid="Settings_LanguageSystem" Content="Use system setting" Tag="System" />
+                    <ComboBoxItem Content="English" Tag="en-US" />
+                    <ComboBoxItem Content="Français" Tag="fr-FR" />
                 </ComboBox>
             </Grid>
 
             <!-- ============ Accounts ============ -->
-            <TextBlock Style="{StaticResource SectionHeader}" Text="Accounts" />
+            <TextBlock x:Uid="Settings_AccountsHeader" Style="{StaticResource SectionHeader}" Text="Accounts" />
 
             <ItemsControl ItemsSource="{x:Bind Accounts.Accounts}">
                 <ItemsControl.ItemsPanel>
@@ -149,10 +179,12 @@
                                 VerticalAlignment="Center"
                                 Visibility="{x:Bind IsDisconnected, Mode=OneWay}">
                                 <HyperlinkButton
+                                    x:Uid="Settings_CreateToken"
                                     VerticalAlignment="Center"
                                     NavigateUri="{x:Bind TokenHelpUri}"
                                     Content="Create a token" />
                                 <PasswordBox
+                                    x:Uid="Settings_TokenBox"
                                     Width="240"
                                     VerticalAlignment="Center"
                                     PlaceholderText="Personal access token"
@@ -163,6 +195,7 @@
                                     IsActive="{x:Bind IsBusy, Mode=OneWay}"
                                     Visibility="{x:Bind IsBusy, Mode=OneWay}" />
                                 <Button
+                                    x:Uid="Settings_ConnectButton"
                                     VerticalAlignment="Center"
                                     Style="{StaticResource AccentButtonStyle}"
                                     Content="Connect"
@@ -182,6 +215,7 @@
                                     DisplayName="{x:Bind Login, Mode=OneWay}"
                                     ProfilePicture="{x:Bind AvatarImage, Mode=OneWay}" />
                                 <Button
+                                    x:Uid="Settings_DisconnectButton"
                                     VerticalAlignment="Center"
                                     Content="Disconnect"
                                     Command="{x:Bind DisconnectCommand}" />
@@ -192,7 +226,7 @@
             </ItemsControl>
 
             <!-- ============ Data ============ -->
-            <TextBlock Style="{StaticResource SectionHeader}" Text="Data" />
+            <TextBlock x:Uid="Settings_DataHeader" Style="{StaticResource SectionHeader}" Text="Data" />
 
             <Grid Style="{StaticResource SettingsCard}">
                 <Grid.ColumnDefinitions>
@@ -203,18 +237,18 @@
                 </Grid.ColumnDefinitions>
                 <FontIcon Grid.Column="0" VerticalAlignment="Center" Glyph="&#xE838;" />
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="App data" />
+                    <TextBlock x:Uid="Settings_AppDataTitle" Style="{StaticResource BodyStrongTextBlockStyle}" Text="App data" />
                     <TextBlock
                         x:Name="DataFolderText"
                         Style="{StaticResource CaptionTextBlockStyle}"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
-                <Button Grid.Column="2" VerticalAlignment="Center" Click="OpenLogs_Click" Content="Open logs" />
-                <Button Grid.Column="3" VerticalAlignment="Center" Click="OpenDataFolder_Click" Content="Open folder" />
+                <Button x:Uid="Settings_OpenLogs" Grid.Column="2" VerticalAlignment="Center" Click="OpenLogs_Click" Content="Open logs" />
+                <Button x:Uid="Settings_OpenFolder" Grid.Column="3" VerticalAlignment="Center" Click="OpenDataFolder_Click" Content="Open folder" />
             </Grid>
 
             <!-- ============ About ============ -->
-            <TextBlock Style="{StaticResource SectionHeader}" Text="About" />
+            <TextBlock x:Uid="Settings_AboutHeader" Style="{StaticResource SectionHeader}" Text="About" />
 
             <Grid Style="{StaticResource SettingsCard}">
                 <Grid.ColumnDefinitions>
@@ -251,15 +285,18 @@
                         IsActive="{x:Bind Updates.IsChecking, Mode=OneWay}"
                         Visibility="{x:Bind Updates.IsChecking, Mode=OneWay}" />
                     <Button
+                        x:Uid="Settings_CheckUpdates"
                         Content="Check for updates"
                         Command="{x:Bind Updates.CheckCommand}" />
                     <Button
+                        x:Uid="Settings_InstallUpdate"
                         Style="{StaticResource AccentButtonStyle}"
                         Content="Install update"
                         Command="{x:Bind Updates.InstallCommand}"
                         Visibility="{x:Bind Updates.CanInstall, Mode=OneWay}"
                         IsEnabled="{x:Bind Updates.CanInstallNow, Mode=OneWay}" />
                     <HyperlinkButton
+                        x:Uid="Settings_GitHubRepo"
                         VerticalAlignment="Center"
                         NavigateUri="https://github.com/AymericChaverot/devhub"
                         Content="GitHub repository" />
@@ -271,8 +308,9 @@
                     <StackPanel Orientation="Horizontal" Spacing="16" Padding="0,12">
                         <FontIcon VerticalAlignment="Center" Glyph="&#xE90F;" />
                         <StackPanel Spacing="2">
-                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Open-source licenses" />
+                            <TextBlock x:Uid="Settings_LicensesTitle" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Open-source licenses" />
                             <TextBlock
+                                x:Uid="Settings_LicensesHint"
                                 Style="{StaticResource CaptionTextBlockStyle}"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 Text="Third-party components used by DevHub" />

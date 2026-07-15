@@ -30,9 +30,9 @@ public sealed partial class DashboardViewModel : ObservableObject
         _settings = settings;
         Environments = environments;
         ForgeAccounts = forgeAccounts;
-        ReviewsFeedLabel = "Reviews";
-        MyPrsFeedLabel = "My pull requests";
-        IssuesFeedLabel = "Issues";
+        ReviewsFeedLabel = Loc.T("Dash_FeedReviews", "Reviews");
+        MyPrsFeedLabel = Loc.T("Dash_FeedMyPrs", "My pull requests");
+        IssuesFeedLabel = Loc.T("Dash_FeedIssues", "Issues");
     }
 
     /// <summary>The Environments singleton; the "Tool updates" card binds straight to it.</summary>
@@ -46,10 +46,10 @@ public sealed partial class DashboardViewModel : ObservableObject
         {
             var greeting = DateTime.Now.Hour switch
             {
-                < 6 => "Good night",
-                < 12 => "Good morning",
-                < 18 => "Good afternoon",
-                _ => "Good evening",
+                < 6 => Loc.T("Dash_GreetingNight", "Good night"),
+                < 12 => Loc.T("Dash_GreetingMorning", "Good morning"),
+                < 18 => Loc.T("Dash_GreetingAfternoon", "Good afternoon"),
+                _ => Loc.T("Dash_GreetingEvening", "Good evening"),
             };
             return Machine is { UserFirstName.Length: > 0 }
                 ? $"{greeting}, {Machine.UserFirstName}"
@@ -61,7 +61,7 @@ public sealed partial class DashboardViewModel : ObservableObject
     {
         get
         {
-            var text = DateTime.Now.ToString("dddd d MMMM yyyy");
+            var text = DateTime.Now.ToString("dddd d MMMM yyyy", Loc.Culture);
             return char.ToUpper(text[0]) + text[1..];
         }
     }
@@ -105,7 +105,7 @@ public sealed partial class DashboardViewModel : ObservableObject
     public string CpuText => Machine?.CpuName ?? "";
 
     public string CpuDetailText =>
-        Machine is null ? "" : $"{Machine.CpuCores} cores · {Machine.CpuThreads} threads";
+        Machine is null ? "" : Loc.F("Dash_CpuDetail", "{0} cores · {1} threads", Machine.CpuCores, Machine.CpuThreads);
 
     public string GpuText => Machine is null ? "" : string.Join("\n", Machine.GpuNames);
 
@@ -119,7 +119,7 @@ public sealed partial class DashboardViewModel : ObservableObject
     public string MemoryPercentText => Usage is null ? "–" : $"{MemoryPercent:0}%";
 
     public string MemoryDetailText =>
-        Usage is null ? "" : $"{Usage.UsedMemoryGb:0.0} / {Usage.TotalMemoryGb:0.0} GB";
+        Usage is null ? "" : Loc.F("Dash_MemoryDetail", "{0:0.0} / {1:0.0} GB", Usage.UsedMemoryGb, Usage.TotalMemoryGb);
 
     public string UptimeText
     {
@@ -132,8 +132,8 @@ public sealed partial class DashboardViewModel : ObservableObject
 
             var up = Usage.Uptime;
             return up.TotalHours >= 1
-                ? $"Up {(int)up.TotalHours} h {up.Minutes:00} min"
-                : $"Up {up.Minutes} min";
+                ? Loc.F("Dash_UptimeHours", "Up {0} h {1:00} min", (int)up.TotalHours, up.Minutes)
+                : Loc.F("Dash_UptimeMinutes", "Up {0} min", up.Minutes);
         }
     }
 
@@ -141,7 +141,7 @@ public sealed partial class DashboardViewModel : ObservableObject
         Usage?.Drives
             .Select(d => new UsageStat(
                 d.Label is null ? d.Name : $"{d.Name} · {d.Label}",
-                $"{d.TotalGb - d.UsedGb:0} GB free of {d.TotalGb:0} GB",
+                Loc.F("Dash_DriveFree", "{0:0} GB free of {1:0} GB", d.TotalGb - d.UsedGb, d.TotalGb),
                 $"{d.UsedRatio * 100:0}%",
                 d.UsedRatio * 100))
             .ToList() ?? [];
@@ -161,10 +161,14 @@ public sealed partial class DashboardViewModel : ObservableObject
             : string.Join(", ", new[] { Weather.City, Weather.Country }.Where(p => p.Length > 0));
 
     public string WeatherRangeText =>
-        Weather is null ? "" : $"{Weather.TodayMinC:0}° / {Weather.TodayMaxC:0}° · Feels like {Weather.FeelsLikeC:0}°";
+        Weather is null
+            ? ""
+            : Loc.F("Dash_WeatherRange", "{0:0}° / {1:0}° · Feels like {2:0}°", Weather.TodayMinC, Weather.TodayMaxC, Weather.FeelsLikeC);
 
     public string WeatherDetailText =>
-        Weather is null ? "" : $"Wind {Weather.WindKmh:0} km/h · Humidity {Weather.HumidityPercent}%";
+        Weather is null
+            ? ""
+            : Loc.F("Dash_WeatherDetail", "Wind {0:0} km/h · Humidity {1}%", Weather.WindKmh, Weather.HumidityPercent);
 
     public ObservableCollection<ProjectViewModel> RecentProjects { get; } = [];
 
@@ -214,9 +218,9 @@ public sealed partial class DashboardViewModel : ObservableObject
 
     public string WorkEmptyText => SelectedFeed switch
     {
-        ForgeFeed.ReviewRequests => "No reviews waiting for you. Nice.",
-        ForgeFeed.AuthoredPullRequests => "You have no open pull requests.",
-        _ => "No issues assigned to you.",
+        ForgeFeed.ReviewRequests => Loc.T("Dash_NoReviews", "No reviews waiting for you. Nice."),
+        ForgeFeed.AuthoredPullRequests => Loc.T("Dash_NoPrs", "You have no open pull requests."),
+        _ => Loc.T("Dash_NoIssues", "No issues assigned to you."),
     };
 
     [ObservableProperty]
@@ -297,9 +301,9 @@ public sealed partial class DashboardViewModel : ObservableObject
                 _feeds[feed] = items;
             }
 
-            ReviewsFeedLabel = $"Reviews ({_feeds[ForgeFeed.ReviewRequests].Count})";
-            MyPrsFeedLabel = $"My pull requests ({_feeds[ForgeFeed.AuthoredPullRequests].Count})";
-            IssuesFeedLabel = $"Issues ({_feeds[ForgeFeed.AssignedIssues].Count})";
+            ReviewsFeedLabel = $"{Loc.T("Dash_FeedReviews", "Reviews")} ({_feeds[ForgeFeed.ReviewRequests].Count})";
+            MyPrsFeedLabel = $"{Loc.T("Dash_FeedMyPrs", "My pull requests")} ({_feeds[ForgeFeed.AuthoredPullRequests].Count})";
+            IssuesFeedLabel = $"{Loc.T("Dash_FeedIssues", "Issues")} ({_feeds[ForgeFeed.AssignedIssues].Count})";
             ShowSelectedFeed();
         }
         catch (Exception ex)

@@ -12,6 +12,7 @@
         <StackPanel Grid.Row="0" Spacing="4">
             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Pomodoro" />
             <TextBlock
+                x:Uid="Pomo_Subtitle"
                 Style="{StaticResource BodyTextBlockStyle}"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Text="Focused work sessions with a notification when time is up. The timer keeps running while you use the rest of the app." />
@@ -71,7 +72,7 @@
                 <Button MinWidth="120" Command="{x:Bind ViewModel.StopCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon FontSize="14" Glyph="&#xE71A;" />
-                        <TextBlock Text="Stop" />
+                        <TextBlock x:Uid="Pomo_Stop" Text="Stop" />
                     </StackPanel>
                 </Button>
             </StackPanel>
@@ -80,17 +81,19 @@
             <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.IsIdle, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
                     <Button
+                        x:Uid="Pomo_Focus25"
                         Style="{StaticResource AccentButtonStyle}"
                         Content="Focus · 25 min"
-                        Tag="25|Focus"
+                        Tag="25|focus"
                         Click="Preset_Click" />
-                    <Button Content="Focus · 50 min" Tag="50|Focus" Click="Preset_Click" />
-                    <Button Content="Break · 5 min" Tag="5|Break" Click="Preset_Click" />
-                    <Button Content="Break · 15 min" Tag="15|Break" Click="Preset_Click" />
+                    <Button x:Uid="Pomo_Focus50" Content="Focus · 50 min" Tag="50|focus" Click="Preset_Click" />
+                    <Button x:Uid="Pomo_Break5" Content="Break · 5 min" Tag="5|break" Click="Preset_Click" />
+                    <Button x:Uid="Pomo_Break15" Content="Break · 15 min" Tag="15|break" Click="Preset_Click" />
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
                     <NumberBox
+                        x:Uid="Pomo_CustomMinutes"
                         x:Name="CustomMinutes"
                         Header="Minutes"
                         Width="140"
@@ -99,11 +102,13 @@
                         Value="25"
                         SpinButtonPlacementMode="Compact" />
                     <TextBox
+                        x:Uid="Pomo_CustomLabel"
                         x:Name="CustomLabel"
                         Header="Label"
                         Width="160"
                         Text="Focus" />
                     <Button
+                        x:Uid="Pomo_Start"
                         VerticalAlignment="Bottom"
                         Content="Start"
                         Click="CustomStart_Click" />

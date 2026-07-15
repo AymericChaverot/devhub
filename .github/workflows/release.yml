@@ -17,6 +17,25 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Stamp version from the tag
+        # The tag is the single source of truth: v0.1.1 → package identity 0.1.1.0.
+        # Without this, the MSIX keeps the manifest's dev version and App Installer
+        # "updates" to the same identity — the in-app updater then loops forever.
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart('v')
+          if ($version -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') { throw "Tag '$env:GITHUB_REF_NAME' is not a version" }
+          # MSIX identities are always 4-part.
+          $identity = if (($version -split '\.').Count -eq 3) { "$version.0" } else { $version }
+
+          $manifest = "src/DevHub.App/Package.appxmanifest"
+          $xml = [xml](Get-Content $manifest -Raw)
+          $xml.Package.Identity.Version = $identity
+          $xml.Save((Resolve-Path $manifest))
+          Write-Host "Package identity version: $identity"
+
+          "APP_VERSION=$version" | Out-File $env:GITHUB_ENV -Append
+
       - name: Build MSIX package
         # WindowsPackageType/SelfContained overrides flip the project from its
         # unpackaged dev default to a packaged MSIX build. Signing happens in a
@@ -26,6 +45,7 @@ jobs:
           dotnet build src/DevHub.App/DevHub.App.csproj
           -c Release
           -p:Platform=x64
+          -p:Version=${{ env.APP_VERSION }}
           -p:WindowsPackageType=MSIX
           -p:WindowsAppSDKSelfContained=false
           -p:GenerateAppxPackageOnBuild=true

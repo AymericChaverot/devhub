@@ -62,6 +62,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Button
+                    x:Uid="Detail_BackTip"
                     x:Name="BackButton"
                     Grid.Column="0"
                     VerticalAlignment="Top"
@@ -113,10 +114,10 @@
                             Click="OpenInIde_Click">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon FontSize="14" Glyph="&#xE8A7;" />
-                                <TextBlock Text="Open" />
+                                <TextBlock x:Uid="Detail_Open" Text="Open" />
                             </StackPanel>
                         </Button>
-                        <Button Click="OpenInExplorer_Click" Content="Explorer" />
+                        <Button x:Uid="Detail_Explorer" Click="OpenInExplorer_Click" Content="Explorer" />
                         <Button
                             x:Name="RemoteButton"
                             Visibility="Collapsed"
@@ -140,6 +141,7 @@
                 Spacing="8">
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="4">
                     <SplitButton
+                        x:Uid="Detail_RunTip"
                         x:Name="RunButton"
                         Margin="0,0,4,0"
                         Click="Run_Click"
@@ -168,10 +170,10 @@
                             <MenuFlyout x:Name="RunFlyout" Placement="BottomEdgeAlignedRight" />
                         </SplitButton.Flyout>
                     </SplitButton>
-                    <Button Click="ManageSubprojects_Click" ToolTipService.ToolTip="Manage subprojects">
+                    <Button x:Uid="Detail_ManageSubprojectsTip" Click="ManageSubprojects_Click" ToolTipService.ToolTip="Manage subprojects">
                         <FontIcon FontSize="14" Glyph="&#xE71D;" />
                     </Button>
-                    <Button Click="Rename_Click" ToolTipService.ToolTip="Rename project">
+                    <Button x:Uid="Detail_RenameTip" Click="Rename_Click" ToolTipService.ToolTip="Rename project">
                         <FontIcon FontSize="14" Glyph="&#xE8AC;" />
                     </Button>
                 </StackPanel>
@@ -240,7 +242,7 @@
             SelectionChanged="SectionBar_SelectionChanged">
             <SelectorBarItem x:Name="ReadmeTab" Text="README" IsSelected="True" />
             <SelectorBarItem x:Name="GitTab" Text="Git" Visibility="Collapsed" />
-            <SelectorBarItem x:Name="FilesTab" Text="Files" />
+            <SelectorBarItem x:Uid="Detail_FilesTab" x:Name="FilesTab" Text="Files" />
             <!-- Text becomes "GitHub"/"GitLab"; only shown when the remote matches a connected account. -->
             <SelectorBarItem x:Name="ForgeTab" Text="GitHub" Visibility="Collapsed" />
         </SelectorBar>
@@ -255,6 +257,7 @@
                 <Grid>
                     <WebView2 x:Name="ReadmeView" Visibility="Collapsed" />
                     <TextBlock
+                        x:Uid="Detail_NoReadme"
                         x:Name="NoReadmeText"
                         Margin="24"
                         HorizontalAlignment="Center"
@@ -286,10 +289,10 @@
                     MinWidth="170"
                     VerticalAlignment="Center"
                     SelectionChanged="BranchPicker_SelectionChanged" />
-                <Button x:Name="NewBranchButton" Click="NewBranch_Click" ToolTipService.ToolTip="Create a branch at HEAD and switch to it">
+                <Button x:Uid="Detail_NewBranchTip" x:Name="NewBranchButton" Click="NewBranch_Click" ToolTipService.ToolTip="Create a branch at HEAD and switch to it">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon FontSize="14" Glyph="&#xE710;" />
-                        <TextBlock Text="Branch" />
+                        <TextBlock x:Uid="Detail_Branch" Text="Branch" />
                     </StackPanel>
                 </Button>
                 <Button x:Name="FetchButton" Click="Fetch_Click" ToolTipService.ToolTip="git fetch --all --prune">
@@ -487,6 +490,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <TextBlock
+                        x:Uid="Detail_FilePreviewHint"
                         x:Name="FileHeader"
                         Margin="16,12"
                         Style="{StaticResource BodyStrongTextBlockStyle}"
@@ -608,6 +612,7 @@
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="Open pull requests" />
                         <TextBlock
+                            x:Uid="Detail_NothingOpen"
                             x:Name="ForgePrsEmpty"
                             Grid.Row="1"
                             Margin="16,0,16,16"
@@ -656,6 +661,7 @@
                                                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                             Visibility="{x:Bind IsDraft}">
                                                             <TextBlock
+                                                                x:Uid="Detail_Draft"
                                                                 FontSize="10"
                                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                                 Text="Draft" />
@@ -693,6 +699,7 @@
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="Open issues" />
                         <TextBlock
+                            x:Uid="Detail_NothingOpen"
                             x:Name="ForgeIssuesEmpty"
                             Grid.Row="1"
                             Margin="16,0,16,16"
@@ -765,6 +772,7 @@
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="Workflow runs" />
                         <TextBlock
+                            x:Uid="Detail_NoRuns"
                             x:Name="ForgeRunsEmpty"
                             Grid.Row="1"
                             Margin="16,0,16,16"

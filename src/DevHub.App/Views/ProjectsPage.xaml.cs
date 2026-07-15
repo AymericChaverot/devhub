@@ -55,10 +55,10 @@ public sealed partial class ProjectsPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Add a project from Git",
+            Title = Loc.T("Proj_AddFromGitTitle", "Add a project from Git"),
             Content = urlBox,
-            PrimaryButtonText = "Clone",
-            CloseButtonText = "Cancel",
+            PrimaryButtonText = Loc.T("Proj_Clone", "Clone"),
+            CloseButtonText = Loc.T("Common_Cancel", "Cancel"),
             DefaultButton = ContentDialogButton.Primary,
         };
 
@@ -94,10 +94,10 @@ public sealed partial class ProjectsPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = $"Delete \"{project.Name}\"?",
-            Content = "The folder will be moved to the Recycle Bin, so you can restore it from there if needed.",
-            PrimaryButtonText = "Move to Recycle Bin",
-            CloseButtonText = "Cancel",
+            Title = Loc.F("Proj_DeleteTitle", "Delete \"{0}\"?", project.Name),
+            Content = Loc.T("Proj_DeleteText", "The folder will be moved to the Recycle Bin, so you can restore it from there if needed."),
+            PrimaryButtonText = Loc.T("Proj_MoveToBin", "Move to Recycle Bin"),
+            CloseButtonText = Loc.T("Common_Cancel", "Cancel"),
             DefaultButton = ContentDialogButton.Close,
         };
 

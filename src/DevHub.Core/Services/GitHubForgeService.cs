@@ -28,8 +28,9 @@ public sealed class GitHubForgeService : IForgeService
 
     public string TokenHelpUrl => "https://github.com/settings/tokens";
 
-    public string TokenScopeHint =>
-        "Classic token with the \"repo\" scope recommended. Fine-grained tokens need Issues + Pull requests read access on all your repositories (the reviews feed may stay empty with them).";
+    public string TokenScopeHint => CoreStrings.Get(
+        "Core_GitHubScopeHint",
+        "Classic token with the \"repo\" scope recommended. Fine-grained tokens need Issues + Pull requests read access on all your repositories (the reviews feed may stay empty with them).");
 
     public async Task<ForgeUser?> GetCurrentUserAsync(string token, CancellationToken cancellationToken = default)
     {

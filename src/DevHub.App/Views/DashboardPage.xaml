@@ -29,6 +29,7 @@
                 CloseButtonClick="UpdateBanner_CloseButtonClick">
                 <InfoBar.ActionButton>
                     <Button
+                        x:Uid="Dash_InstallNow"
                         Style="{StaticResource AccentButtonStyle}"
                         Content="Install now"
                         Command="{x:Bind Updates.InstallCommand}"
@@ -36,6 +37,7 @@
                 </InfoBar.ActionButton>
                 <StackPanel Margin="0,0,0,12" Spacing="8">
                     <HyperlinkButton
+                        x:Uid="Dash_ReleaseNotes"
                         Padding="0"
                         Content="Release notes"
                         Command="{x:Bind Updates.OpenReleasePageCommand}" />
@@ -112,7 +114,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Bottom">
-                        <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="System" />
+                        <TextBlock x:Uid="Dash_SystemHeader" Style="{StaticResource SubtitleTextBlockStyle}" Text="System" />
                         <TextBlock
                             VerticalAlignment="Bottom"
                             Margin="0,0,0,3"
@@ -192,6 +194,7 @@
                         BorderThickness="1">
                         <StackPanel Spacing="10">
                             <TextBlock
+                                x:Uid="Dash_MemoryLabel"
                                 Style="{StaticResource CaptionTextBlockStyle}"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 Text="MEMORY" />
@@ -266,6 +269,7 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <TextBlock
+                                x:Uid="Dash_OsLabel"
                                 Grid.Row="0"
                                 Style="{StaticResource CaptionTextBlockStyle}"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -348,7 +352,7 @@
 
             <!-- Tool updates -->
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Tools" />
+                <TextBlock x:Uid="Dash_ToolsHeader" Style="{StaticResource SubtitleTextBlockStyle}" Text="Tools" />
                 <Border
                     Padding="16"
                     CornerRadius="{ThemeResource OverlayCornerRadius}"
@@ -369,7 +373,7 @@
                             VerticalAlignment="Center"
                             Visibility="{x:Bind ViewModel.Environments.IsLoading, Mode=OneWay}">
                             <ProgressRing Width="16" Height="16" IsActive="{x:Bind ViewModel.Environments.IsLoading, Mode=OneWay}" />
-                            <TextBlock Text="Checking for tool updates…" />
+                            <TextBlock x:Uid="Dash_CheckingTools" Text="Checking for tool updates…" />
                         </StackPanel>
 
                         <!-- Updates available -->
@@ -399,7 +403,7 @@
                                 FontSize="16"
                                 Glyph="&#xE73E;"
                                 Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                            <TextBlock VerticalAlignment="Center" Text="All tools are up to date" />
+                            <TextBlock x:Uid="Dash_ToolsUpToDate" VerticalAlignment="Center" Text="All tools are up to date" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
@@ -408,7 +412,7 @@
                                 Content="Update all"
                                 Command="{x:Bind ViewModel.Environments.UpdateAllCommand}"
                                 Visibility="{x:Bind ViewModel.Environments.HasUpdates, Mode=OneWay}" />
-                            <Button Content="Open Environments" Click="OpenEnvironments_Click" />
+                            <Button x:Uid="Dash_OpenEnvironments" Content="Open Environments" Click="OpenEnvironments_Click" />
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -416,7 +420,7 @@
 
             <!-- Your work (feeds from the connected forges) -->
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Your work" />
+                <TextBlock x:Uid="Dash_WorkHeader" Style="{StaticResource SubtitleTextBlockStyle}" Text="Your work" />
                 <Border
                     Padding="12"
                     CornerRadius="{ThemeResource OverlayCornerRadius}"
@@ -442,11 +446,13 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock
+                                x:Uid="Dash_ConnectHint"
                                 VerticalAlignment="Center"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 Text="Connect your GitHub or GitLab account to see pull requests waiting for your review."
                                 TextWrapping="Wrap" />
                             <Button
+                                x:Uid="Dash_OpenSettings"
                                 Grid.Column="1"
                                 VerticalAlignment="Center"
                                 Content="Open Settings"
@@ -460,7 +466,7 @@
                             Padding="4"
                             Visibility="{x:Bind ViewModel.IsLoadingWork, Mode=OneWay}">
                             <ProgressRing Width="16" Height="16" IsActive="{x:Bind ViewModel.IsLoadingWork, Mode=OneWay}" />
-                            <TextBlock Text="Checking your work across forges…" />
+                            <TextBlock x:Uid="Dash_CheckingWork" Text="Checking your work across forges…" />
                         </StackPanel>
 
                         <!-- All clear -->
@@ -534,6 +540,7 @@
                                                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                         Visibility="{x:Bind IsDraft}">
                                                         <TextBlock
+                                                            x:Uid="Common_DraftBadge"
                                                             FontSize="10"
                                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                             Text="Draft" />
@@ -569,9 +576,10 @@
 
             <!-- Recent projects -->
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Recent projects" />
+                <TextBlock x:Uid="Dash_RecentHeader" Style="{StaticResource SubtitleTextBlockStyle}" Text="Recent projects" />
 
                 <TextBlock
+                    x:Uid="Dash_RecentEmpty"
                     Style="{StaticResource BodyTextBlockStyle}"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="Projects you open will show up here."
