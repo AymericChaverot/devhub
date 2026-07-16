@@ -122,9 +122,15 @@ This interactive script will:
    Import-Certificate -FilePath .\DevHub-signing.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
    ```
 
-3. Double-click the `.msix` — App Installer does the rest. Updates are offered
-   in-app afterwards (the certificate step is one-time).
+3. Double-click the `.msix` — App Installer does the rest.
 
+### Updating
+
+Once installed, future updates are handled automatically or in-app:
+- DevHub silently checks for updates at startup without blocking the user.
+- If a new version is available, a notification banner appears on your dashboard with an "Install now" option.
+- You can also manually check for updates via **Settings → About → Check for updates**.
+- The certificate import step is a one-time operation; subsequent updates will install seamlessly.
 
 Or build from source:
 
