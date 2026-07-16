@@ -8,7 +8,7 @@ Install language runtimes and dev tools in one click, and browse every project o
 machine with automatic language & framework detection, README preview and
 open-in-your-favorite-IDE — all in a fast, Fluent-design app.
 
-> 🚧 DevHub is in active development (v0.1.0 preview).
+> 🚧 DevHub is in active development (v0.1.3 preview).
 > See the [roadmap](#roadmap) for what is coming next.
 
 ---
@@ -94,13 +94,29 @@ licenses.
 
 ### Install
 
-Grab the MSIX from the [latest release](https://github.com/AymericChaverot/devhub/releases).
-Preview packages are signed with a self-signed certificate, so Windows needs to trust
-it once:
+Preview packages are signed with a self-signed certificate, so Windows needs to trust it once. You can install DevHub using either the automatic script or manually.
 
-1. Download `DevHub-signing.cer` and the `.msix` from the release.
-2. In an **administrator** PowerShell (the store must be *Local Machine* — the
-   certificate wizard's "Current User" default will not work):
+#### Option 1: Automatic Install (Recommended)
+
+Run the following command in a standard PowerShell window (no administrator rights needed to start):
+
+```powershell
+irm https://raw.githubusercontent.com/AymericChaverot/devhub/main/install.ps1 | iex
+```
+
+This interactive script will:
+1. Verify system requirements (OS version and winget availability).
+2. Check if the latest version is already installed on your machine.
+3. Detect if the package signing certificate is already trusted (if it is, **no Administrator elevation** is requested).
+4. If elevation is required to trust the certificate, ask for your permission before requesting UAC elevation.
+5. Download, unblock, and register the application.
+6. Ask if you want to launch the application immediately.
+
+
+#### Option 2: Manual Install
+
+1. Grab `DevHub-signing.cer` and the `.msix` from the [latest release](https://github.com/AymericChaverot/devhub/releases).
+2. In an **administrator** PowerShell (the store must be *Local Machine* — the certificate wizard's "Current User" default will not work):
 
    ```powershell
    Import-Certificate -FilePath .\DevHub-signing.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
@@ -108,6 +124,7 @@ it once:
 
 3. Double-click the `.msix` — App Installer does the rest. Updates are offered
    in-app afterwards (the certificate step is one-time).
+
 
 Or build from source:
 

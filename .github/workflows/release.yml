@@ -94,12 +94,20 @@ jobs:
           body: |
             ## Installation (first time)
 
-            The package is signed with a self-signed certificate; Windows must trust
-            it once before installing:
+            Preview packages are signed with a self-signed certificate, so Windows needs to trust it once. You can install DevHub using either the automatic script or manually:
 
-            1. Download **DevHub-signing.cer** and **DevHub-…-x64.msix**.
-            2. In an **administrator** PowerShell (the store must be *Local Machine* —
-               the certificate wizard's "Current User" default will not work):
+            ### Option 1: Automatic Install (Recommended)
+
+            Run the following command in a PowerShell window. The script will automatically fetch the latest release, ask for Administrator elevation to trust the certificate, and register the package:
+
+            ```powershell
+            irm https://raw.githubusercontent.com/AymericChaverot/devhub/main/install.ps1 | iex
+            ```
+
+            ### Option 2: Manual Install
+
+            1. Download **DevHub-signing.cer** and the `.msix` file below.
+            2. In an **administrator** PowerShell (the store must be *Local Machine* — the certificate wizard's "Current User" default will not work):
 
                ```powershell
                Import-Certificate -FilePath .\DevHub-signing.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
@@ -112,3 +120,4 @@ jobs:
             Nothing to do: DevHub checks this repository at startup and offers new
             versions from its dashboard (Settings → About → *Check for updates* works
             too). The certificate step is one-time only.
+
