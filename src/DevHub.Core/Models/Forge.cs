@@ -25,6 +25,9 @@ public enum ForgeFeed
 
     /// <summary>Open issues assigned to me.</summary>
     AssignedIssues,
+
+    /// <summary>PRs/MRs I authored and issues assigned to me, recently closed or merged.</summary>
+    RecentlyClosed,
 }
 
 /// <summary>The authenticated account on a forge.</summary>
@@ -33,6 +36,14 @@ public sealed record ForgeUser(
     string DisplayName,
     string AvatarUrl,
     string ProfileUrl);
+
+/// <summary>Lifecycle state of a <see cref="ForgeItem"/>. Issues are never "Merged".</summary>
+public enum ForgeItemState
+{
+    Open,
+    Closed,
+    Merged,
+}
 
 /// <summary>A pull/merge request or an issue.</summary>
 public sealed record ForgeItem(
@@ -44,7 +55,8 @@ public sealed record ForgeItem(
     string Author,
     string WebUrl,
     DateTime UpdatedAt,
-    bool IsDraft);
+    bool IsDraft,
+    ForgeItemState State = ForgeItemState.Open);
 
 /// <summary>Header facts about a remote repository.</summary>
 public sealed record ForgeRepoInfo(

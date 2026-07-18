@@ -53,7 +53,9 @@
   <data name="Dash_ConnectHint.Text" xml:space="preserve"><value>Connect your GitHub or GitLab account to see pull requests waiting for your review.</value></data>
   <data name="Dash_OpenSettings.Content" xml:space="preserve"><value>Open Settings</value></data>
   <data name="Dash_CheckingWork.Text" xml:space="preserve"><value>Checking your work across forges…</value></data>
-  <data name="Common_DraftBadge.Text" xml:space="preserve"><value>Draft</value></data>
+  <data name="Common_DraftBadge" xml:space="preserve"><value>Draft</value></data>
+  <data name="Common_ClosedBadge" xml:space="preserve"><value>Closed</value></data>
+  <data name="Common_MergedBadge" xml:space="preserve"><value>Merged</value></data>
   <data name="Dash_RecentHeader.Text" xml:space="preserve"><value>Recent projects</value></data>
   <data name="Dash_RecentEmpty.Text" xml:space="preserve"><value>Projects you open will show up here.</value></data>
   <data name="Dash_GreetingNight" xml:space="preserve"><value>Good night</value></data>
@@ -70,10 +72,14 @@
   <data name="Dash_FeedReviews" xml:space="preserve"><value>Reviews</value></data>
   <data name="Dash_FeedMyPrs" xml:space="preserve"><value>My pull requests</value></data>
   <data name="Dash_FeedIssues" xml:space="preserve"><value>Issues</value></data>
+  <data name="Dash_FeedClosed" xml:space="preserve"><value>Recently closed</value></data>
   <data name="Dash_NoReviews" xml:space="preserve"><value>No reviews waiting for you. Nice.</value></data>
   <data name="Dash_NoPrs" xml:space="preserve"><value>You have no open pull requests.</value></data>
   <data name="Dash_NoIssues" xml:space="preserve"><value>No issues assigned to you.</value></data>
+  <data name="Dash_NoClosed" xml:space="preserve"><value>Nothing closed or merged recently.</value></data>
   <data name="Detail_BackTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Back to projects</value></data>
+  <data name="Detail_CollapseHero" xml:space="preserve"><value>Collapse</value></data>
+  <data name="Detail_ExpandHero" xml:space="preserve"><value>Expand</value></data>
   <data name="Detail_Open.Text" xml:space="preserve"><value>Open</value></data>
   <data name="Detail_Explorer.Content" xml:space="preserve"><value>Explorer</value></data>
   <data name="Detail_RunTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Run this project in a terminal</value></data>

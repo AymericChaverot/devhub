@@ -232,6 +232,19 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </StackPanel>
+
+            <!-- Manually collapses/expands the hero, animated; an alternative to scrolling
+                 content to shrink it. Declared last so it stays on top for hit-testing. -->
+            <Button
+                x:Name="HeroCollapseButton"
+                Margin="0,0,10,10"
+                Padding="6"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                CornerRadius="16"
+                Click="ToggleHero_Click">
+                <FontIcon x:Name="HeroCollapseIcon" FontSize="12" Glyph="&#xE70E;" />
+            </Button>
         </Grid>
 
         <!-- Section tabs -->
@@ -593,7 +606,10 @@
                 </Grid>
             </Border>
 
-            <!-- PRs / issues / CI runs, side by side -->
+            <!-- PRs / issues / CI runs, side by side, each independently scrollable. Scrolling
+                 any one of them also collapses the hero (see HookForgeScroll), same as the
+                 Git/README tabs; the corner button on the hero does the same thing without
+                 needing to scroll first. -->
             <Grid Grid.Row="1" ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -626,7 +642,7 @@
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Text="Nothing open."
                             Visibility="Collapsed" />
-                        <ScrollViewer Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer x:Name="ForgePrScroll" Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
                             <ItemsControl x:Name="ForgePrList">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:ForgeItemViewModel">
@@ -713,7 +729,7 @@
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Text="Nothing open."
                             Visibility="Collapsed" />
-                        <ScrollViewer Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer x:Name="ForgeIssueScroll" Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
                             <ItemsControl x:Name="ForgeIssueList">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:ForgeItemViewModel">
@@ -786,7 +802,7 @@
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Text="No runs yet."
                             Visibility="Collapsed" />
-                        <ScrollViewer Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer x:Name="ForgeRunScroll" Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
                             <ItemsControl x:Name="ForgeRunList">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:ForgeRunViewModel">

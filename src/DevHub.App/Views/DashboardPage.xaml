@@ -466,6 +466,7 @@
                             <SelectorBarItem Text="{x:Bind ViewModel.ReviewsFeedLabel, Mode=OneWay}" IsSelected="True" />
                             <SelectorBarItem Text="{x:Bind ViewModel.MyPrsFeedLabel, Mode=OneWay}" />
                             <SelectorBarItem Text="{x:Bind ViewModel.IssuesFeedLabel, Mode=OneWay}" />
+                            <SelectorBarItem Text="{x:Bind ViewModel.ClosedFeedLabel, Mode=OneWay}" />
                         </SelectorBar>
 
                         <!-- No account connected -->
@@ -567,12 +568,11 @@
                                                         VerticalAlignment="Center"
                                                         CornerRadius="8"
                                                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                        Visibility="{x:Bind IsDraft}">
+                                                        Visibility="{x:Bind HasStateBadge}">
                                                         <TextBlock
-                                                            x:Uid="Common_DraftBadge"
                                                             FontSize="10"
                                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                            Text="Draft" />
+                                                            Text="{x:Bind StateBadgeText}" />
                                                     </Border>
                                                 </StackPanel>
                                                 <TextBlock

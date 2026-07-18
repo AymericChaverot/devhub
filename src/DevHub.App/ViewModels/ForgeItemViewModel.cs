@@ -1,6 +1,7 @@
 using DevHub.Core.Models;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using Windows.UI;
 
 namespace DevHub.App.ViewModels;
 
@@ -26,13 +27,42 @@ public sealed class ForgeItemViewModel
 
     public bool IsDraft => _item.IsDraft;
 
+    public bool IsClosed => _item.State == ForgeItemState.Closed;
+
+    public bool IsMerged => _item.State == ForgeItemState.Merged;
+
     public bool IsPullRequest => _item.Kind == ForgeItemKind.PullRequest;
 
     public bool IsIssue => _item.Kind == ForgeItemKind.Issue;
 
-    /// <summary>Open items are green (GitHub-style); drafts are toned down.</summary>
-    public Brush IconBrush => (Brush)Application.Current.Resources[
-        _item.IsDraft ? "TextFillColorSecondaryBrush" : "SystemFillColorSuccessBrush"];
+    /// <summary>Draft/Closed/Merged, whichever applies; empty for a plain open item.</summary>
+    public string StateBadgeText => _item.State switch
+    {
+        ForgeItemState.Merged => Loc.T("Common_MergedBadge", "Merged"),
+        ForgeItemState.Closed => Loc.T("Common_ClosedBadge", "Closed"),
+        _ => _item.IsDraft ? Loc.T("Common_DraftBadge", "Draft") : "",
+    };
+
+    public bool HasStateBadge => StateBadgeText.Length > 0;
+
+    /// <summary>Open items are green (GitHub-style), merged purple, closed red; drafts are toned down.</summary>
+    public Brush IconBrush
+    {
+        get
+        {
+            if (_item.State == ForgeItemState.Merged)
+            {
+                return new SolidColorBrush(Color.FromArgb(0xFF, 0x82, 0x50, 0xDF));
+            }
+
+            var key = _item.State switch
+            {
+                ForgeItemState.Closed => "SystemFillColorCriticalBrush",
+                _ => _item.IsDraft ? "TextFillColorSecondaryBrush" : "SystemFillColorSuccessBrush",
+            };
+            return (Brush)Application.Current.Resources[key];
+        }
+    }
 
     public string MetaText
     {

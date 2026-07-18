@@ -46,6 +46,22 @@ public sealed class GitLabForgeService : IForgeService
         ForgeFeed feed, string token, string login, CancellationToken cancellationToken = default)
     {
         var user = Uri.EscapeDataString(login);
+
+        if (feed == ForgeFeed.RecentlyClosed)
+        {
+            // GitLab's list endpoint takes a single state, so closed and merged MRs need separate calls.
+            var closedMrs = await FetchItemsAsync(
+                $"merge_requests?state=closed&scope=all&author_username={user}",
+                ForgeItemKind.PullRequest, ForgeItemState.Closed, token, cancellationToken);
+            var mergedMrs = await FetchItemsAsync(
+                $"merge_requests?state=merged&scope=all&author_username={user}",
+                ForgeItemKind.PullRequest, ForgeItemState.Merged, token, cancellationToken);
+            var closedIssues = await FetchItemsAsync(
+                $"issues?state=closed&scope=all&assignee_username={user}",
+                ForgeItemKind.Issue, ForgeItemState.Closed, token, cancellationToken);
+            return [.. closedMrs.Concat(mergedMrs).Concat(closedIssues).OrderByDescending(i => i.UpdatedAt)];
+        }
+
         var (path, kind) = feed switch
         {
             ForgeFeed.ReviewRequests =>
@@ -55,10 +71,16 @@ public sealed class GitLabForgeService : IForgeService
             _ => ($"issues?state=opened&scope=all&assignee_username={user}", ForgeItemKind.Issue),
         };
 
+        return await FetchItemsAsync(path, kind, ForgeItemState.Open, token, cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<ForgeItem>> FetchItemsAsync(
+        string path, ForgeItemKind kind, ForgeItemState state, string token, CancellationToken cancellationToken)
+    {
         using var response = await SendAsync(
             $"{ApiBase}/{path}&order_by=updated_at&sort=desc&per_page=20", token, cancellationToken);
         response.EnsureSuccessStatusCode();
-        return await ParseItemsAsync(response, kind, repoFullName: null, cancellationToken);
+        return await ParseItemsAsync(response, kind, repoFullName: null, state, cancellationToken);
     }
 
     public async Task<ForgeRepoInfo?> GetRepositoryAsync(
@@ -94,7 +116,7 @@ public sealed class GitLabForgeService : IForgeService
             return [];
         }
 
-        return await ParseItemsAsync(response, ForgeItemKind.PullRequest, repoFullName, cancellationToken);
+        return await ParseItemsAsync(response, ForgeItemKind.PullRequest, repoFullName, ForgeItemState.Open, cancellationToken);
     }
 
     public async Task<IReadOnlyList<ForgeItem>> GetRepoIssuesAsync(
@@ -110,7 +132,7 @@ public sealed class GitLabForgeService : IForgeService
             return [];
         }
 
-        return await ParseItemsAsync(response, ForgeItemKind.Issue, repoFullName, cancellationToken);
+        return await ParseItemsAsync(response, ForgeItemKind.Issue, repoFullName, ForgeItemState.Open, cancellationToken);
     }
 
     public async Task<IReadOnlyList<ForgeWorkflowRun>> GetRepoWorkflowRunsAsync(
@@ -172,7 +194,11 @@ public sealed class GitLabForgeService : IForgeService
     };
 
     private static async Task<IReadOnlyList<ForgeItem>> ParseItemsAsync(
-        HttpResponseMessage response, ForgeItemKind kind, string? repoFullName, CancellationToken cancellationToken)
+        HttpResponseMessage response,
+        ForgeItemKind kind,
+        string? repoFullName,
+        ForgeItemState state,
+        CancellationToken cancellationToken)
     {
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
         var results = new List<ForgeItem>();
@@ -197,7 +223,8 @@ public sealed class GitLabForgeService : IForgeService
                 item.GetProperty("author").GetProperty("username").GetString() ?? "",
                 item.GetProperty("web_url").GetString() ?? "",
                 item.GetProperty("updated_at").GetDateTime(),
-                item.TryGetProperty("draft", out var draft) && draft.ValueKind == JsonValueKind.True));
+                item.TryGetProperty("draft", out var draft) && draft.ValueKind == JsonValueKind.True,
+                state));
         }
 
         return results;

@@ -57,13 +57,20 @@ public sealed class GitHubForgeService : IForgeService
         // The /issues endpoint works with both classic and fine-grained tokens; the
         // search API only sees what classic tokens can. Review requests have no
         // non-search REST endpoint, so that feed still goes through search.
+        if (feed == ForgeFeed.RecentlyClosed)
+        {
+            var closedPrs = await ListMyIssuesAsync("created", pullRequests: true, "closed", token, cancellationToken);
+            var closedIssues = await ListMyIssuesAsync("assigned", pullRequests: false, "closed", token, cancellationToken);
+            return [.. closedPrs.Concat(closedIssues).OrderByDescending(i => i.UpdatedAt)];
+        }
+
         return feed switch
         {
             ForgeFeed.ReviewRequests => await SearchAsync(
                 $"is:pr is:open review-requested:{login}", ForgeItemKind.PullRequest, token, cancellationToken),
             ForgeFeed.AuthoredPullRequests => await ListMyIssuesAsync(
-                "created", pullRequests: true, token, cancellationToken),
-            _ => await ListMyIssuesAsync("assigned", pullRequests: false, token, cancellationToken),
+                "created", pullRequests: true, "open", token, cancellationToken),
+            _ => await ListMyIssuesAsync("assigned", pullRequests: false, "open", token, cancellationToken),
         };
     }
 
@@ -93,10 +100,10 @@ public sealed class GitHubForgeService : IForgeService
     /// picks which side to keep.
     /// </summary>
     private async Task<IReadOnlyList<ForgeItem>> ListMyIssuesAsync(
-        string filter, bool pullRequests, string token, CancellationToken cancellationToken)
+        string filter, bool pullRequests, string state, string token, CancellationToken cancellationToken)
     {
         using var response = await SendAsync(
-            $"{ApiBase}/issues?filter={filter}&state=open&sort=updated&direction=desc&per_page=30",
+            $"{ApiBase}/issues?filter={filter}&state={state}&sort=updated&direction=desc&per_page=30",
             token,
             cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -105,13 +112,21 @@ public sealed class GitHubForgeService : IForgeService
         var results = new List<ForgeItem>();
         foreach (var item in doc.RootElement.EnumerateArray())
         {
-            if (item.TryGetProperty("pull_request", out _) != pullRequests)
+            if (item.TryGetProperty("pull_request", out var pr) != pullRequests)
             {
                 continue;
             }
 
             var kind = pullRequests ? ForgeItemKind.PullRequest : ForgeItemKind.Issue;
-            results.Add(ParseItem(item, kind, RepoFromRepositoryUrl(item)));
+
+            // A closed PR is "Merged" once pull_request.merged_at is set; closed issues have no such concept.
+            var itemState = state != "closed"
+                ? ForgeItemState.Open
+                : pullRequests && pr.TryGetProperty("merged_at", out var merged) && merged.ValueKind == JsonValueKind.String
+                    ? ForgeItemState.Merged
+                    : ForgeItemState.Closed;
+
+            results.Add(ParseItem(item, kind, RepoFromRepositoryUrl(item), itemState));
         }
 
         return results;
@@ -243,7 +258,8 @@ public sealed class GitHubForgeService : IForgeService
         };
     }
 
-    private static ForgeItem ParseItem(JsonElement item, ForgeItemKind kind, string repoFullName) =>
+    private static ForgeItem ParseItem(
+        JsonElement item, ForgeItemKind kind, string repoFullName, ForgeItemState state = ForgeItemState.Open) =>
         new(
             ForgeKind.GitHub,
             kind,
@@ -253,7 +269,8 @@ public sealed class GitHubForgeService : IForgeService
             item.GetProperty("user").GetProperty("login").GetString() ?? "",
             item.GetProperty("html_url").GetString() ?? "",
             item.GetProperty("updated_at").GetDateTime(),
-            item.TryGetProperty("draft", out var draft) && draft.ValueKind == JsonValueKind.True);
+            item.TryGetProperty("draft", out var draft) && draft.ValueKind == JsonValueKind.True,
+            state);
 
     private Task<HttpResponseMessage> SendAsync(string url, string token, CancellationToken cancellationToken)
     {

@@ -57,6 +57,7 @@ public sealed partial class DashboardViewModel : ObservableObject
         ReviewsFeedLabel = Loc.T("Dash_FeedReviews", "Reviews");
         MyPrsFeedLabel = Loc.T("Dash_FeedMyPrs", "My pull requests");
         IssuesFeedLabel = Loc.T("Dash_FeedIssues", "Issues");
+        ClosedFeedLabel = Loc.T("Dash_FeedClosed", "Recently closed");
     }
 
     /// <summary>The Environments singleton; the "Tool updates" card binds straight to it.</summary>
@@ -228,9 +229,10 @@ public sealed partial class DashboardViewModel : ObservableObject
         [ForgeFeed.ReviewRequests] = [],
         [ForgeFeed.AuthoredPullRequests] = [],
         [ForgeFeed.AssignedIssues] = [],
+        [ForgeFeed.RecentlyClosed] = [],
     };
 
-    /// <summary>0 = review requests, 1 = my PRs, 2 = assigned issues (SelectorBar order).</summary>
+    /// <summary>0 = review requests, 1 = my PRs, 2 = assigned issues, 3 = recently closed (SelectorBar order).</summary>
     [ObservableProperty]
     public partial int SelectedFeedIndex { get; set; }
 
@@ -264,10 +266,14 @@ public sealed partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     public partial string IssuesFeedLabel { get; set; }
 
+    [ObservableProperty]
+    public partial string ClosedFeedLabel { get; set; }
+
     public string WorkEmptyText => SelectedFeed switch
     {
         ForgeFeed.ReviewRequests => Loc.T("Dash_NoReviews", "No reviews waiting for you. Nice."),
         ForgeFeed.AuthoredPullRequests => Loc.T("Dash_NoPrs", "You have no open pull requests."),
+        ForgeFeed.RecentlyClosed => Loc.T("Dash_NoClosed", "Nothing closed or merged recently."),
         _ => Loc.T("Dash_NoIssues", "No issues assigned to you."),
     };
 
@@ -352,6 +358,7 @@ public sealed partial class DashboardViewModel : ObservableObject
             ReviewsFeedLabel = $"{Loc.T("Dash_FeedReviews", "Reviews")} ({_feeds[ForgeFeed.ReviewRequests].Count})";
             MyPrsFeedLabel = $"{Loc.T("Dash_FeedMyPrs", "My pull requests")} ({_feeds[ForgeFeed.AuthoredPullRequests].Count})";
             IssuesFeedLabel = $"{Loc.T("Dash_FeedIssues", "Issues")} ({_feeds[ForgeFeed.AssignedIssues].Count})";
+            ClosedFeedLabel = $"{Loc.T("Dash_FeedClosed", "Recently closed")} ({_feeds[ForgeFeed.RecentlyClosed].Count})";
             ShowSelectedFeed();
         }
         catch (Exception ex)

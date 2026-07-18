@@ -8,8 +8,10 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Effects;
 using Microsoft.Graphics.Canvas.Svg;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Serilog;
@@ -21,6 +23,7 @@ public sealed partial class ProjectDetailPage : Page
     private const int GraphPageSize = 100;
     private const double FallbackExpandedHeroHeight = 190;
     private const double CollapsedHeroHeight = 68;
+    private const double HeroScrollBudget = 160;
 
     private readonly ISettingsService _settings;
     private readonly IIdeService _ides;
@@ -40,11 +43,16 @@ public sealed partial class ProjectDetailPage : Page
     private bool _graphComplete;
     private bool _graphLoadingMore;
     private bool _graphScrollHooked;
+    private bool _forgeScrollHooked;
     private bool _filesLoaded;
     private bool _readmeScrollHooked;
     private bool _fileViewScrollHooked;
     private double _heroProgress = -1;
     private double? _expandedHeroHeightSnapshot;
+    private DispatcherQueueTimer? _heroAnimTimer;
+    private double _heroAnimStart;
+    private double _heroAnimTarget;
+    private DateTime _heroAnimStartTime;
     private Uri? _remoteWebUrl;
     private bool _initializingIdePicker;
 
@@ -411,6 +419,89 @@ public sealed partial class ProjectDetailPage : Page
         {
             HookGraphScroll();
         }
+
+        if (selected == ForgeTab)
+        {
+            HookForgeScroll();
+        }
+    }
+
+    /// <summary>
+    /// Same auto-collapse as the Git/README tabs: the columns' scroll drives the hero down
+    /// as it moves — but only ever further shut, never back open. All three drive the SAME
+    /// hero, so a barely-touched column sitting near its own top would otherwise snap the
+    /// hero back open the moment the pointer moved to it (or the moment the button had
+    /// already collapsed it without scrolling anything). Only the button re-expands it.
+    /// Collapsing the hero also grows this same box (Grid.Row="1" is star-sized), which
+    /// shrinks a column's ScrollableHeight and can force-clamp its VerticalOffset, re-firing
+    /// ViewChanged without the user having scrolled; reacting to that resizes the hero again
+    /// and can loop within a layout pass into a LayoutCycleException crash. A real scroll
+    /// gesture never changes the viewport height, only the offset, so that's the signal
+    /// that tells the two apart.
+    /// </summary>
+    private void HookForgeScroll()
+    {
+        if (_forgeScrollHooked)
+        {
+            return;
+        }
+
+        _forgeScrollHooked = true;
+        var scrollViewers = new[] { ForgePrScroll, ForgeIssueScroll, ForgeRunScroll };
+        var lastViewportHeights = scrollViewers.ToDictionary(sv => sv, sv => sv.ViewportHeight);
+
+        foreach (var scrollViewer in scrollViewers)
+        {
+            scrollViewer.ViewChanged += (_, _) =>
+            {
+                var viewportChanged = Math.Abs(scrollViewer.ViewportHeight - lastViewportHeights[scrollViewer]) > 0.5;
+                lastViewportHeights[scrollViewer] = scrollViewer.ViewportHeight;
+                if (viewportChanged)
+                {
+                    return;
+                }
+
+                var maxOffset = scrollViewers.Max(sv => sv.VerticalOffset);
+                var scrollProgress = maxOffset / HeroScrollBudget;
+                if (scrollProgress > _heroProgress)
+                {
+                    SetHeroCollapse(scrollProgress);
+                }
+            };
+        }
+    }
+
+    /// <summary>Toggles the hero between fully expanded and fully collapsed, animated.</summary>
+    private void ToggleHero_Click(object sender, RoutedEventArgs e)
+    {
+        AnimateHeroCollapse(_heroProgress < 0.5 ? 1 : 0);
+    }
+
+    /// <summary>Eases <see cref="_heroProgress"/> from its current value to <paramref name="target"/>.</summary>
+    private void AnimateHeroCollapse(double target)
+    {
+        _heroAnimTimer?.Stop();
+        _heroAnimStart = Math.Clamp(_heroProgress < 0 ? 0 : _heroProgress, 0, 1);
+        _heroAnimTarget = target;
+        _heroAnimStartTime = DateTime.UtcNow;
+
+        _heroAnimTimer ??= DispatcherQueue.CreateTimer();
+        _heroAnimTimer.Interval = TimeSpan.FromMilliseconds(15);
+        _heroAnimTimer.Tick -= HeroAnimTimer_Tick;
+        _heroAnimTimer.Tick += HeroAnimTimer_Tick;
+        _heroAnimTimer.Start();
+    }
+
+    private void HeroAnimTimer_Tick(object? sender, object e)
+    {
+        const double durationMs = 250;
+        var t = Math.Clamp((DateTime.UtcNow - _heroAnimStartTime).TotalMilliseconds / durationMs, 0, 1);
+        var eased = 1 - Math.Pow(1 - t, 3);
+        SetHeroCollapse(_heroAnimStart + ((_heroAnimTarget - _heroAnimStart) * eased));
+        if (t >= 1)
+        {
+            _heroAnimTimer!.Stop();
+        }
     }
 
     /// <summary>
@@ -516,6 +607,13 @@ public sealed partial class ProjectDetailPage : Page
         IdeDecorTransform.Rotation = 10 - (16 * p);
         LangDecor.Opacity = 0.20 * (1 - (0.35 * p));
         IdeDecor.Opacity = 0.20 * (1 - (0.35 * p));
+
+        HeroCollapseIcon.Glyph = p < 0.5 ? "" : "";
+        ToolTipService.SetToolTip(
+            HeroCollapseButton,
+            p < 0.5
+                ? Loc.T("Detail_CollapseHero", "Collapse")
+                : Loc.T("Detail_ExpandHero", "Expand"));
     }
 
     /// <summary>Bridges the WebView's scroll position out to the collapsing hero.</summary>
@@ -535,7 +633,13 @@ public sealed partial class ProjectDetailPage : Page
                 System.Globalization.CultureInfo.InvariantCulture,
                 out var y))
             {
-                SetHeroCollapse(y / 160);
+                // Only ever collapses further, never back open — same as the forge columns;
+                // the corner button is the only way to re-expand it.
+                var scrollProgress = y / HeroScrollBudget;
+                if (scrollProgress > _heroProgress)
+                {
+                    SetHeroCollapse(scrollProgress);
+                }
             }
         };
     }
@@ -645,7 +749,13 @@ public sealed partial class ProjectDetailPage : Page
         GraphList.LayoutUpdated -= GraphList_LayoutUpdated;
         scrollViewer.ViewChanged += (_, _) =>
         {
-            SetHeroCollapse(scrollViewer.VerticalOffset / 160);
+            // Only ever collapses further, never back open — same as the forge columns;
+            // the corner button is the only way to re-expand it.
+            var scrollProgress = scrollViewer.VerticalOffset / HeroScrollBudget;
+            if (scrollProgress > _heroProgress)
+            {
+                SetHeroCollapse(scrollProgress);
+            }
 
             if (scrollViewer.VerticalOffset >= scrollViewer.ScrollableHeight - 400)
             {
