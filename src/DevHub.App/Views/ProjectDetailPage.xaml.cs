@@ -290,6 +290,7 @@ public sealed partial class ProjectDetailPage : Page
         _forgeWebUrl = null;
         _forgeLoaded = false;
         ForgeTab.Visibility = Visibility.Collapsed;
+        ForgeAccountAvatar.Visibility = Visibility.Collapsed;
 
         if (!ForgeUrls.TryParseRepo(project.GitRemoteUrl, out var host, out var repo))
         {
@@ -306,6 +307,11 @@ public sealed partial class ProjectDetailPage : Page
         ForgeTab.Text = account.DisplayName;
         ForgeOpenRepoLabel.Text = Loc.F("Detail_OpenOnForge", "Open on {0}", account.DisplayName);
         ForgeTab.Visibility = Visibility.Visible;
+
+        ForgeAccountAvatar.DisplayName = account.Login;
+        ForgeAccountAvatar.ProfilePicture = account.AvatarImage;
+        ToolTipService.SetToolTip(ForgeAccountAvatar, account.ViewingAsTooltip);
+        ForgeAccountAvatar.Visibility = Visibility.Visible;
     }
 
     private async Task LoadForgeAsync()

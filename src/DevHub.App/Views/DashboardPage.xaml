@@ -421,7 +421,35 @@
 
             <!-- Your work (feeds from the connected forges) -->
             <StackPanel Spacing="10">
-                <TextBlock x:Uid="Dash_WorkHeader" Style="{StaticResource SubtitleTextBlockStyle}" Text="Your work" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        x:Uid="Dash_WorkHeader"
+                        Style="{StaticResource SubtitleTextBlockStyle}"
+                        Text="Your work" />
+                    <ItemsControl Grid.Column="1" ItemsSource="{x:Bind ViewModel.ForgeAccounts.Accounts}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ForgeAccountViewModel">
+                                <PersonPicture
+                                    Width="24"
+                                    Height="24"
+                                    DisplayName="{x:Bind Login, Mode=OneWay}"
+                                    ProfilePicture="{x:Bind AvatarImage, Mode=OneWay}"
+                                    ToolTipService.ToolTip="{x:Bind ViewingAsTooltip, Mode=OneWay}"
+                                    Visibility="{x:Bind IsConnected, Mode=OneWay}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
                 <Border
                     Padding="12"
                     CornerRadius="{ThemeResource OverlayCornerRadius}"

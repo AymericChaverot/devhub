@@ -566,6 +566,12 @@
                         Orientation="Horizontal"
                         Spacing="12"
                         VerticalAlignment="Center">
+                        <PersonPicture
+                            x:Name="ForgeAccountAvatar"
+                            Width="24"
+                            Height="24"
+                            VerticalAlignment="Center"
+                            Visibility="Collapsed" />
                         <ProgressRing x:Name="ForgeLoading" Width="16" Height="16" IsActive="False" />
                         <TextBlock
                             x:Name="ForgeRepoStats"

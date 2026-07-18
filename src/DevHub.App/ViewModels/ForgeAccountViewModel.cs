@@ -22,10 +22,30 @@ public sealed partial class ForgeAccountViewModel : ObservableObject
 
         // Trust the stored state at startup; API calls surface expired tokens later.
         if (_settings.Settings.ConnectedForgeLogins.TryGetValue(service.DisplayName, out var login)
-            && _tokens.Read(service.DisplayName) is not null)
+            && _tokens.Read(service.DisplayName) is { } token)
         {
             Login = login;
             IsConnected = true;
+
+            // The avatar itself is never persisted (only the login is), so it has to be
+            // re-fetched on every launch or it stays blank until the user reconnects.
+            _ = RefreshAvatarAsync(token);
+        }
+    }
+
+    private async Task RefreshAvatarAsync(string token)
+    {
+        try
+        {
+            var user = await _service.GetCurrentUserAsync(token);
+            if (user is not null)
+            {
+                AvatarUrl = user.AvatarUrl;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Refreshing the {Forge} avatar failed", DisplayName);
         }
     }
 
@@ -59,7 +79,11 @@ public sealed partial class ForgeAccountViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(ViewingAsTooltip))]
     public partial string? Login { get; set; }
+
+    /// <summary>Tooltip for the account's avatar, wherever it is shown outside Settings.</summary>
+    public string ViewingAsTooltip => Loc.F("Forge_ViewingAs", "Viewing info as {0}", Login ?? "");
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(AvatarImage))]

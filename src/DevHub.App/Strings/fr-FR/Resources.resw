@@ -153,6 +153,7 @@
   <data name="Forge_RunCancelled" xml:space="preserve"><value>Annulé</value></data>
   <data name="Forge_RunDone" xml:space="preserve"><value>Terminé</value></data>
   <data name="Forge_ConnectedAs" xml:space="preserve"><value>Connecté en tant que {0}</value></data>
+  <data name="Forge_ViewingAs" xml:space="preserve"><value>Informations affichées en tant que {0}</value></data>
   <data name="Forge_ConnectHint" xml:space="preserve"><value>Connectez-vous avec un token d&apos;accès personnel</value></data>
   <data name="Forge_EmptyToken" xml:space="preserve"><value>Collez d&apos;abord un token d&apos;accès personnel.</value></data>
   <data name="Forge_TokenRejected" xml:space="preserve"><value>{0} a rejeté ce token. {1}</value></data>
