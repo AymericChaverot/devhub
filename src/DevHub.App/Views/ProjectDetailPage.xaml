@@ -103,21 +103,6 @@
                     </ItemsControl>
 
                     <StackPanel x:Name="ActionsRow" Orientation="Horizontal" Spacing="8" Margin="0,6,0,0">
-                        <ComboBox
-                            x:Name="IdePicker"
-                            MinWidth="180"
-                            VerticalAlignment="Center"
-                            SelectionChanged="IdePicker_SelectionChanged" />
-                        <Button
-                            x:Name="OpenInIdeButton"
-                            Style="{StaticResource AccentButtonStyle}"
-                            Click="OpenInIde_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon FontSize="14" Glyph="&#xE8A7;" />
-                                <TextBlock x:Uid="Detail_Open" Text="Open" />
-                            </StackPanel>
-                        </Button>
-                        <Button x:Uid="Detail_Explorer" Click="OpenInExplorer_Click" Content="Explorer" />
                         <Button
                             x:Name="RemoteButton"
                             Visibility="Collapsed"
@@ -131,6 +116,39 @@
 
                 </StackPanel>
             </Grid>
+
+            <!-- IDE picker / Open / Explorer: visually part of ActionsRow's row (immediately
+                 to its left) when expanded, but unlike the rest of that row, these stay
+                 usable when the hero collapses instead of fading out. Living here as a
+                 free-floating HeroCard child — positioned entirely by SetHeroCollapse via
+                 HeroQuickActionsTransform, measured against ActionsRow's real position —
+                 means the expanded state can match "before" exactly while still being able
+                 to slide over to a right-aligned spot as the hero shrinks. -->
+            <StackPanel
+                x:Name="HeroQuickActions"
+                Orientation="Horizontal"
+                Spacing="8"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top">
+                <StackPanel.RenderTransform>
+                    <TranslateTransform x:Name="HeroQuickActionsTransform" />
+                </StackPanel.RenderTransform>
+                <ComboBox
+                    x:Name="IdePicker"
+                    MinWidth="180"
+                    VerticalAlignment="Center"
+                    SelectionChanged="IdePicker_SelectionChanged" />
+                <Button
+                    x:Name="OpenInIdeButton"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="OpenInIde_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE8A7;" />
+                        <TextBlock x:Uid="Detail_Open" Text="Open" />
+                    </StackPanel>
+                </Button>
+                <Button x:Uid="Detail_Explorer" Click="OpenInExplorer_Click" Content="Explorer" />
+            </StackPanel>
 
             <!-- Declared last so it stays on top of the stretched hero text for hit-testing -->
             <StackPanel

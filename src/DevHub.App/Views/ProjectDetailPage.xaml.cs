@@ -15,6 +15,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Serilog;
+using Windows.Foundation;
 
 namespace DevHub.App.Views;
 
@@ -52,6 +53,7 @@ public sealed partial class ProjectDetailPage : Page
     private DispatcherQueueTimer? _heroAnimTimer;
     private double _heroAnimStart;
     private double _heroAnimTarget;
+    private bool _heroLockedByButton;
     private DateTime _heroAnimStartTime;
     private Uri? _remoteWebUrl;
     private bool _initializingIdePicker;
@@ -112,6 +114,13 @@ public sealed partial class ProjectDetailPage : Page
         await PopulateIdePickerAsync(project);
         await LoadGitAsync(project);
         await LoadReadmeAsync(project.Path);
+
+        // HeroQuickActions (the IDE picker/Open/Explorer group) is positioned entirely by
+        // SetHeroCollapse, measured against ActionsRow's real, laid-out position. Without
+        // an initial call it sits at its default (0,0) transform — overlapping the back
+        // button — until the first scroll or button click. Deferred one tick so the layout
+        // pass reacting to everything set above has actually run first.
+        DispatcherQueue.TryEnqueue(() => SetHeroCollapse(0));
     }
 
     /// <summary>Stamps the project as "last opened now"; the dashboard's recent list reads this.</summary>
@@ -427,17 +436,18 @@ public sealed partial class ProjectDetailPage : Page
     }
 
     /// <summary>
-    /// Same auto-collapse as the Git/README tabs: the columns' scroll drives the hero down
-    /// as it moves — but only ever further shut, never back open. All three drive the SAME
-    /// hero, so a barely-touched column sitting near its own top would otherwise snap the
-    /// hero back open the moment the pointer moved to it (or the moment the button had
-    /// already collapsed it without scrolling anything). Only the button re-expands it.
-    /// Collapsing the hero also grows this same box (Grid.Row="1" is star-sized), which
-    /// shrinks a column's ScrollableHeight and can force-clamp its VerticalOffset, re-firing
-    /// ViewChanged without the user having scrolled; reacting to that resizes the hero again
-    /// and can loop within a layout pass into a LayoutCycleException crash. A real scroll
-    /// gesture never changes the viewport height, only the offset, so that's the signal
-    /// that tells the two apart.
+    /// Same auto-collapse as the Git/README tabs: the columns' scroll drives the hero, both
+    /// ways, exactly like scrolling a column's offset up or down always did before — unless
+    /// the button has taken over (see AnimateHeroCollapse), in which case scroll has no say
+    /// over the hero at all anymore. All three columns drive the SAME hero, so whichever is
+    /// furthest along wins — otherwise a barely-touched column sitting near its own top
+    /// would snap the hero back open the moment the pointer moved to it. Collapsing the hero
+    /// also grows this same box (Grid.Row="1" is star-sized), which shrinks a column's
+    /// ScrollableHeight and can force-clamp its VerticalOffset, re-firing ViewChanged
+    /// without the user having scrolled; reacting to that resizes the hero again and can
+    /// loop within a layout pass into a LayoutCycleException crash. A real scroll gesture
+    /// never changes the viewport height, only the offset, so that's the signal that tells
+    /// the two apart.
     /// </summary>
     private void HookForgeScroll()
     {
@@ -463,7 +473,7 @@ public sealed partial class ProjectDetailPage : Page
 
                 var maxOffset = scrollViewers.Max(sv => sv.VerticalOffset);
                 var scrollProgress = maxOffset / HeroScrollBudget;
-                if (scrollProgress > _heroProgress)
+                if (!_heroLockedByButton)
                 {
                     SetHeroCollapse(scrollProgress);
                 }
@@ -484,6 +494,10 @@ public sealed partial class ProjectDetailPage : Page
         _heroAnimStart = Math.Clamp(_heroProgress < 0 ? 0 : _heroProgress, 0, 1);
         _heroAnimTarget = target;
         _heroAnimStartTime = DateTime.UtcNow;
+
+        // The button hands the user explicit manual control: once pressed, scrolling has no
+        // further say over the hero at all, on any tab, for the rest of this page's life.
+        _heroLockedByButton = true;
 
         _heroAnimTimer ??= DispatcherQueue.CreateTimer();
         _heroAnimTimer.Interval = TimeSpan.FromMilliseconds(15);
@@ -523,9 +537,12 @@ public sealed partial class ProjectDetailPage : Page
         ProjectPath.MaxHeight = (22 * inv) + 0.01;
         TechList.Opacity = inv;
         TechList.MaxHeight = (240 * inv) + 0.01;
-        ActionsRow.Opacity = inv;
-        ActionsRow.MaxHeight = (48 * inv) + 0.01;
-        ActionsRow.IsHitTestVisible = p < 0.5;
+
+        // The IDE picker/Open/Explorer group (HeroQuickActions) stays visible and slides
+        // over to the right instead of fading with the rest of the row — only the remote
+        // button, which is still part of ActionsRow, fades out the old way.
+        RemoteButton.Opacity = inv;
+        RemoteButton.IsHitTestVisible = p < 0.5;
         HeroTopButtons.Opacity = inv;
         HeroTopButtons.MaxHeight = (480 * inv) + 0.01;
         HeroTopButtons.IsHitTestVisible = p < 0.5;
@@ -536,7 +553,6 @@ public sealed partial class ProjectDetailPage : Page
         var fullyCollapsed = p >= 0.999;
         ProjectPath.Visibility = fullyCollapsed ? Visibility.Collapsed : Visibility.Visible;
         TechList.Visibility = fullyCollapsed ? Visibility.Collapsed : Visibility.Visible;
-        ActionsRow.Visibility = fullyCollapsed ? Visibility.Collapsed : Visibility.Visible;
 
         // The content Grid's own top/bottom padding (24px each) was eating most of the
         // "collapsed" budget regardless of HeroCard's height, so it shrinks too.
@@ -572,6 +588,32 @@ public sealed partial class ProjectDetailPage : Page
             HeroCard.MinHeight = 0;
             HeroCard.Height = heroCardHeight;
         }
+
+        // HeroQuickActions is a free-floating sibling (not part of the title's vertical
+        // flow) so it can end up right-aligned in the slim collapsed bar without needing to
+        // shrink/clip actual controls. At p=0 its measured target is exactly where ActionsRow
+        // itself starts — that row used to open with these same controls, so this lines its
+        // left edge up with ActionsRow's, not its own trailing edge — and it slides from
+        // there to the right-aligned collapsed spot. ActionsRow (now just the remote button)
+        // still starts at that same X in its own normal flow, unaware of this floating
+        // sibling, so its left margin is pushed out by however much room this still needs,
+        // shrinking back to 0 as this slides away and stops needing it.
+        const double quickActionsSpacing = 8;
+        const double quickActionsRightMargin = 54;
+        var qaWidth = HeroQuickActions.ActualWidth > 0 ? HeroQuickActions.ActualWidth : 360;
+        var qaHeight = HeroQuickActions.ActualHeight > 0 ? HeroQuickActions.ActualHeight : 32;
+
+        // X comes from TechList, not ActionsRow: ActionsRow's own left margin is what gets
+        // pushed out below to reserve room for this, so measuring X from it here would feed
+        // that adjustment back into next frame's "natural" position and drift the group
+        // right on every call. TechList shares the same column and is never touched.
+        var naturalX = TechList.TransformToVisual(HeroCard).TransformPoint(new Point(0, 0)).X;
+        var naturalY = ActionsRow.TransformToVisual(HeroCard).TransformPoint(new Point(0, 0)).Y;
+        var collapsedX = Math.Max(naturalX, HeroCard.ActualWidth - quickActionsRightMargin - qaWidth);
+        var collapsedY = (heroCardHeight / 2) - (qaHeight / 2);
+        HeroQuickActionsTransform.X = naturalX + (p * (collapsedX - naturalX));
+        HeroQuickActionsTransform.Y = naturalY + (p * (collapsedY - naturalY));
+        ActionsRow.Margin = new Thickness((qaWidth + quickActionsSpacing) * inv, 6, 0, 0);
 
         // At rest, the button keeps its small default (natural) size, top-aligned next
         // to the multi-line title block — no explicit Height. Once collapsing starts it
@@ -633,10 +675,10 @@ public sealed partial class ProjectDetailPage : Page
                 System.Globalization.CultureInfo.InvariantCulture,
                 out var y))
             {
-                // Only ever collapses further, never back open — same as the forge columns;
-                // the corner button is the only way to re-expand it.
+                // Both ways, like before — unless the button has taken over (see
+                // AnimateHeroCollapse), in which case scroll no longer has any say.
                 var scrollProgress = y / HeroScrollBudget;
-                if (scrollProgress > _heroProgress)
+                if (!_heroLockedByButton)
                 {
                     SetHeroCollapse(scrollProgress);
                 }
@@ -749,10 +791,10 @@ public sealed partial class ProjectDetailPage : Page
         GraphList.LayoutUpdated -= GraphList_LayoutUpdated;
         scrollViewer.ViewChanged += (_, _) =>
         {
-            // Only ever collapses further, never back open — same as the forge columns;
-            // the corner button is the only way to re-expand it.
+            // Both ways, like before — unless the button has taken over (see
+            // AnimateHeroCollapse), in which case scroll no longer has any say.
             var scrollProgress = scrollViewer.VerticalOffset / HeroScrollBudget;
-            if (scrollProgress > _heroProgress)
+            if (!_heroLockedByButton)
             {
                 SetHeroCollapse(scrollProgress);
             }
