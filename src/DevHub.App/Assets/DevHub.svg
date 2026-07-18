@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Main face: Microsoft-style diagonal, cyan → blue → violet -->
+    <linearGradient id="sheet" x1="0.12" y1="0.02" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#5FD0FF"/>
+      <stop offset="0.38" stop-color="#2E7CF0"/>
+      <stop offset="0.72" stop-color="#5B45EF"/>
+      <stop offset="1" stop-color="#7A2BE0"/>
+    </linearGradient>
+    <!-- Extruded side face: same hues, deeper -->
+    <linearGradient id="side" x1="0.12" y1="0.02" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#1C5FD1"/>
+      <stop offset="0.6" stop-color="#2A34B8"/>
+      <stop offset="1" stop-color="#471896"/>
+    </linearGradient>
+    <!-- Depth: gentle darkening toward the bottom edge of the face -->
+    <linearGradient id="depth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0.6" stop-color="#101C64" stop-opacity="0"/>
+      <stop offset="1" stop-color="#101C64" stop-opacity="0.20"/>
+    </linearGradient>
+    <!-- Specular light falling from the top-left -->
+    <radialGradient id="specular" cx="0.32" cy="0.14" r="0.9">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.38"/>
+      <stop offset="0.35" stop-color="#FFFFFF" stop-opacity="0.10"/>
+      <stop offset="0.7" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Rim light along the top edges -->
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="0.35" stop-color="#FFFFFF" stop-opacity="0.15"/>
+      <stop offset="0.6" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Inner glass plate -->
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/>
+    </linearGradient>
+    <!-- White glass for the glyph -->
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E4F2FF"/>
+    </linearGradient>
+    <filter id="ambient" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="#020A2E" flood-opacity="0.32"/>
+    </filter>
+    <filter id="plateShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#14328C" flood-opacity="0.20"/>
+    </filter>
+    <filter id="glyphShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="9" stdDeviation="11" flood-color="#153E9E" flood-opacity="0.42"/>
+    </filter>
+
+    <!-- Flat-top hexagon with rounded corners, centered on (512,512) -->
+    <path id="hexSheet" d="M 400,166
+        L 624,166
+        Q 708,166 750,238.7
+        L 862,432.8
+        Q 904,505.5 862,578.2
+        L 750,772.3
+        Q 708,845 624,845
+        L 400,845
+        Q 316,845 274,772.3
+        L 162,578.2
+        Q 120,505.5 162,432.8
+        L 274,238.7
+        Q 316,166 400,166 Z"/>
+    <clipPath id="hexClip"><use href="#hexSheet"/></clipPath>
+  </defs>
+
+  <!-- ===== 2.5D body: extruded side face, then the lit top face ===== -->
+  <g filter="url(#ambient)">
+    <use href="#hexSheet" y="26" fill="url(#side)"/>
+    <use href="#hexSheet" fill="url(#sheet)"/>
+  </g>
+  <use href="#hexSheet" fill="url(#depth)"/>
+  <g clip-path="url(#hexClip)">
+    <use href="#hexSheet" fill="url(#specular)"/>
+    <use href="#hexSheet" fill="none" stroke="url(#rim)" stroke-width="10"/>
+  </g>
+
+  <!-- ===== Floating inner glass plate (smaller hexagon) ===== -->
+  <g transform="translate(512,505.5) scale(0.72) translate(-512,-505.5)">
+    <g filter="url(#plateShadow)">
+      <use href="#hexSheet" fill="url(#plate)"/>
+    </g>
+    <use href="#hexSheet" fill="none" stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="5"/>
+  </g>
+
+  <!-- ===== White glass code braces, the product glyph ===== -->
+  <g filter="url(#glyphShadow)" stroke="url(#glass)" stroke-width="46" fill="none"
+     stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 452,354 C 404,354 404,390 404,422 C 404,464 404,474 362,506
+             C 404,538 404,548 404,590 C 404,622 404,658 452,658"/>
+    <path d="M 572,354 C 620,354 620,390 620,422 C 620,464 620,474 662,506
+             C 620,538 620,548 620,590 C 620,622 620,658 572,658"/>
+  </g>
+</svg>

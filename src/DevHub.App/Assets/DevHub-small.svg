@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="sheet" x1="0.12" y1="0.02" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#5FD0FF"/>
+      <stop offset="0.38" stop-color="#2E7CF0"/>
+      <stop offset="0.72" stop-color="#5B45EF"/>
+      <stop offset="1" stop-color="#7A2BE0"/>
+    </linearGradient>
+    <linearGradient id="side" x1="0.12" y1="0.02" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#1C5FD1"/>
+      <stop offset="0.6" stop-color="#2A34B8"/>
+      <stop offset="1" stop-color="#471896"/>
+    </linearGradient>
+    <!-- Larger hexagon (full-bleed) for maximum presence at 16-32 px -->
+    <path id="hexSheet" d="M 396,120
+        L 628,120
+        Q 716,120 760,196.2
+        L 876,397.3
+        Q 920,473.5 876,549.7
+        L 760,750.8
+        Q 716,827 628,827
+        L 396,827
+        Q 308,827 264,750.8
+        L 148,549.7
+        Q 104,473.5 148,397.3
+        L 264,196.2
+        Q 308,120 396,120 Z"/>
+  </defs>
+
+  <!-- Simplified 2.5D: side face + top face, no fine seams or speculars -->
+  <use href="#hexSheet" y="40" fill="url(#side)"/>
+  <use href="#hexSheet" fill="url(#sheet)"/>
+
+  <!-- Thick braces so the glyph survives 16 px -->
+  <g stroke="#FFFFFF" stroke-width="72" fill="none"
+     stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 442,300 C 386,300 386,340 386,380 C 386,430 386,442 336,474
+             C 386,506 386,518 386,568 C 386,608 386,648 442,648"/>
+    <path d="M 582,300 C 638,300 638,340 638,380 C 638,430 638,442 688,474
+             C 638,506 638,518 638,568 C 638,608 638,648 582,648"/>
+  </g>
+</svg>
