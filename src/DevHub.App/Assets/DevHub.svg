@@ -41,7 +41,7 @@
       <stop offset="1" stop-color="#E4F2FF"/>
     </linearGradient>
     <filter id="ambient" x="-25%" y="-25%" width="150%" height="150%">
-      <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="#020A2E" flood-opacity="0.32"/>
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#020A2E" flood-opacity="0.32"/>
     </filter>
     <filter id="plateShadow" x="-30%" y="-30%" width="160%" height="160%">
       <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#14328C" flood-opacity="0.20"/>
@@ -66,7 +66,7 @@
         Q 316,166 400,166 Z"/>
     <clipPath id="hexClip"><use href="#hexSheet"/></clipPath>
   </defs>
-  <g transform="translate(512,512) scale(1.13) translate(-512,-512)">
+  <g transform="translate(512,518.5) scale(1.28) translate(-512,-518.5)">
 
   <!-- ===== 2.5D body: extruded side face, then the lit top face ===== -->
   <g filter="url(#ambient)">

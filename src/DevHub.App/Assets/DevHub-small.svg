@@ -26,7 +26,7 @@
         L 264,196.2
         Q 308,120 396,120 Z"/>
   </defs>
-  <g transform="translate(512,493.5) scale(1.10) translate(-512,-493.5)">
+  <g transform="translate(512,493.5) scale(1.23) translate(-512,-493.5)">
 
   <!-- Simplified 2.5D: side face + top face, no fine seams or speculars -->
   <use href="#hexSheet" y="40" fill="url(#side)"/>
