@@ -301,4 +301,48 @@
   <data name="Update_DownloadingPercent" xml:space="preserve"><value>Downloading… {0:0}%</value></data>
   <data name="Update_Launching" xml:space="preserve"><value>Launching the installer…</value></data>
   <data name="Update_Failed" xml:space="preserve"><value>Update failed: {0}</value></data>
+  <data name="Shell_NavEnvVars.Content" xml:space="preserve"><value>Environment Variables</value></data>
+  <data name="EnvVar_Title.Text" xml:space="preserve"><value>Environment Variables</value></data>
+  <data name="EnvVar_Subtitle.Text" xml:space="preserve"><value>Inspect and edit user and system variables. Changes are written to the registry and broadcast to running applications.</value></data>
+  <data name="EnvVar_UserTab.Text" xml:space="preserve"><value>User variables</value></data>
+  <data name="EnvVar_SystemTab.Text" xml:space="preserve"><value>System variables</value></data>
+  <data name="EnvVar_Search.PlaceholderText" xml:space="preserve"><value>Search by name or value</value></data>
+  <data name="EnvVar_New.Text" xml:space="preserve"><value>New variable</value></data>
+  <data name="EnvVar_Refresh.Text" xml:space="preserve"><value>Refresh</value></data>
+  <data name="EnvVar_Export.Text" xml:space="preserve"><value>Export</value></data>
+  <data name="EnvVar_Import.Text" xml:space="preserve"><value>Import</value></data>
+  <data name="EnvVar_ElevationBar.Title" xml:space="preserve"><value>Administrator rights required</value></data>
+  <data name="EnvVar_ElevationBar.Message" xml:space="preserve"><value>DevHub is not running as administrator. Saving a system variable will show a Windows elevation prompt for each change.</value></data>
+  <data name="EnvVar_NoSelection.Text" xml:space="preserve"><value>Select a variable to inspect or edit it.</value></data>
+  <data name="EnvVar_Delete.Text" xml:space="preserve"><value>Delete</value></data>
+  <data name="EnvVar_BadgeMissing.Text" xml:space="preserve"><value>INVALID / NOT FOUND</value></data>
+  <data name="EnvVar_BadgeDuplicate.Text" xml:space="preserve"><value>DUPLICATE</value></data>
+  <data name="EnvVar_AddEntry.Text" xml:space="preserve"><value>Add entry</value></data>
+  <data name="EnvVar_ValueBox.Header" xml:space="preserve"><value>Value</value></data>
+  <data name="EnvVar_ReadError" xml:space="preserve"><value>Could not read environment variables: {0}</value></data>
+  <data name="EnvVar_BadName" xml:space="preserve"><value>Variable names must be non-empty and cannot contain '='.</value></data>
+  <data name="EnvVar_Saved" xml:space="preserve"><value>{0} saved.</value></data>
+  <data name="EnvVar_Deleted" xml:space="preserve"><value>{0} deleted.</value></data>
+  <data name="EnvVar_Exported" xml:space="preserve"><value>Backup written to {0}.</value></data>
+  <data name="EnvVar_Restored" xml:space="preserve"><value>{0} variables restored.</value></data>
+  <data name="EnvVar_ElevationDeclined" xml:space="preserve"><value>The change was cancelled (administrator approval declined).</value></data>
+  <data name="EnvVar_NameHeader" xml:space="preserve"><value>Name</value></data>
+  <data name="EnvVar_ValueHeader" xml:space="preserve"><value>Value</value></data>
+  <data name="EnvVar_NewTitle" xml:space="preserve"><value>New variable</value></data>
+  <data name="EnvVar_DeleteTitle" xml:space="preserve"><value>Delete "{0}"?</value></data>
+  <data name="EnvVar_DeleteText" xml:space="preserve"><value>The variable will be removed from the registry. Consider exporting a backup first.</value></data>
+  <data name="EnvVar_DeleteAction" xml:space="preserve"><value>Delete</value></data>
+  <data name="EnvVar_AddEntryTitle" xml:space="preserve"><value>Add entry</value></data>
+  <data name="EnvVar_EditEntryTitle" xml:space="preserve"><value>Edit entry</value></data>
+  <data name="EnvVar_RestoreTitle" xml:space="preserve"><value>Restore from backup</value></data>
+  <data name="EnvVar_RestoreText" xml:space="preserve"><value>Backup from {0}, exported {1:g}. Existing variables with the same name will be overwritten; others are kept.</value></data>
+  <data name="EnvVar_RestoreUser" xml:space="preserve"><value>User variables ({0})</value></data>
+  <data name="EnvVar_RestoreSystem" xml:space="preserve"><value>System variables ({0})</value></data>
+  <data name="EnvVar_Restore" xml:space="preserve"><value>Restore</value></data>
+  <data name="EnvVar_ImportError" xml:space="preserve"><value>Could not read the backup file: {0}</value></data>
+  <data name="EnvVar_Repair.Text" xml:space="preserve"><value>Repair</value></data>
+  <data name="EnvVar_CopyValue.Text" xml:space="preserve"><value>Copy</value></data>
+  <data name="EnvVar_OpenExplorer.Text" xml:space="preserve"><value>Open in Explorer</value></data>
+  <data name="EnvVar_Copied" xml:space="preserve"><value>Copied to clipboard.</value></data>
+  <data name="EnvVar_Repaired" xml:space="preserve"><value>{0} invalid or duplicate entries removed.</value></data>
 </root>

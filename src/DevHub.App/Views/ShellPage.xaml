@@ -21,6 +21,11 @@
                     <FontIcon Glyph="&#xE7B8;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
+            <NavigationViewItem x:Uid="Shell_NavEnvVars" Content="Environment Variables" Tag="envvars">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE756;" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
             <NavigationViewItem x:Uid="Shell_NavProjects" Content="Projects" Tag="projects">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE8B7;" />

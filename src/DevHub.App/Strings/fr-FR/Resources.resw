@@ -301,4 +301,48 @@
   <data name="Update_DownloadingPercent" xml:space="preserve"><value>Téléchargement… {0:0} %</value></data>
   <data name="Update_Launching" xml:space="preserve"><value>Lancement de l&apos;installateur…</value></data>
   <data name="Update_Failed" xml:space="preserve"><value>Échec de la mise à jour : {0}</value></data>
+  <data name="Shell_NavEnvVars.Content" xml:space="preserve"><value>Variables d&apos;environnement</value></data>
+  <data name="EnvVar_Title.Text" xml:space="preserve"><value>Variables d&apos;environnement</value></data>
+  <data name="EnvVar_Subtitle.Text" xml:space="preserve"><value>Consultez et modifiez les variables utilisateur et système. Les changements sont écrits dans le registre et diffusés aux applications en cours.</value></data>
+  <data name="EnvVar_UserTab.Text" xml:space="preserve"><value>Variables utilisateur</value></data>
+  <data name="EnvVar_SystemTab.Text" xml:space="preserve"><value>Variables système</value></data>
+  <data name="EnvVar_Search.PlaceholderText" xml:space="preserve"><value>Rechercher par nom ou valeur</value></data>
+  <data name="EnvVar_New.Text" xml:space="preserve"><value>Nouvelle variable</value></data>
+  <data name="EnvVar_Refresh.Text" xml:space="preserve"><value>Actualiser</value></data>
+  <data name="EnvVar_Export.Text" xml:space="preserve"><value>Exporter</value></data>
+  <data name="EnvVar_Import.Text" xml:space="preserve"><value>Importer</value></data>
+  <data name="EnvVar_ElevationBar.Title" xml:space="preserve"><value>Droits administrateur requis</value></data>
+  <data name="EnvVar_ElevationBar.Message" xml:space="preserve"><value>DevHub ne s&apos;exécute pas en tant qu&apos;administrateur. Enregistrer une variable système affichera une invite d&apos;élévation Windows à chaque modification.</value></data>
+  <data name="EnvVar_NoSelection.Text" xml:space="preserve"><value>Sélectionnez une variable pour la consulter ou la modifier.</value></data>
+  <data name="EnvVar_Delete.Text" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="EnvVar_BadgeMissing.Text" xml:space="preserve"><value>INVALIDE / INTROUVABLE</value></data>
+  <data name="EnvVar_BadgeDuplicate.Text" xml:space="preserve"><value>DOUBLON</value></data>
+  <data name="EnvVar_AddEntry.Text" xml:space="preserve"><value>Ajouter une entrée</value></data>
+  <data name="EnvVar_ValueBox.Header" xml:space="preserve"><value>Valeur</value></data>
+  <data name="EnvVar_ReadError" xml:space="preserve"><value>Impossible de lire les variables d&apos;environnement : {0}</value></data>
+  <data name="EnvVar_BadName" xml:space="preserve"><value>Le nom d&apos;une variable ne peut pas être vide ni contenir « = ».</value></data>
+  <data name="EnvVar_Saved" xml:space="preserve"><value>{0} enregistrée.</value></data>
+  <data name="EnvVar_Deleted" xml:space="preserve"><value>{0} supprimée.</value></data>
+  <data name="EnvVar_Exported" xml:space="preserve"><value>Sauvegarde écrite dans {0}.</value></data>
+  <data name="EnvVar_Restored" xml:space="preserve"><value>{0} variables restaurées.</value></data>
+  <data name="EnvVar_ElevationDeclined" xml:space="preserve"><value>La modification a été annulée (élévation refusée).</value></data>
+  <data name="EnvVar_NameHeader" xml:space="preserve"><value>Nom</value></data>
+  <data name="EnvVar_ValueHeader" xml:space="preserve"><value>Valeur</value></data>
+  <data name="EnvVar_NewTitle" xml:space="preserve"><value>Nouvelle variable</value></data>
+  <data name="EnvVar_DeleteTitle" xml:space="preserve"><value>Supprimer « {0} » ?</value></data>
+  <data name="EnvVar_DeleteText" xml:space="preserve"><value>La variable sera supprimée du registre. Pensez à exporter une sauvegarde avant.</value></data>
+  <data name="EnvVar_DeleteAction" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="EnvVar_AddEntryTitle" xml:space="preserve"><value>Ajouter une entrée</value></data>
+  <data name="EnvVar_EditEntryTitle" xml:space="preserve"><value>Modifier l&apos;entrée</value></data>
+  <data name="EnvVar_RestoreTitle" xml:space="preserve"><value>Restaurer depuis une sauvegarde</value></data>
+  <data name="EnvVar_RestoreText" xml:space="preserve"><value>Sauvegarde de {0}, exportée le {1:g}. Les variables existantes portant le même nom seront écrasées ; les autres sont conservées.</value></data>
+  <data name="EnvVar_RestoreUser" xml:space="preserve"><value>Variables utilisateur ({0})</value></data>
+  <data name="EnvVar_RestoreSystem" xml:space="preserve"><value>Variables système ({0})</value></data>
+  <data name="EnvVar_Restore" xml:space="preserve"><value>Restaurer</value></data>
+  <data name="EnvVar_ImportError" xml:space="preserve"><value>Impossible de lire le fichier de sauvegarde : {0}</value></data>
+  <data name="EnvVar_Repair.Text" xml:space="preserve"><value>Réparer</value></data>
+  <data name="EnvVar_CopyValue.Text" xml:space="preserve"><value>Copier</value></data>
+  <data name="EnvVar_OpenExplorer.Text" xml:space="preserve"><value>Ouvrir dans l&apos;explorateur</value></data>
+  <data name="EnvVar_Copied" xml:space="preserve"><value>Copié dans le presse-papiers.</value></data>
+  <data name="EnvVar_Repaired" xml:space="preserve"><value>{0} entrées invalides ou en double supprimées.</value></data>
 </root>

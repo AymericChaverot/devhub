@@ -55,6 +55,7 @@ public sealed partial class ShellPage : Page
         {
             "home" => typeof(DashboardPage),
             "environments" => typeof(EnvironmentsPage),
+            "envvars" => typeof(EnvVariablesPage),
             "projects" => typeof(ProjectsPage),
             "toolbox" => typeof(DevToolsPage),
             "pomodoro" => typeof(PomodoroPage),

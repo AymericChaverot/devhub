@@ -97,6 +97,8 @@ public partial class App : Application
         services.AddSingleton<ITokenStore, WindowsCredentialTokenStore>();
         services.AddSingleton<ITerminalService, WindowsTerminalService>();
         services.AddSingleton<IUpdateService, GitHubUpdateService>();
+        services.AddSingleton<IEnvironmentVariableService, EnvironmentVariableService>();
+        services.AddSingleton<ViewModels.EnvVariablesViewModel>();
         services.AddSingleton<ViewModels.UpdateViewModel>();
         services.AddSingleton<ViewModels.PomodoroViewModel>();
         services.AddSingleton<IForgeService, GitHubForgeService>();
