@@ -345,4 +345,13 @@
   <data name="EnvVar_OpenExplorer.Text" xml:space="preserve"><value>Ouvrir dans l&apos;explorateur</value></data>
   <data name="EnvVar_Copied" xml:space="preserve"><value>Copié dans le presse-papiers.</value></data>
   <data name="EnvVar_Repaired" xml:space="preserve"><value>{0} entrées invalides ou en double supprimées.</value></data>
+  <data name="Dash_UpdateAll.Content" xml:space="preserve"><value>Tout mettre à jour</value></data>
+  <data name="Env_UpdatesAvailable" xml:space="preserve"><value>{0} mise(s) à jour d&apos;outils disponible(s)</value></data>
+  <data name="EnvVar_CopyEntryBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copier le chemin</value></data>
+  <data name="EnvVar_OpenEntryBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Ouvrir dans l&apos;explorateur</value></data>
+  <data name="EnvVar_MoveUpBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Monter</value></data>
+  <data name="EnvVar_MoveDownBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Descendre</value></data>
+  <data name="EnvVar_EditEntryBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Modifier l&apos;entrée</value></data>
+  <data name="EnvVar_DeleteEntryBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Supprimer l&apos;entrée</value></data>
+  <data name="EnvVar_RepairBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Supprimer toutes les entrées invalides et en double</value></data>
 </root>

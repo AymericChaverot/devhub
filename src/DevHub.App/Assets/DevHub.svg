@@ -66,6 +66,7 @@
         Q 316,166 400,166 Z"/>
     <clipPath id="hexClip"><use href="#hexSheet"/></clipPath>
   </defs>
+  <g transform="translate(512,512) scale(1.13) translate(-512,-512)">
 
   <!-- ===== 2.5D body: extruded side face, then the lit top face ===== -->
   <g filter="url(#ambient)">
@@ -93,5 +94,6 @@
              C 404,538 404,548 404,590 C 404,622 404,658 452,658"/>
     <path d="M 572,354 C 620,354 620,390 620,422 C 620,464 620,474 662,506
              C 620,538 620,548 620,590 C 620,622 620,658 572,658"/>
+  </g>
   </g>
 </svg>

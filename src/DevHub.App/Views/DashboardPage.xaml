@@ -331,18 +331,18 @@
                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             <TextBlock
                                                 Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                Text="{x:Bind Title}" />
+                                                Text="{x:Bind Title, Mode=OneWay}" />
                                         </StackPanel>
                                         <TextBlock
                                             Grid.Column="1"
                                             Style="{StaticResource BodyStrongTextBlockStyle}"
-                                            Text="{x:Bind PercentText}" />
+                                            Text="{x:Bind PercentText, Mode=OneWay}" />
                                     </Grid>
-                                    <ProgressBar Maximum="100" Value="{x:Bind Percent}" />
+                                    <ProgressBar Maximum="100" Value="{x:Bind Percent, Mode=OneWay}" />
                                     <TextBlock
                                         Style="{StaticResource CaptionTextBlockStyle}"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="{x:Bind DetailText}" />
+                                        Text="{x:Bind DetailText, Mode=OneWay}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
@@ -387,9 +387,9 @@
                                 FontSize="16"
                                 Glyph="&#xE896;"
                                 Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            <TextBlock VerticalAlignment="Center">
-                                <Run Text="{x:Bind ViewModel.Environments.UpdateCount, Mode=OneWay}" /><Run Text=" tool update(s) available" />
-                            </TextBlock>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Text="{x:Bind ViewModel.Environments.UpdatesAvailableText, Mode=OneWay}" />
                         </StackPanel>
 
                         <!-- Up to date -->
@@ -408,6 +408,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                             <Button
+                                x:Uid="Dash_UpdateAll"
                                 Style="{StaticResource AccentButtonStyle}"
                                 Content="Update all"
                                 Command="{x:Bind ViewModel.Environments.UpdateAllCommand}"

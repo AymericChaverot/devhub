@@ -6,8 +6,32 @@ using Serilog;
 
 namespace DevHub.App.ViewModels;
 
-/// <summary>One usage gauge on the dashboard (memory or a drive).</summary>
-public sealed record UsageStat(string Title, string DetailText, string PercentText, double Percent);
+/// <summary>
+/// One usage gauge on the dashboard (a drive). Mutable and observable so refreshes
+/// update the existing card in place — rebuilding it would visibly reset the bar to 0.
+/// </summary>
+public sealed partial class UsageStat : ObservableObject
+{
+    public UsageStat(string title, string detailText, string percentText, double percent)
+    {
+        Title = title;
+        DetailText = detailText;
+        PercentText = percentText;
+        Percent = percent;
+    }
+
+    [ObservableProperty]
+    public partial string Title { get; set; }
+
+    [ObservableProperty]
+    public partial string DetailText { get; set; }
+
+    [ObservableProperty]
+    public partial string PercentText { get; set; }
+
+    [ObservableProperty]
+    public partial double Percent { get; set; }
+}
 
 public sealed partial class DashboardViewModel : ObservableObject
 {
@@ -83,8 +107,9 @@ public sealed partial class DashboardViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(MemoryPercentText))]
     [NotifyPropertyChangedFor(nameof(MemoryDetailText))]
     [NotifyPropertyChangedFor(nameof(UptimeText))]
-    [NotifyPropertyChangedFor(nameof(DriveStats))]
     public partial ResourceUsage? Usage { get; set; }
+
+    partial void OnUsageChanged(ResourceUsage? value) => UpdateDriveStats();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasWeather))]
@@ -137,14 +162,37 @@ public sealed partial class DashboardViewModel : ObservableObject
         }
     }
 
-    public IReadOnlyList<UsageStat> DriveStats =>
-        Usage?.Drives
-            .Select(d => new UsageStat(
-                d.Label is null ? d.Name : $"{d.Name} · {d.Label}",
-                Loc.F("Dash_DriveFree", "{0:0} GB free of {1:0} GB", d.TotalGb - d.UsedGb, d.TotalGb),
-                $"{d.UsedRatio * 100:0}%",
-                d.UsedRatio * 100))
-            .ToList() ?? [];
+    public ObservableCollection<UsageStat> DriveStats { get; } = [];
+
+    /// <summary>Syncs the drive cards in place; replacing the list would reset the bars to 0.</summary>
+    private void UpdateDriveStats()
+    {
+        var drives = Usage?.Drives ?? [];
+        while (DriveStats.Count > drives.Count)
+        {
+            DriveStats.RemoveAt(DriveStats.Count - 1);
+        }
+
+        for (var i = 0; i < drives.Count; i++)
+        {
+            var d = drives[i];
+            var title = d.Label is null ? d.Name : $"{d.Name} · {d.Label}";
+            var detail = Loc.F("Dash_DriveFree", "{0:0} GB free of {1:0} GB", d.TotalGb - d.UsedGb, d.TotalGb);
+            var percent = d.UsedRatio * 100;
+
+            if (i < DriveStats.Count)
+            {
+                DriveStats[i].Title = title;
+                DriveStats[i].DetailText = detail;
+                DriveStats[i].PercentText = $"{percent:0}%";
+                DriveStats[i].Percent = percent;
+            }
+            else
+            {
+                DriveStats.Add(new UsageStat(title, detail, $"{percent:0}%", percent));
+            }
+        }
+    }
 
     public bool HasWeather => Weather is not null;
 

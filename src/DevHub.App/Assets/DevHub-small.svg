@@ -26,6 +26,7 @@
         L 264,196.2
         Q 308,120 396,120 Z"/>
   </defs>
+  <g transform="translate(512,493.5) scale(1.10) translate(-512,-493.5)">
 
   <!-- Simplified 2.5D: side face + top face, no fine seams or speculars -->
   <use href="#hexSheet" y="40" fill="url(#side)"/>
@@ -38,5 +39,6 @@
              C 386,506 386,518 386,568 C 386,608 386,648 442,648"/>
     <path d="M 582,300 C 638,300 638,340 638,380 C 638,430 638,442 688,474
              C 638,506 638,518 638,568 C 638,608 638,648 582,648"/>
+  </g>
   </g>
 </svg>

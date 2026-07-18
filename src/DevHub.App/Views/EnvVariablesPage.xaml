@@ -239,6 +239,7 @@
 
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="2">
                                                 <Button
+                                                    x:Uid="EnvVar_CopyEntryBtn"
                                                     Padding="6"
                                                     Tag="{x:Bind}"
                                                     Click="CopyEntry_Click"
@@ -246,6 +247,7 @@
                                                     <FontIcon FontSize="12" Glyph="&#xE8C8;" />
                                                 </Button>
                                                 <Button
+                                                    x:Uid="EnvVar_OpenEntryBtn"
                                                     Padding="6"
                                                     Tag="{x:Bind}"
                                                     Visibility="{x:Bind IsOpenableFolder}"
@@ -254,6 +256,7 @@
                                                     <FontIcon FontSize="12" Glyph="&#xE838;" />
                                                 </Button>
                                                 <Button
+                                                    x:Uid="EnvVar_MoveUpBtn"
                                                     Padding="6"
                                                     Tag="{x:Bind}"
                                                     IsEnabled="{x:Bind CanMoveUp}"
@@ -262,6 +265,7 @@
                                                     <FontIcon FontSize="12" Glyph="&#xE70E;" />
                                                 </Button>
                                                 <Button
+                                                    x:Uid="EnvVar_MoveDownBtn"
                                                     Padding="6"
                                                     Tag="{x:Bind}"
                                                     IsEnabled="{x:Bind CanMoveDown}"
@@ -270,6 +274,7 @@
                                                     <FontIcon FontSize="12" Glyph="&#xE70D;" />
                                                 </Button>
                                                 <Button
+                                                    x:Uid="EnvVar_EditEntryBtn"
                                                     Padding="6"
                                                     Tag="{x:Bind}"
                                                     Click="EditEntry_Click"
@@ -277,6 +282,7 @@
                                                     <FontIcon FontSize="12" Glyph="&#xE70F;" />
                                                 </Button>
                                                 <Button
+                                                    x:Uid="EnvVar_DeleteEntryBtn"
                                                     Padding="6"
                                                     Tag="{x:Bind}"
                                                     Click="DeleteEntry_Click"
@@ -297,6 +303,7 @@
                                     </StackPanel>
                                 </Button>
                                 <Button
+                                    x:Uid="EnvVar_RepairBtn"
                                     Command="{x:Bind ViewModel.RepairEntriesCommand}"
                                     Visibility="{x:Bind ViewModel.HasEntryWarnings, Mode=OneWay}"
                                     ToolTipService.ToolTip="Remove all invalid and duplicate entries">

@@ -73,6 +73,8 @@ public sealed partial class EnvironmentsViewModel : ObservableObject
 
     public string UpdateAllLabel => Loc.F("Env_UpdateAll", "Update all ({0})", UpdateCount);
 
+    public string UpdatesAvailableText => Loc.F("Env_UpdatesAvailable", "{0} tool update(s) available", UpdateCount);
+
     public void ClearError() => ErrorMessage = null;
 
     partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(IsUpToDate));
@@ -191,6 +193,7 @@ public sealed partial class EnvironmentsViewModel : ObservableObject
         OnPropertyChanged(nameof(IsUpToDate));
         OnPropertyChanged(nameof(UpdateCount));
         OnPropertyChanged(nameof(UpdateAllLabel));
+        OnPropertyChanged(nameof(UpdatesAvailableText));
     }
 
     /// <summary>Queues an update for every variant that has one; winget applies them one at a time.</summary>
