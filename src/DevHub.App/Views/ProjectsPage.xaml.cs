@@ -44,6 +44,8 @@ public sealed partial class ProjectsPage : Page
         }
     }
 
+    private void NewProject_Click(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(NewProjectWizardPage));
+
     private async void AddFromGit_Click(object sender, RoutedEventArgs e)
     {
         var urlBox = new TextBox

@@ -103,10 +103,13 @@ public partial class App : Application
         services.AddSingleton<ViewModels.PomodoroViewModel>();
         services.AddSingleton<IForgeService, GitHubForgeService>();
         services.AddSingleton<IForgeService, GitLabForgeService>();
+        services.AddSingleton<IProjectTemplateCatalog, ProjectTemplateCatalog>();
+        services.AddSingleton<IProjectScaffolderService, ProjectScaffolderService>();
         services.AddSingleton<ViewModels.ForgeAccountsViewModel>();
         services.AddSingleton<ViewModels.EnvironmentsViewModel>();
         services.AddSingleton<ViewModels.ProjectsViewModel>();
         services.AddSingleton<ViewModels.DashboardViewModel>();
+        services.AddTransient<ViewModels.NewProjectWizardViewModel>();
         return services.BuildServiceProvider();
     }
 

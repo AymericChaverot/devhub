@@ -96,6 +96,27 @@ public sealed class SqliteProjectStore : IProjectStore
         }, cancellationToken);
     }
 
+    public Task UpsertAsync(Project project, CancellationToken cancellationToken = default)
+    {
+        return Task.Run(() =>
+        {
+            using var connection = Open();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT OR REPLACE INTO Projects (Name, Path, GitRemoteUrl, IsGitRepository, LastScannedAt, Languages, Frameworks)
+                VALUES ($name, $path, $remote, $isGit, $scannedAt, $languages, $frameworks)
+                """;
+            command.Parameters.AddWithValue("$name", project.Name);
+            command.Parameters.AddWithValue("$path", project.Path);
+            command.Parameters.AddWithValue("$remote", (object?)project.GitRemoteUrl ?? DBNull.Value);
+            command.Parameters.AddWithValue("$isGit", project.IsGitRepository);
+            command.Parameters.AddWithValue("$scannedAt", project.LastScannedAt.ToString("O"));
+            command.Parameters.AddWithValue("$languages", JsonSerializer.Serialize(project.Languages));
+            command.Parameters.AddWithValue("$frameworks", JsonSerializer.Serialize(project.Frameworks));
+            command.ExecuteNonQuery();
+        }, cancellationToken);
+    }
+
     private SqliteConnection Open()
     {
         var connection = new SqliteConnection(_connectionString);

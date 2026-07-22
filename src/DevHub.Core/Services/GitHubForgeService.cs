@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.Json;
 using DevHub.Core.Models;
 
@@ -149,14 +150,39 @@ public sealed class GitHubForgeService : IForgeService
         }
 
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
+        return ParseRepoInfo(doc.RootElement, repoFullName);
+    }
+
+    public async Task<ForgeRepoInfo> CreateRepositoryAsync(
+        string token, string name, bool isPrivate, CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{ApiBase}/user/repos")
+        {
+            Content = JsonContent.Create(new { name, @private = isPrivate }),
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await _http.SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new InvalidOperationException($"GitHub rejected the repository ({response.StatusCode}): {body}");
+        }
+
+        using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
         var root = doc.RootElement;
-        return new ForgeRepoInfo(
+        var fullName = root.TryGetProperty("full_name", out var fn) ? fn.GetString() ?? name : name;
+        return ParseRepoInfo(root, fullName);
+    }
+
+    private static ForgeRepoInfo ParseRepoInfo(JsonElement root, string repoFullName) =>
+        new(
             repoFullName,
             root.TryGetProperty("description", out var desc) ? desc.GetString() : null,
             root.TryGetProperty("stargazers_count", out var stars) ? stars.GetInt32() : 0,
             root.TryGetProperty("forks_count", out var forks) ? forks.GetInt32() : 0,
-            root.TryGetProperty("html_url", out var url) ? url.GetString() ?? "" : "");
-    }
+            root.TryGetProperty("html_url", out var url) ? url.GetString() ?? "" : "",
+            root.TryGetProperty("clone_url", out var clone) ? clone.GetString() ?? "" : "");
 
     public async Task<IReadOnlyList<ForgeItem>> GetRepoPullRequestsAsync(
         string token, string repoFullName, CancellationToken cancellationToken = default)

@@ -64,7 +64,8 @@ public sealed record ForgeRepoInfo(
     string? Description,
     int Stars,
     int Forks,
-    string WebUrl);
+    string WebUrl,
+    string CloneUrl = "");
 
 /// <summary>Outcome of a CI run, normalized across forges.</summary>
 public enum ForgeRunStatus

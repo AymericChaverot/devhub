@@ -35,6 +35,10 @@ public interface IGitService
 
     Task<string> PushAsync(string path, CancellationToken cancellationToken = default);
 
+    /// <summary>Pushes a specific branch to a specific remote, optionally setting it as the upstream.</summary>
+    Task<string> PushAsync(
+        string path, string remoteName, string branchName, bool setUpstream, CancellationToken cancellationToken = default);
+
     /// <summary>Whether the git CLI is available (required for fetch/pull/push).</summary>
     Task<bool> IsGitCliAvailableAsync();
 }

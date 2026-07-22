@@ -184,6 +184,7 @@
   <data name="Pomo_ToastBreakOver" xml:space="preserve"><value>La pause est finie — au travail !</value></data>
   <data name="Pomo_ToastFocusDone" xml:space="preserve"><value>Bien joué ! C&apos;est l&apos;heure d&apos;une pause.</value></data>
   <data name="Proj_Title.Text" xml:space="preserve"><value>Projets</value></data>
+  <data name="Proj_NewProject.Text" xml:space="preserve"><value>Nouveau projet</value></data>
   <data name="Proj_AddFromGit.Text" xml:space="preserve"><value>Ajouter depuis Git</value></data>
   <data name="Proj_Rescan.Text" xml:space="preserve"><value>Rescanner</value></data>
   <data name="Proj_ChangeFolder.Content" xml:space="preserve"><value>Changer de dossier…</value></data>
@@ -205,6 +206,50 @@
   <data name="Proj_CloneFailed" xml:space="preserve"><value>Échec du clonage : {0}</value></data>
   <data name="Proj_Recycling" xml:space="preserve"><value>Déplacement de {0} vers la Corbeille…</value></data>
   <data name="Proj_DeleteFailed" xml:space="preserve"><value>Échec de la suppression : {0}</value></data>
+  <data name="Wizard_BackTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Retour aux projets</value></data>
+  <data name="Wizard_Title.Text" xml:space="preserve"><value>Nouveau projet</value></data>
+  <data name="Wizard_Step1Title" xml:space="preserve"><value>1. Informations du projet</value></data>
+  <data name="Wizard_Step2Title" xml:space="preserve"><value>2. Stack</value></data>
+  <data name="Wizard_Step3Title" xml:space="preserve"><value>3. Git et forge</value></data>
+  <data name="Wizard_NameLabel.Text" xml:space="preserve"><value>Nom</value></data>
+  <data name="Wizard_PathLabel.Text" xml:space="preserve"><value>Chemin</value></data>
+  <data name="Wizard_Browse.Content" xml:space="preserve"><value>Parcourir…</value></data>
+  <data name="Wizard_IdeLabel.Text" xml:space="preserve"><value>IDE par défaut</value></data>
+  <data name="Wizard_CommandLabel.Text" xml:space="preserve"><value>Commande</value></data>
+  <data name="Wizard_RuntimeWarningInfoBar.Title" xml:space="preserve"><value>Environnement introuvable</value></data>
+  <data name="Wizard_RuntimeWarningInfoBar.Message" xml:space="preserve"><value>Ce modèle nécessite un environnement qui n'est pas installé.</value></data>
+  <data name="Wizard_InstallViaEnvironments.Content" xml:space="preserve"><value>Installer via Environnements</value></data>
+  <data name="Wizard_InitGit.Content" xml:space="preserve"><value>Initialiser un dépôt Git</value></data>
+  <data name="Wizard_RemoteLabel.Text" xml:space="preserve"><value>Dépôt distant</value></data>
+  <data name="Wizard_RemoteNone.Content" xml:space="preserve"><value>Aucun</value></data>
+  <data name="Wizard_RemotePaste.Content" xml:space="preserve"><value>Coller une URL existante</value></data>
+  <data name="Wizard_RemoteForge.Content" xml:space="preserve"><value>Créer via un compte connecté</value></data>
+  <data name="Wizard_RemoteUrlBox.PlaceholderText" xml:space="preserve"><value>https://github.com/utilisateur/mon-repo.git</value></data>
+  <data name="Wizard_NewRepoNameBox.PlaceholderText" xml:space="preserve"><value>Nom du dépôt</value></data>
+  <data name="Wizard_RepoPrivate.Content" xml:space="preserve"><value>Dépôt privé</value></data>
+  <data name="Wizard_NoForgeAccounts.Text" xml:space="preserve"><value>Aucun compte connecté. Connectez-en un depuis les paramètres.</value></data>
+  <data name="Wizard_PublishInitial.Content" xml:space="preserve"><value>Publier le commit initial et pousser vers le dépôt distant</value></data>
+  <data name="Wizard_BackStep.Content" xml:space="preserve"><value>Précédent</value></data>
+  <data name="Wizard_NextStep.Content" xml:space="preserve"><value>Suivant</value></data>
+  <data name="Wizard_Create.Content" xml:space="preserve"><value>Créer</value></data>
+  <data name="Wizard_CancelButton.Content" xml:space="preserve"><value>Annuler</value></data>
+  <data name="Wizard_NoStack.Content" xml:space="preserve"><value>Aucune stack (dossier vide)</value></data>
+  <data name="Wizard_NoStackPreview" xml:space="preserve"><value>Aucune stack — un dossier vide est créé.</value></data>
+  <data name="Wizard_NoCommand" xml:space="preserve"><value>Aucune commande — les fichiers de départ sont créés directement.</value></data>
+  <data name="Wizard_NeedNameAndPath" xml:space="preserve"><value>Saisissez d'abord un nom de projet et un dossier.</value></data>
+  <data name="Wizard_Starting" xml:space="preserve"><value>Démarrage…</value></data>
+  <data name="Wizard_Failed" xml:space="preserve"><value>Échec de la génération du projet.</value></data>
+  <data name="Wizard_NoForgeAccount" xml:space="preserve"><value>Choisissez d'abord un compte connecté.</value></data>
+  <data name="Wizard_StepDone" xml:space="preserve"><value>Terminé : {0}</value></data>
+  <data name="Wizard_StepFailed" xml:space="preserve"><value>Échec : {0} — {1}</value></data>
+  <data name="Wizard_StepCreateDir" xml:space="preserve"><value>Création du dossier du projet…</value></data>
+  <data name="Wizard_StepScaffold" xml:space="preserve"><value>Exécution de la commande de génération…</value></data>
+  <data name="Wizard_StepGitInit" xml:space="preserve"><value>Initialisation de Git…</value></data>
+  <data name="Wizard_StepGitRemote" xml:space="preserve"><value>Liaison du dépôt distant…</value></data>
+  <data name="Wizard_StepGitCommit" xml:space="preserve"><value>Création du commit initial…</value></data>
+  <data name="Wizard_StepGitPush" xml:space="preserve"><value>Envoi vers le dépôt distant…</value></data>
+  <data name="Wizard_StepRegister" xml:space="preserve"><value>Enregistrement du projet…</value></data>
+  <data name="Wizard_StepLaunchIde" xml:space="preserve"><value>Ouverture de l'IDE…</value></data>
   <data name="Settings_Title.Text" xml:space="preserve"><value>Paramètres</value></data>
   <data name="Settings_GeneralHeader.Text" xml:space="preserve"><value>Général</value></data>
   <data name="Settings_ProjectsFolderTitle.Text" xml:space="preserve"><value>Dossier des projets</value></data>

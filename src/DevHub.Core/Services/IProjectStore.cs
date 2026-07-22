@@ -9,4 +9,7 @@ public interface IProjectStore
 
     /// <summary>Replaces the cached snapshot with the latest scan result.</summary>
     Task ReplaceAllAsync(IReadOnlyList<Project> projects, CancellationToken cancellationToken = default);
+
+    /// <summary>Inserts or updates a single project (matched by Path) without touching the rest of the table.</summary>
+    Task UpsertAsync(Project project, CancellationToken cancellationToken = default);
 }

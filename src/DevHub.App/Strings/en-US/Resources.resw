@@ -184,6 +184,7 @@
   <data name="Pomo_ToastBreakOver" xml:space="preserve"><value>Break&apos;s over — back to it!</value></data>
   <data name="Pomo_ToastFocusDone" xml:space="preserve"><value>Nice work! Time for a break.</value></data>
   <data name="Proj_Title.Text" xml:space="preserve"><value>Projects</value></data>
+  <data name="Proj_NewProject.Text" xml:space="preserve"><value>New Project</value></data>
   <data name="Proj_AddFromGit.Text" xml:space="preserve"><value>Add from Git</value></data>
   <data name="Proj_Rescan.Text" xml:space="preserve"><value>Rescan</value></data>
   <data name="Proj_ChangeFolder.Content" xml:space="preserve"><value>Change folder…</value></data>
@@ -205,6 +206,50 @@
   <data name="Proj_CloneFailed" xml:space="preserve"><value>Clone failed: {0}</value></data>
   <data name="Proj_Recycling" xml:space="preserve"><value>Moving {0} to the Recycle Bin…</value></data>
   <data name="Proj_DeleteFailed" xml:space="preserve"><value>Delete failed: {0}</value></data>
+  <data name="Wizard_BackTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Back to projects</value></data>
+  <data name="Wizard_Title.Text" xml:space="preserve"><value>New Project</value></data>
+  <data name="Wizard_Step1Title" xml:space="preserve"><value>1. Project metadata</value></data>
+  <data name="Wizard_Step2Title" xml:space="preserve"><value>2. Stack</value></data>
+  <data name="Wizard_Step3Title" xml:space="preserve"><value>3. Git &amp; forge</value></data>
+  <data name="Wizard_NameLabel.Text" xml:space="preserve"><value>Name</value></data>
+  <data name="Wizard_PathLabel.Text" xml:space="preserve"><value>Path</value></data>
+  <data name="Wizard_Browse.Content" xml:space="preserve"><value>Browse…</value></data>
+  <data name="Wizard_IdeLabel.Text" xml:space="preserve"><value>Default IDE</value></data>
+  <data name="Wizard_CommandLabel.Text" xml:space="preserve"><value>Command</value></data>
+  <data name="Wizard_RuntimeWarningInfoBar.Title" xml:space="preserve"><value>Runtime not found</value></data>
+  <data name="Wizard_RuntimeWarningInfoBar.Message" xml:space="preserve"><value>This template needs a runtime that isn't installed.</value></data>
+  <data name="Wizard_InstallViaEnvironments.Content" xml:space="preserve"><value>Install via Environments</value></data>
+  <data name="Wizard_InitGit.Content" xml:space="preserve"><value>Initialize Git repository</value></data>
+  <data name="Wizard_RemoteLabel.Text" xml:space="preserve"><value>Remote repository</value></data>
+  <data name="Wizard_RemoteNone.Content" xml:space="preserve"><value>None</value></data>
+  <data name="Wizard_RemotePaste.Content" xml:space="preserve"><value>Paste existing URL</value></data>
+  <data name="Wizard_RemoteForge.Content" xml:space="preserve"><value>Create via connected account</value></data>
+  <data name="Wizard_RemoteUrlBox.PlaceholderText" xml:space="preserve"><value>https://github.com/user/my-repo.git</value></data>
+  <data name="Wizard_NewRepoNameBox.PlaceholderText" xml:space="preserve"><value>Repository name</value></data>
+  <data name="Wizard_RepoPrivate.Content" xml:space="preserve"><value>Private repository</value></data>
+  <data name="Wizard_NoForgeAccounts.Text" xml:space="preserve"><value>No connected accounts. Connect one from Settings first.</value></data>
+  <data name="Wizard_PublishInitial.Content" xml:space="preserve"><value>Publish initial commit and push to remote</value></data>
+  <data name="Wizard_BackStep.Content" xml:space="preserve"><value>Back</value></data>
+  <data name="Wizard_NextStep.Content" xml:space="preserve"><value>Next</value></data>
+  <data name="Wizard_Create.Content" xml:space="preserve"><value>Create</value></data>
+  <data name="Wizard_CancelButton.Content" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Wizard_NoStack.Content" xml:space="preserve"><value>No stack (empty folder)</value></data>
+  <data name="Wizard_NoStackPreview" xml:space="preserve"><value>No stack — an empty folder is created.</value></data>
+  <data name="Wizard_NoCommand" xml:space="preserve"><value>No command — starter files are created directly.</value></data>
+  <data name="Wizard_NeedNameAndPath" xml:space="preserve"><value>Enter a project name and a folder first.</value></data>
+  <data name="Wizard_Starting" xml:space="preserve"><value>Starting…</value></data>
+  <data name="Wizard_Failed" xml:space="preserve"><value>Scaffolding failed.</value></data>
+  <data name="Wizard_NoForgeAccount" xml:space="preserve"><value>Choose a connected account first.</value></data>
+  <data name="Wizard_StepDone" xml:space="preserve"><value>Done: {0}</value></data>
+  <data name="Wizard_StepFailed" xml:space="preserve"><value>Failed: {0} — {1}</value></data>
+  <data name="Wizard_StepCreateDir" xml:space="preserve"><value>Creating project folder…</value></data>
+  <data name="Wizard_StepScaffold" xml:space="preserve"><value>Running scaffold command…</value></data>
+  <data name="Wizard_StepGitInit" xml:space="preserve"><value>Initializing git…</value></data>
+  <data name="Wizard_StepGitRemote" xml:space="preserve"><value>Linking remote…</value></data>
+  <data name="Wizard_StepGitCommit" xml:space="preserve"><value>Creating initial commit…</value></data>
+  <data name="Wizard_StepGitPush" xml:space="preserve"><value>Pushing to remote…</value></data>
+  <data name="Wizard_StepRegister" xml:space="preserve"><value>Registering project…</value></data>
+  <data name="Wizard_StepLaunchIde" xml:space="preserve"><value>Opening IDE…</value></data>
   <data name="Settings_Title.Text" xml:space="preserve"><value>Settings</value></data>
   <data name="Settings_GeneralHeader.Text" xml:space="preserve"><value>General</value></data>
   <data name="Settings_ProjectsFolderTitle.Text" xml:space="preserve"><value>Projects folder</value></data>

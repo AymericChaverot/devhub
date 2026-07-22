@@ -183,6 +183,10 @@ public sealed class LibGit2GitService : IGitService
     public Task<string> PushAsync(string path, CancellationToken cancellationToken = default) =>
         RunGitCliAsync(path, "push", cancellationToken);
 
+    public Task<string> PushAsync(
+        string path, string remoteName, string branchName, bool setUpstream, CancellationToken cancellationToken = default) =>
+        RunGitCliAsync(path, $"push {(setUpstream ? "-u " : "")}{remoteName} {branchName}", cancellationToken);
+
     public async Task<bool> IsGitCliAvailableAsync()
     {
         try

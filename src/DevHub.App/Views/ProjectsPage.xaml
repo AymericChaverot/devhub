@@ -28,9 +28,15 @@
             Orientation="Horizontal"
             Spacing="8"
             Visibility="{x:Bind ViewModel.HasProjectsFolder, Mode=OneWay}">
-            <Button Style="{StaticResource AccentButtonStyle}" Click="AddFromGit_Click">
+            <Button Style="{StaticResource AccentButtonStyle}" Click="NewProject_Click">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon FontSize="14" Glyph="&#xE710;" />
+                    <TextBlock x:Uid="Proj_NewProject" Text="New Project" />
+                </StackPanel>
+            </Button>
+            <Button Click="AddFromGit_Click">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon FontSize="14" Glyph="&#xE8AB;" />
                     <TextBlock x:Uid="Proj_AddFromGit" Text="Add from Git" />
                 </StackPanel>
             </Button>

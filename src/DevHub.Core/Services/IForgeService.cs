@@ -44,4 +44,8 @@ public interface IForgeService
     /// <summary>Recent CI runs (GitHub Actions / GitLab pipelines), newest first. Empty when unreachable.</summary>
     Task<IReadOnlyList<ForgeWorkflowRun>> GetRepoWorkflowRunsAsync(
         string token, string repoFullName, CancellationToken cancellationToken = default);
+
+    /// <summary>Creates an empty repository under the token's account. Throws on failure (e.g. name taken).</summary>
+    Task<ForgeRepoInfo> CreateRepositoryAsync(
+        string token, string name, bool isPrivate, CancellationToken cancellationToken = default);
 }

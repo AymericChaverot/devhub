@@ -116,11 +116,22 @@ public sealed partial class ProjectDetailPage : Page
         await LoadReadmeAsync(project.Path);
 
         // HeroQuickActions (the IDE picker/Open/Explorer group) is positioned entirely by
-        // SetHeroCollapse, measured against ActionsRow's real, laid-out position. Without
-        // an initial call it sits at its default (0,0) transform — overlapping the back
-        // button — until the first scroll or button click. Deferred one tick so the layout
-        // pass reacting to everything set above has actually run first.
-        DispatcherQueue.TryEnqueue(() => SetHeroCollapse(0));
+        // SetHeroCollapse, measured against TechList's real, laid-out position. Without an
+        // initial call it sits at its default (0,0) transform — overlapping the back button —
+        // until the first scroll or button click. A single deferred DispatcherQueue tick isn't
+        // always enough: for projects with a README, LoadReadmeAsync's WebView2 startup above
+        // yields long enough for layout to settle; for projects without one (a fresh scaffold —
+        // "go mod init" etc. leave no README) that await returns almost instantly, so the queued
+        // tick could still fire before TechList's ItemsSource has actually been arranged.
+        // LayoutUpdated fires once the pending layout pass (including that ItemsSource change)
+        // has completed, so it's used instead of a fixed number of ticks.
+        void OnHeroLayoutSettled(object? layoutSender, object? layoutArgs)
+        {
+            TechList.LayoutUpdated -= OnHeroLayoutSettled;
+            SetHeroCollapse(0);
+        }
+
+        TechList.LayoutUpdated += OnHeroLayoutSettled;
     }
 
     /// <summary>Stamps the project as "last opened now"; the dashboard's recent list reads this.</summary>

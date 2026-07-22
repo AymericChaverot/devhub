@@ -244,6 +244,20 @@ public sealed partial class ForgeAccountViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Creates a repository under this account. Unlike the feed/read calls above, this is a
+    /// user-triggered mutation (from the New Project wizard) so failures are not swallowed.
+    /// </summary>
+    public async Task<ForgeRepoInfo> CreateRepositoryAsync(string name, bool isPrivate)
+    {
+        if (!IsConnected || _tokens.Read(DisplayName) is not { } token)
+        {
+            throw new InvalidOperationException($"{DisplayName} is not connected.");
+        }
+
+        return await _service.CreateRepositoryAsync(token, name, isPrivate);
+    }
+
     private async Task<IReadOnlyList<ForgeItem>> GuardedRepoCallAsync(
         string repoFullName,
         Func<string, string, CancellationToken, Task<IReadOnlyList<ForgeItem>>> call)
