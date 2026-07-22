@@ -2,13 +2,9 @@
 
 **A central hub for developing on Windows.**
 
-DevHub is a native Windows application (WinUI 3) that streamlines the two things every
-developer does on a new machine: **setting up tooling** and **working with projects**.
-Install language runtimes and dev tools in one click, and browse every project on your
-machine with automatic language & framework detection, README preview and
-open-in-your-favorite-IDE — all in a fast, Fluent-design app.
+DevHub is a native Windows application (WinUI 3) that streamlines the key developer tasks on a new machine: **setting up tooling**, **managing system environment variables**, and **organizing projects**. Install language runtimes and dev tools in one click, clean up and diagnose your system PATH, and browse every project on your machine with automatic language & framework detection, README preview and open-in-your-favorite-IDE — all in a fast, Fluent-design app.
 
-> 🚧 DevHub is in active development (v0.1.3 preview).
+> 🚧 DevHub is in active development (v0.1.8 preview).
 > See the [roadmap](#roadmap) for what is coming next.
 
 ---
@@ -27,23 +23,28 @@ open-in-your-favorite-IDE — all in a fast, Fluent-design app.
 - Search, category and installed-state filters; live detection of what is already on
   your machine, with real brand logos.
 
-### 📁 Projects — scan, inspect, open
+### 🔑 Environment Variables — user & system manager
+
+- **Full User & System scope editor**: Inspect, add, edit, and delete environment variables.
+- **Interactive PATH/list editor**: Parses and displays semicolon-delimited lists (such as `PATH`, `PATHEXT`, or `PSModulePath`) as separate, individually-editable items. Move entries up/down with dedicated buttons.
+- **Path diagnostics & analyzer**: Instantly checks and flags invalid/dead paths (directories/files that do not exist on disk) and duplicate entries.
+- **One-click "Repair"**: Clean up messy list variables (like `PATH`) by automatically removing all dead paths and duplicate entries in a single action.
+- **Safe elevation**: Batch writes to machine-scope system variables into a single elevated operation (`.reg` script execution), meaning you get exactly one UAC elevation prompt per save instead of one per variable.
+- **Live propagation**: Automatically broadcasts a system-wide `WM_SETTINGCHANGE` message, notifying terminal shells (PowerShell, Command Prompt) and IDEs to refresh their environment variables instantly without requiring a system restart or user logoff.
+- **Backup & restore**: Export a complete backup of both User and System environment variables to a JSON file for quick migration or safe recovery.
+
+### 📁 Projects — scan, inspect, open & create
 
 - Point DevHub at your `Projects` folder: every project is listed instantly (SQLite
   cache) and refreshed by background scans.
-- **Automatic detection** of languages *and* frameworks with their versions, straight
-  from the manifests: `package.json`, `Cargo.toml`, `go.mod`, `*.csproj`,
-  `pyproject.toml`, `pom.xml`, `build.gradle(.kts)`, `composer.json`, `Gemfile` and more.
-  Next.js, Angular, Astro, Vite, Tauri, Ratatui, ASP.NET Core, Django, Rails, Laravel...
-  each shows as a colored badge.
-- **Project pages**: hero with the project's tech stack, blurred brand-logo artwork,
-  rendered README, a *View on GitHub / GitLab* button, folder rename, and per-project
-  IDE choice (each project can open in a different editor — VS Code, Visual Studio,
-  JetBrains IDEs, Cursor, Zed, Sublime Text are auto-detected).
-- **Subprojects for monorepos**: split a repository into explorable subprojects
-  (backend, frontend, docs...), each with its own tech badges, README and IDE shortcut.
-- Add projects by **cloning from a Git URL**; remove them from the list or send the
-  folder to the Recycle Bin (never a permanent delete).
+- **Project Creation Wizard**: Create brand-new projects from scratch using popular templates (Next.js, React Vite, Rust/Cargo, Go, Python, .NET Core WebApi) or start with a clean empty folder.
+- **Dependency checks**: Checks if the required runtime toolchain (Node.js, Cargo, Go, Python, .NET SDK) is installed before scaffolding. If missing, it provides a shortcut to install it via the Environments tab.
+- **Git & forge initialization**: Automatically initialize a Git repository, customize the default branch, link a remote URL (paste an existing repo URL or create it directly on your connected GitHub/GitLab account), and push the initial commit.
+- **Default IDE configuration**: Set a preferred editor/IDE for the new project to open it directly upon creation.
+- **Automatic tech detection**: Detects languages *and* frameworks with their versions straight from manifests (`package.json`, `Cargo.toml`, `go.mod`, `*.csproj`, `pyproject.toml`, `pom.xml`, `build.gradle(.kts)`, `composer.json`, `Gemfile`, etc.), displaying them as clean, color-coded badges (Next.js, Angular, Astro, Vite, Tauri, ASP.NET Core, Django, Rails, Laravel, etc.).
+- **Project pages**: Hero header with tech stack, blurred logo artwork, rendered README preview, *View on GitHub / GitLab* button, inline folder renaming, and per-project IDE selection (VS Code, Visual Studio, JetBrains, Cursor, Zed, Sublime Text are auto-detected).
+- **Subprojects for monorepos**: Split a large repository into explorable subprojects (backend, frontend, docs, etc.), each with its own tech badges, README, and IDE preference.
+- **Recycle Bin deletion**: Send project folders to the Windows Recycle Bin for safety, avoiding permanent accidental deletion.
 
 ### 🏠 Dashboard
 
@@ -52,8 +53,7 @@ open-in-your-favorite-IDE — all in a fast, Fluent-design app.
 - **Weather** with a dynamic sky: gradient backdrop that follows the real conditions
   (starry at night, animated rain, snow and lightning), automatic IP location or a
   city of your choice.
-- **Your work across forges**: reviews requested, your open PRs and assigned issues,
-  aggregated from GitHub and GitLab.
+- **Your work across forges**: reviews requested, your open PRs, assigned issues, and recently closed items aggregated across GitHub and GitLab.
 - Recently opened projects and a tool-updates card with one-click *Update all*.
 
 ### 🔀 Git, GitHub & GitLab
@@ -63,7 +63,7 @@ open-in-your-favorite-IDE — all in a fast, Fluent-design app.
   Manager).
 - **Connect GitHub and GitLab** with personal access tokens — stored in the Windows
   Credential Manager, never in a file. Repo pages show description, stars/forks, open
-  PRs/MRs, open issues and CI runs (GitHub Actions / GitLab pipelines) with live
+  PRs/MRs, open issues, recently closed items, and CI runs (GitHub Actions / GitLab pipelines) with live
   status colors.
 - **Run configurations**: define named launch commands per project (dev, test...) and
   start them in Windows Terminal from the accent Run button.
@@ -78,7 +78,7 @@ open-in-your-favorite-IDE — all in a fast, Fluent-design app.
 
 ### ⚙️ A real settings page
 
-Projects folder, weather location, GitHub/GitLab accounts, live light/dark theme,
+Projects folder, weather location, appearance settings (light/dark/system theme), language selection, GitHub/GitLab accounts, live light/dark theme,
 in-app updates, quick access to logs and app data, version info and open-source
 licenses.
 
