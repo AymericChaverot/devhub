@@ -5,6 +5,8 @@ namespace DevHub.Core.Services;
 
 public sealed class LibGit2GitService : IGitService
 {
+    static LibGit2GitService() => GitEnvironment.Configure();
+
     public Task<GitRepositoryInfo?> GetRepositoryInfoAsync(
         string path, int historyCount = 20, CancellationToken cancellationToken = default)
     {

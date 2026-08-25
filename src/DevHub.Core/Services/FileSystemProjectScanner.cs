@@ -5,6 +5,8 @@ namespace DevHub.Core.Services;
 
 public sealed class FileSystemProjectScanner : IProjectScanner
 {
+    static FileSystemProjectScanner() => GitEnvironment.Configure();
+
     public Task<IReadOnlyList<Project>> ScanAsync(
         string projectsFolder, CancellationToken cancellationToken = default)
     {
