@@ -7,7 +7,7 @@ namespace DevHub.Core.Services;
 /// <summary>Opens an interactive terminal in a directory and runs a command in it.</summary>
 public interface ITerminalService
 {
-    void OpenTerminal(string workingDirectory, string command);
+    void OpenTerminal(string workingDirectory, string command = "");
 }
 
 /// <summary>
@@ -18,11 +18,13 @@ public interface ITerminalService
 [SupportedOSPlatform("windows")]
 public sealed class WindowsTerminalService : ITerminalService
 {
-    public void OpenTerminal(string workingDirectory, string command)
+    public void OpenTerminal(string workingDirectory, string command = "")
     {
         // Bypass applies to this session only (never written to the machine policy);
         // without it, restricted machines can't run script shims like npm.ps1.
-        string[] shellArguments = ["-ExecutionPolicy", "Bypass", "-NoExit", "-Command", command];
+        string[] shellArguments = string.IsNullOrWhiteSpace(command)
+            ? ["-ExecutionPolicy", "Bypass", "-NoExit"]
+            : ["-ExecutionPolicy", "Bypass", "-NoExit", "-Command", command];
 
         try
         {
