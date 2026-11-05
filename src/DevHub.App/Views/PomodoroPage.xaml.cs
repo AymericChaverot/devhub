@@ -12,6 +12,7 @@ public sealed partial class PomodoroPage : Page
         // Singleton view model: the countdown keeps running when the user navigates away.
         ViewModel = App.Services.GetRequiredService<PomodoroViewModel>();
         InitializeComponent();
+        Loaded += async (_, _) => await ViewModel.LoadProjectsAsync();
     }
 
     public PomodoroViewModel ViewModel { get; }
