@@ -19,19 +19,22 @@ public sealed partial class ToolVariantViewModel : ObservableObject
     private readonly Func<ToolVariantViewModel, Task> _install;
     private readonly Func<ToolVariantViewModel, Task> _uninstall;
     private readonly Func<ToolVariantViewModel, Task> _update;
+    private readonly Action<ToolVariantViewModel>? _cancelQueued;
 
     public ToolVariantViewModel(
         string toolName,
         ToolVariant variant,
         Func<ToolVariantViewModel, Task> install,
         Func<ToolVariantViewModel, Task> uninstall,
-        Func<ToolVariantViewModel, Task> update)
+        Func<ToolVariantViewModel, Task> update,
+        Action<ToolVariantViewModel>? cancelQueued = null)
     {
         ToolName = toolName;
         Variant = variant;
         _install = install;
         _uninstall = uninstall;
         _update = update;
+        _cancelQueued = cancelQueued;
     }
 
     public ToolVariant Variant { get; }
@@ -102,4 +105,7 @@ public sealed partial class ToolVariantViewModel : ObservableObject
 
     [RelayCommand]
     private Task UpdateAsync() => _update(this);
+
+    [RelayCommand]
+    private void CancelQueued() => _cancelQueued?.Invoke(this);
 }
