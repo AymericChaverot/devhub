@@ -40,6 +40,26 @@ public sealed class AppSettings
 
     /// <summary>City for the dashboard weather; null/empty = locate automatically from the IP.</summary>
     public string? WeatherLocation { get; set; }
+
+    /// <summary>Project paths pinned as favorites by the user.</summary>
+    public List<string> PinnedProjectPaths { get; set; } = [];
+
+    /// <summary>Completed Pomodoro sessions for statistics and history.</summary>
+    public List<PomodoroSessionRecord> PomodoroHistory { get; set; } = [];
+}
+
+/// <summary>A completed Pomodoro session recorded in user settings.</summary>
+public sealed class PomodoroSessionRecord
+{
+    public DateTime CompletedAtUtc { get; set; }
+
+    public int DurationMinutes { get; set; }
+
+    public string Label { get; set; } = "";
+
+    public bool IsBreak { get; set; }
+
+    public string? ProjectName { get; set; }
 }
 
 /// <summary>A named way to launch a project, e.g. ("dev", "npm run dev").</summary>

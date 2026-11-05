@@ -38,6 +38,32 @@ public sealed class JsonSettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SaveThenLoad_RoundTripsPinnedProjectsAndPomodoroHistory()
+    {
+        var writer = new JsonSettingsService(SettingsPath);
+        await writer.LoadAsync();
+        writer.Settings.PinnedProjectPaths.Add(@"C:\Projects\devhub");
+        writer.Settings.PomodoroHistory.Add(new DevHub.Core.Models.PomodoroSessionRecord
+        {
+            CompletedAtUtc = new DateTime(2026, 11, 5, 10, 0, 0, DateTimeKind.Utc),
+            DurationMinutes = 25,
+            Label = "Focus",
+            IsBreak = false,
+            ProjectName = "devhub",
+        });
+        await writer.SaveAsync();
+
+        var reader = new JsonSettingsService(SettingsPath);
+        await reader.LoadAsync();
+
+        Assert.Single(reader.Settings.PinnedProjectPaths, @"C:\Projects\devhub");
+        var session = Assert.Single(reader.Settings.PomodoroHistory);
+        Assert.Equal(25, session.DurationMinutes);
+        Assert.Equal("devhub", session.ProjectName);
+        Assert.False(session.IsBreak);
+    }
+
+    [Fact]
     public async Task Load_WhenFileIsCorrupt_FallsBackToDefaults()
     {
         Directory.CreateDirectory(_tempDir);
