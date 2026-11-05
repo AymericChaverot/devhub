@@ -46,6 +46,12 @@ public sealed class AppSettings
 
     /// <summary>Completed Pomodoro sessions for statistics and history.</summary>
     public List<PomodoroSessionRecord> PomodoroHistory { get; set; } = [];
+
+    /// <summary>Default shell used by the Terminal button ("powershell", "pwsh", "cmd", "git-bash", "wsl").</summary>
+    public string DefaultTerminalShell { get; set; } = "powershell";
+
+    /// <summary>Per-project terminal shell override (project path → shell id).</summary>
+    public Dictionary<string, string> ProjectTerminalShells { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
 /// <summary>A completed Pomodoro session recorded in user settings.</summary>

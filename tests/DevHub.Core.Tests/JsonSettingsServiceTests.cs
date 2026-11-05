@@ -87,5 +87,19 @@ public sealed class JsonSettingsServiceTests : IDisposable
         Assert.True(File.Exists(nested));
     }
 
+    [Theory]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    [InlineData("powershell", "powershell.exe", "-NoExit")]
+    [InlineData("cmd", "cmd.exe", "/K")]
+    [InlineData("git-bash", "bash.exe", "--login")]
+    [InlineData("wsl", "wsl.exe", "--cd")]
+    public void BuildShellInvocation_ProducesExpectedExecutableAndArgs(
+        string shellId, string expectedExeSuffix, string expectedFirstArg)
+    {
+        var (exe, args) = WindowsTerminalService.BuildShellInvocation(@"C:\work\demo", "npm test", shellId);
+        Assert.EndsWith(expectedExeSuffix, exe, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(expectedFirstArg, args);
+    }
+
     public void Dispose() => Directory.Delete(_tempDir, recursive: true);
 }

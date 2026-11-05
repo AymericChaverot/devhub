@@ -54,7 +54,26 @@ public sealed partial class SettingsPage : Page
             "fr-FR" => 2,
             _ => 0,
         };
+        TerminalShellPicker.SelectedIndex = (_settings.Settings.DefaultTerminalShell ?? "powershell").ToLowerInvariant() switch
+        {
+            "pwsh" => 1,
+            "cmd" => 2,
+            "git-bash" => 3,
+            "wsl" => 4,
+            _ => 0,
+        };
         _initializingTheme = false;
+    }
+
+    private async void TerminalShellPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initializingTheme || (TerminalShellPicker.SelectedItem as ComboBoxItem)?.Tag is not string shellId)
+        {
+            return;
+        }
+
+        _settings.Settings.DefaultTerminalShell = shellId;
+        await _settings.SaveAsync();
     }
 
     private async void LanguagePicker_SelectionChanged(object sender, SelectionChangedEventArgs e)

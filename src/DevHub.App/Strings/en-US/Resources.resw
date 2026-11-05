@@ -452,4 +452,6 @@
   <data name="Detail_NoCleanableText" xml:space="preserve"><value>Total size: {0}&#x0a;&#x0a;No heavy dependency or build folders (node_modules, bin, obj, target, .venv…) were found.</value></data>
   <data name="Detail_DiskSummary" xml:space="preserve"><value>Total project size: {0}  ·  Reclaimable: {1}</value></data>
   <data name="Detail_CleanDiskTitle" xml:space="preserve"><value>Clean dependencies &amp; build artifacts</value></data>
+  <data name="Settings_TerminalShellTitle.Text" xml:space="preserve"><value>Default terminal shell</value></data>
+  <data name="Settings_TerminalShellHint.Text" xml:space="preserve"><value>Default shell launched by the Terminal button on projects (can also be overridden per project).</value></data>
 </root>

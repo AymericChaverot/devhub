@@ -69,6 +69,35 @@
                     KeyDown="WeatherLocation_KeyDown" />
             </Grid>
 
+            <Grid Style="{StaticResource SettingsCard}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon Grid.Column="0" VerticalAlignment="Center" Glyph="&#xE756;" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock x:Uid="Settings_TerminalShellTitle" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Default terminal shell" />
+                    <TextBlock
+                        x:Uid="Settings_TerminalShellHint"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="Default shell launched by the Terminal button on projects (can also be overridden per project)." />
+                </StackPanel>
+                <ComboBox
+                    x:Name="TerminalShellPicker"
+                    Grid.Column="2"
+                    Width="220"
+                    VerticalAlignment="Center"
+                    SelectionChanged="TerminalShellPicker_SelectionChanged">
+                    <ComboBoxItem Content="Windows PowerShell" Tag="powershell" />
+                    <ComboBoxItem Content="PowerShell 7 (pwsh)" Tag="pwsh" />
+                    <ComboBoxItem Content="Command Prompt (cmd)" Tag="cmd" />
+                    <ComboBoxItem Content="Git Bash" Tag="git-bash" />
+                    <ComboBoxItem Content="WSL" Tag="wsl" />
+                </ComboBox>
+            </Grid>
+
             <!-- ============ Appearance ============ -->
             <TextBlock x:Uid="Settings_AppearanceHeader" Style="{StaticResource SectionHeader}" Text="Appearance" />
 

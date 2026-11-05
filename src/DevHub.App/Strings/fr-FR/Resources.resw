@@ -452,4 +452,6 @@
   <data name="Detail_NoCleanableText" xml:space="preserve"><value>Taille totale : {0}&#x0a;&#x0a;Aucun dossier lourd de dépendances ou de build (node_modules, bin, obj, target, .venv…) n&apos;a été trouvé.</value></data>
   <data name="Detail_DiskSummary" xml:space="preserve"><value>Taille totale du projet : {0}  ·  Récupérable : {1}</value></data>
   <data name="Detail_CleanDiskTitle" xml:space="preserve"><value>Nettoyer les dépendances &amp; artefacts de build</value></data>
+  <data name="Settings_TerminalShellTitle.Text" xml:space="preserve"><value>Shell du terminal par défaut</value></data>
+  <data name="Settings_TerminalShellHint.Text" xml:space="preserve"><value>Shell lancé par défaut via le bouton Terminal d&apos;un projet (peut aussi être personnalisé par projet).</value></data>
 </root>
