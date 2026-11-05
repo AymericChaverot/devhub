@@ -39,6 +39,19 @@ public interface IGitService
     Task<string> PushAsync(
         string path, string remoteName, string branchName, bool setUpstream, CancellationToken cancellationToken = default);
 
+    /// <summary>Returns a unified diff (or file preview for untracked files) for a working-tree file.</summary>
+    Task<string> GetFileDiffAsync(
+        string path, string relativeFilePath, CancellationToken cancellationToken = default);
+
+    /// <summary>Stages all changes and commits them with <paramref name="message"/>.</summary>
+    Task CommitAllAsync(string path, string message, CancellationToken cancellationToken = default);
+
+    /// <summary>Stashes working-tree changes (including untracked files).</summary>
+    Task<string> StashAsync(string path, CancellationToken cancellationToken = default);
+
+    /// <summary>Pops the latest stash entry.</summary>
+    Task<string> StashPopAsync(string path, CancellationToken cancellationToken = default);
+
     /// <summary>Whether the git CLI is available (required for fetch/pull/push).</summary>
     Task<bool> IsGitCliAvailableAsync();
 }

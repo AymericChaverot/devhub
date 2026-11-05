@@ -42,6 +42,28 @@ public sealed class LibGit2GitService : IGitService
                 totalCommits = repository.Commits.QueryBy(countFilter).Count();
             }
 
+            var workingChanges = new List<GitWorkingChange>();
+            foreach (var entry in status)
+            {
+                if (entry.State == FileStatus.Ignored || entry.State == FileStatus.Unaltered)
+                {
+                    continue;
+                }
+
+                var (symbol, label) = entry.State switch
+                {
+                    var s when (s & (FileStatus.NewInIndex | FileStatus.NewInWorkdir)) != 0 =>
+                        (s.HasFlag(FileStatus.NewInWorkdir) && !s.HasFlag(FileStatus.NewInIndex) ? "?" : "A",
+                         s.HasFlag(FileStatus.NewInWorkdir) && !s.HasFlag(FileStatus.NewInIndex) ? "Untracked" : "Added"),
+                    var s when (s & (FileStatus.DeletedFromIndex | FileStatus.DeletedFromWorkdir)) != 0 =>
+                        ("D", "Deleted"),
+                    var s when (s & (FileStatus.RenamedInIndex | FileStatus.RenamedInWorkdir)) != 0 =>
+                        ("R", "Renamed"),
+                    _ => ("M", "Modified"),
+                };
+                workingChanges.Add(new GitWorkingChange(entry.FilePath, symbol, label));
+            }
+
             return new GitRepositoryInfo
             {
                 CurrentBranch = repository.Info.IsHeadDetached
@@ -63,6 +85,10 @@ public sealed class LibGit2GitService : IGitService
                     .ThenBy(b => b.Name, StringComparer.OrdinalIgnoreCase)
                     .ToList(),
                 Commits = commits,
+                WorkingChanges = workingChanges
+                    .OrderBy(c => c.RelativePath, StringComparer.OrdinalIgnoreCase)
+                    .ToList(),
+                StashCount = repository.Stashes.Count(),
                 TotalCommits = totalCommits,
             };
         }, cancellationToken);
@@ -188,6 +214,58 @@ public sealed class LibGit2GitService : IGitService
     public Task<string> PushAsync(
         string path, string remoteName, string branchName, bool setUpstream, CancellationToken cancellationToken = default) =>
         RunGitCliAsync(path, $"push {(setUpstream ? "-u " : "")}{remoteName} {branchName}", cancellationToken);
+
+    public Task<string> GetFileDiffAsync(
+        string path, string relativeFilePath, CancellationToken cancellationToken = default)
+    {
+        return Task.Run(() =>
+        {
+            using var repository = new Repository(path);
+            var patch = repository.Diff.Compare<Patch>(
+                repository.Head.Tip?.Tree,
+                DiffTargets.Index | DiffTargets.WorkingDirectory,
+                [relativeFilePath]);
+
+            if (!string.IsNullOrWhiteSpace(patch.Content) && patch.Content.Contains("@@", StringComparison.Ordinal))
+            {
+                return patch.Content;
+            }
+
+            // Untracked file: show its lines prefixed with '+'
+            var fullPath = Path.Combine(path, relativeFilePath);
+            if (File.Exists(fullPath))
+            {
+                var lines = File.ReadLines(fullPath).Take(300).Select(l => $"+{l}").ToList();
+                return $"--- /dev/null\n+++ b/{relativeFilePath}\n@@ -0,0 +1,{lines.Count} @@\n" + string.Join("\n", lines);
+            }
+
+            return "";
+        }, cancellationToken);
+    }
+
+    public Task CommitAllAsync(string path, string message, CancellationToken cancellationToken = default)
+    {
+        return Task.Run(() =>
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentException("Commit message cannot be empty.", nameof(message));
+            }
+
+            using var repository = new Repository(path);
+            Commands.Stage(repository, "*");
+            var now = DateTimeOffset.Now;
+            var signature = repository.Config.BuildSignature(now)
+                ?? new Signature(Environment.UserName, $"{Environment.UserName}@localhost", now);
+            repository.Commit(message.Trim(), signature, signature);
+        }, cancellationToken);
+    }
+
+    public Task<string> StashAsync(string path, CancellationToken cancellationToken = default) =>
+        RunGitCliAsync(path, "stash push -u", cancellationToken);
+
+    public Task<string> StashPopAsync(string path, CancellationToken cancellationToken = default) =>
+        RunGitCliAsync(path, "stash pop", cancellationToken);
 
     public async Task<bool> IsGitCliAvailableAsync()
     {

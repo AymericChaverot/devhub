@@ -27,6 +27,12 @@ public sealed record GitRepositoryInfo
 
     public IReadOnlyList<GitCommitInfo> Commits { get; init; } = [];
 
+    /// <summary>Individual modified, added, removed, or untracked files in the working tree.</summary>
+    public IReadOnlyList<GitWorkingChange> WorkingChanges { get; init; } = [];
+
+    /// <summary>Number of stashed changesets in the repository.</summary>
+    public int StashCount { get; init; }
+
     /// <summary>Total commits reachable from local branches (what the graph can show).</summary>
     public int TotalCommits { get; init; }
 }
@@ -34,3 +40,5 @@ public sealed record GitRepositoryInfo
 public sealed record GitBranchInfo(string Name, bool IsCurrent, bool IsRemote = false);
 
 public sealed record GitCommitInfo(string ShortSha, string Message, string Author, DateTimeOffset When);
+
+public sealed record GitWorkingChange(string RelativePath, string StatusSymbol, string StatusLabel);

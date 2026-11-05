@@ -149,6 +149,35 @@ public sealed class LibGit2GitServiceTests : IDisposable
         Assert.Equal("exp/idea", info!.CurrentBranch);
     }
 
+    [Fact]
+    public async Task WorkingChangesDiffAndCommitAll_WorkEndToEnd()
+    {
+        var repoPath = CreateRepositoryWithCommits("repo-quickcommit", "initial");
+        File.WriteAllText(Path.Combine(repoPath, "file0.txt"), "updated content\nline 2");
+        File.WriteAllText(Path.Combine(repoPath, "added.txt"), "brand new file");
+
+        var service = new LibGit2GitService();
+        var infoBefore = await service.GetRepositoryInfoAsync(repoPath);
+        Assert.NotNull(infoBefore);
+        Assert.Equal(2, infoBefore.WorkingChanges.Count);
+        Assert.Contains(infoBefore.WorkingChanges, c => c.RelativePath == "file0.txt" && c.StatusSymbol == "M");
+        Assert.Contains(infoBefore.WorkingChanges, c => c.RelativePath == "added.txt" && c.StatusSymbol == "?");
+
+        var modifiedDiff = await service.GetFileDiffAsync(repoPath, "file0.txt");
+        Assert.Contains("+updated content", modifiedDiff);
+
+        var untrackedDiff = await service.GetFileDiffAsync(repoPath, "added.txt");
+        Assert.Contains("+brand new file", untrackedDiff);
+
+        await service.CommitAllAsync(repoPath, "feat: quick commit");
+
+        var infoAfter = await service.GetRepositoryInfoAsync(repoPath);
+        Assert.NotNull(infoAfter);
+        Assert.False(infoAfter.IsDirty);
+        Assert.Empty(infoAfter.WorkingChanges);
+        Assert.Equal("feat: quick commit", infoAfter.Commits[0].Message);
+    }
+
     private string CreateRepositoryWithCommits(string name, params string[] messages)
     {
         var path = Directory.CreateDirectory(Path.Combine(_root, name)).FullName;
