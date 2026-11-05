@@ -406,4 +406,50 @@
   <data name="EnvVar_EditEntryBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Modifier l&apos;entrée</value></data>
   <data name="EnvVar_DeleteEntryBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Supprimer l&apos;entrée</value></data>
   <data name="EnvVar_RepairBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Supprimer toutes les entrées invalides et en double</value></data>
+  <data name="Shell_QuickSearchBtn.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Palette de commandes (Ctrl+K)</value></data>
+  <data name="Shell_QuickSearchLabel.Text" xml:space="preserve"><value>Rechercher…</value></data>
+  <data name="Shell_PalettePlaceholder.PlaceholderText" xml:space="preserve"><value>Tapez une commande, un projet ou un outil… (Échap pour fermer)</value></data>
+  <data name="Palette_CatNav" xml:space="preserve"><value>Navigation</value></data>
+  <data name="Palette_CatProject" xml:space="preserve"><value>Projet</value></data>
+  <data name="Palette_CatTool" xml:space="preserve"><value>Boîte à outils</value></data>
+  <data name="Palette_OpenInIde" xml:space="preserve"><value>{0} — Ouvrir dans l&apos;IDE</value></data>
+  <data name="Palette_OpenTerminal" xml:space="preserve"><value>{0} — Ouvrir dans le terminal</value></data>
+  <data name="Palette_GoToSection" xml:space="preserve"><value>Aller à la section</value></data>
+  <data name="Tools_NavPorts.Text" xml:space="preserve"><value>Ports locaux</value></data>
+  <data name="Tools_PortsSearch.PlaceholderText" xml:space="preserve"><value>Filtrer par port ou processus…</value></data>
+  <data name="Tools_PortsDevOnly.Content" xml:space="preserve"><value>Ports de dev courants uniquement</value></data>
+  <data name="Tools_PortsCount" xml:space="preserve"><value>{0} port(s) en écoute</value></data>
+  <data name="Tools_CopyPortTip" xml:space="preserve"><value>Copier le port</value></data>
+  <data name="Tools_KillProcess" xml:space="preserve"><value>Terminer</value></data>
+  <data name="Tools_KillProcessTip" xml:space="preserve"><value>Terminer {0} (PID {1})</value></data>
+  <data name="Tools_ProcessKilled" xml:space="preserve"><value>{0} (PID {1}) terminé sur le port {2}.</value></data>
+  <data name="Pomo_NoProject" xml:space="preserve"><value>Aucun projet</value></data>
+  <data name="Pomo_ProjectPicker.Header" xml:space="preserve"><value>Projet</value></data>
+  <data name="Pomo_TodayHeader.Text" xml:space="preserve"><value>FOCUS AUJOURD&apos;HUI</value></data>
+  <data name="Pomo_WeekHeader.Text" xml:space="preserve"><value>7 DERNIERS JOURS</value></data>
+  <data name="Pomo_StatsFormat" xml:space="preserve"><value>{0} session(s) · {1} min</value></data>
+  <data name="Pomo_HistoryHeader.Text" xml:space="preserve"><value>Sessions récentes</value></data>
+  <data name="Pomo_ClearHistory.Content" xml:space="preserve"><value>Effacer</value></data>
+  <data name="Common_CancelButton.Content" xml:space="preserve"><value>Annuler</value></data>
+  <data name="Env_QueueProgress" xml:space="preserve"><value>Opération {0}/{1} en cours…</value></data>
+  <data name="Proj_AllTech" xml:space="preserve"><value>Toutes les technologies</value></data>
+  <data name="Proj_SortPinnedName" xml:space="preserve"><value>Épinglés &amp; Nom</value></data>
+  <data name="Proj_SortRecent" xml:space="preserve"><value>Ouverts récemment</value></data>
+  <data name="Proj_SortName" xml:space="preserve"><value>Nom (A–Z)</value></data>
+  <data name="Proj_Search.PlaceholderText" xml:space="preserve"><value>Rechercher un projet…</value></data>
+  <data name="Proj_PinButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Épingler / désépingler le projet</value></data>
+  <data name="Detail_Terminal.Text" xml:space="preserve"><value>Terminal</value></data>
+  <data name="Detail_TerminalTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Ouvrir un terminal ici</value></data>
+  <data name="Detail_PinTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Épingler / désépingler le projet</value></data>
+  <data name="Detail_CleanDiskTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Espace disque &amp; nettoyage des dépendances/caches</value></data>
+  <data name="Detail_SuggestedConfigs" xml:space="preserve"><value>Commandes détectées</value></data>
+  <data name="Detail_Changes" xml:space="preserve"><value>Modifications</value></data>
+  <data name="Detail_CommitMessage.PlaceholderText" xml:space="preserve"><value>Message de commit…</value></data>
+  <data name="Detail_CommitAll.Content" xml:space="preserve"><value>Commiter</value></data>
+  <data name="Detail_EmptyCommitMsg" xml:space="preserve"><value>Entrez un message de commit d&apos;abord.</value></data>
+  <data name="Detail_Committed" xml:space="preserve"><value>Commit créé : {0}</value></data>
+  <data name="Detail_DiskUsageTitle" xml:space="preserve"><value>Espace disque du projet</value></data>
+  <data name="Detail_NoCleanableText" xml:space="preserve"><value>Taille totale : {0}&#x0a;&#x0a;Aucun dossier lourd de dépendances ou de build (node_modules, bin, obj, target, .venv…) n&apos;a été trouvé.</value></data>
+  <data name="Detail_DiskSummary" xml:space="preserve"><value>Taille totale du projet : {0}  ·  Récupérable : {1}</value></data>
+  <data name="Detail_CleanDiskTitle" xml:space="preserve"><value>Nettoyer les dépendances &amp; artefacts de build</value></data>
 </root>
