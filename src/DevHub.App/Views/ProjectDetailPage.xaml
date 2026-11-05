@@ -71,7 +71,7 @@
                     <FontIcon FontSize="14" Glyph="&#xE72B;" />
                 </Button>
 
-                <StackPanel Grid.Column="1" Spacing="10">
+                <StackPanel x:Name="HeroTitleStack" Grid.Column="1" Spacing="10">
                     <TextBlock x:Name="ProjectName" Style="{StaticResource TitleLargeTextBlockStyle}" />
                     <TextBlock
                         x:Name="ProjectPath"
@@ -157,12 +157,19 @@
                     </StackPanel>
                 </Button>
                 <Button x:Uid="Detail_Explorer" Click="OpenInExplorer_Click" Content="Explorer" />
-                <Button x:Uid="Detail_TerminalTip" Click="OpenInTerminal_Click" ToolTipService.ToolTip="Open terminal here">
+                <SplitButton
+                    x:Uid="Detail_TerminalTip"
+                    x:Name="TerminalSplitButton"
+                    Click="OpenInTerminal_Click"
+                    ToolTipService.ToolTip="Open terminal here">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon FontSize="13" Glyph="&#xE756;" />
-                        <TextBlock x:Uid="Detail_Terminal" Text="Terminal" />
+                        <TextBlock x:Uid="Detail_Terminal" x:Name="TerminalButtonLabel" Text="Terminal" />
                     </StackPanel>
-                </Button>
+                    <SplitButton.Flyout>
+                        <MenuFlyout x:Name="TerminalShellFlyout" Placement="BottomEdgeAlignedLeft" />
+                    </SplitButton.Flyout>
+                </SplitButton>
             </StackPanel>
 
             <!-- Declared last so it stays on top of the stretched hero text for hit-testing -->
@@ -177,6 +184,7 @@
                         x:Uid="Detail_RunTip"
                         x:Name="RunButton"
                         Margin="0,0,4,0"
+                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                         Click="Run_Click"
                         ToolTipService.ToolTip="Run this project in a terminal">
                         <!-- Lightweight styling: repaint every SplitButton state with the
@@ -186,14 +194,30 @@
                             <StaticResource x:Key="SplitButtonBackgroundPointerOver" ResourceKey="AccentFillColorSecondaryBrush" />
                             <StaticResource x:Key="SplitButtonBackgroundPressed" ResourceKey="AccentFillColorTertiaryBrush" />
                             <StaticResource x:Key="SplitButtonBackgroundDisabled" ResourceKey="AccentFillColorDisabledBrush" />
+                            <StaticResource x:Key="SplitButtonBackgroundSecondary" ResourceKey="AccentFillColorDefaultBrush" />
+                            <StaticResource x:Key="SplitButtonBackgroundSecondaryPointerOver" ResourceKey="AccentFillColorSecondaryBrush" />
+                            <StaticResource x:Key="SplitButtonBackgroundSecondaryPressed" ResourceKey="AccentFillColorTertiaryBrush" />
+                            <StaticResource x:Key="SplitButtonBackgroundSecondaryDisabled" ResourceKey="AccentFillColorDisabledBrush" />
                             <StaticResource x:Key="SplitButtonForeground" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
                             <StaticResource x:Key="SplitButtonForegroundPointerOver" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
                             <StaticResource x:Key="SplitButtonForegroundPressed" ResourceKey="TextOnAccentFillColorSecondaryBrush" />
                             <StaticResource x:Key="SplitButtonForegroundDisabled" ResourceKey="TextOnAccentFillColorDisabledBrush" />
+                            <StaticResource x:Key="SplitButtonForegroundSecondary" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                            <StaticResource x:Key="SplitButtonForegroundSecondaryPointerOver" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                            <StaticResource x:Key="SplitButtonForegroundSecondaryPressed" ResourceKey="TextOnAccentFillColorSecondaryBrush" />
+                            <StaticResource x:Key="SplitButtonForegroundSecondaryDisabled" ResourceKey="TextOnAccentFillColorDisabledBrush" />
+                            <StaticResource x:Key="SplitButtonSecondaryForeground" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                            <StaticResource x:Key="SplitButtonSecondaryForegroundPointerOver" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                            <StaticResource x:Key="SplitButtonSecondaryForegroundPressed" ResourceKey="TextOnAccentFillColorSecondaryBrush" />
+                            <StaticResource x:Key="SplitButtonSecondaryForegroundDisabled" ResourceKey="TextOnAccentFillColorDisabledBrush" />
                             <StaticResource x:Key="SplitButtonBorderBrush" ResourceKey="AccentControlElevationBorderBrush" />
                             <StaticResource x:Key="SplitButtonBorderBrushPointerOver" ResourceKey="AccentControlElevationBorderBrush" />
                             <StaticResource x:Key="SplitButtonBorderBrushPressed" ResourceKey="AccentFillColorTertiaryBrush" />
                             <StaticResource x:Key="SplitButtonBorderBrushDisabled" ResourceKey="AccentFillColorDisabledBrush" />
+                            <StaticResource x:Key="SplitButtonBorderBrushSecondary" ResourceKey="AccentControlElevationBorderBrush" />
+                            <StaticResource x:Key="SplitButtonBorderBrushSecondaryPointerOver" ResourceKey="AccentControlElevationBorderBrush" />
+                            <StaticResource x:Key="SplitButtonBorderBrushSecondaryPressed" ResourceKey="AccentFillColorTertiaryBrush" />
+                            <StaticResource x:Key="SplitButtonBorderBrushSecondaryDisabled" ResourceKey="AccentFillColorDisabledBrush" />
                         </SplitButton.Resources>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon FontSize="13" Glyph="&#xE768;" />

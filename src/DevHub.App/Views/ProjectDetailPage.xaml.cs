@@ -57,6 +57,7 @@ public sealed partial class ProjectDetailPage : Page
     private DateTime _heroAnimStartTime;
     private Uri? _remoteWebUrl;
     private bool _initializingIdePicker;
+    private bool _idePickerReady;
 
     private string? _langDecorPath;
     private string? _ideDecorPath;
@@ -95,6 +96,7 @@ public sealed partial class ProjectDetailPage : Page
         }
 
         _project = project;
+        _idePickerReady = false;
         HeroQuickActions.Opacity = 0;
         ProjectName.Text = project.Name;
         ProjectPath.Text = relativeDisplay ?? project.Path;
@@ -111,24 +113,12 @@ public sealed partial class ProjectDetailPage : Page
         SetupForgeTab(project);
         RefreshPinState();
         RebuildRunMenu();
-
-        // Position HeroQuickActions as soon as the header's own layout settles (before waiting
-        // on Git / README / WebView2 initialization) so it never flashes at (0,0) in the top-left.
-        void OnHeroLayoutSettled(object? layoutSender, object? layoutArgs)
-        {
-            if (HeroCard.ActualWidth <= 0 || HeroQuickActions.ActualWidth <= 0)
-            {
-                return;
-            }
-
-            TechList.LayoutUpdated -= OnHeroLayoutSettled;
-            SetHeroCollapse(0);
-            UpdateHeroQuickActionsPosition();
-        }
-
-        TechList.LayoutUpdated += OnHeroLayoutSettled;
+        RebuildTerminalShellMenu();
+        SetHeroCollapse(0);
 
         await PopulateIdePickerAsync(project);
+        _idePickerReady = true;
+        UpdateLayout();
         UpdateHeroQuickActionsPosition();
 
         await Task.WhenAll(
@@ -299,7 +289,7 @@ public sealed partial class ProjectDetailPage : Page
         Log.Information("Running {Config} for {Project}: {Command}", config.Name, _project.Name, config.Command);
         try
         {
-            _terminal.OpenTerminal(_project.Path, config.Command);
+            _terminal.OpenTerminal(_project.Path, config.Command, GetActiveTerminalShell());
         }
         catch (Exception ex)
         {
@@ -543,6 +533,7 @@ public sealed partial class ProjectDetailPage : Page
 
         _forgeScrollHooked = true;
         var scrollViewers = new[] { ForgePrScroll, ForgeIssueScroll, ForgeRunScroll };
+        var lastOffsets = scrollViewers.ToDictionary(sv => sv, sv => sv.VerticalOffset);
         var lastViewportHeights = scrollViewers.ToDictionary(sv => sv, sv => sv.ViewportHeight);
 
         foreach (var scrollViewer in scrollViewers)
@@ -553,14 +544,27 @@ public sealed partial class ProjectDetailPage : Page
                 lastViewportHeights[scrollViewer] = scrollViewer.ViewportHeight;
                 if (viewportChanged)
                 {
+                    lastOffsets[scrollViewer] = scrollViewer.VerticalOffset;
                     return;
                 }
 
-                var maxOffset = scrollViewers.Max(sv => sv.VerticalOffset);
-                var scrollProgress = maxOffset / HeroScrollBudget;
-                if (!_heroLockedByButton)
+                var delta = scrollViewer.VerticalOffset - lastOffsets[scrollViewer];
+                if (!_heroLockedByButton && _heroProgress < 0.99 && scrollViewer.VerticalOffset > 0)
                 {
-                    SetHeroCollapse(scrollProgress);
+                    RequestHeroCollapseFromScroll(collapse: true);
+                    lastOffsets[scrollViewer] = 0;
+                    scrollViewer.ChangeView(null, 0, null, disableAnimation: true);
+                    return;
+                }
+
+                lastOffsets[scrollViewer] = scrollViewer.VerticalOffset;
+                if (delta > 4)
+                {
+                    RequestHeroCollapseFromScroll(collapse: true);
+                }
+                else if (delta < -4 && scrollViewers.All(sv => sv.VerticalOffset <= 8))
+                {
+                    RequestHeroCollapseFromScroll(collapse: false);
                 }
             };
         }
@@ -569,20 +573,46 @@ public sealed partial class ProjectDetailPage : Page
     /// <summary>Toggles the hero between fully expanded and fully collapsed, animated.</summary>
     private void ToggleHero_Click(object sender, RoutedEventArgs e)
     {
-        AnimateHeroCollapse(_heroProgress < 0.5 ? 1 : 0);
+        AnimateHeroCollapse(_heroProgress < 0.5 ? 1 : 0, lockByButton: true);
+    }
+
+    private void RequestHeroCollapseFromScroll(bool collapse)
+    {
+        if (_heroLockedByButton)
+        {
+            return;
+        }
+
+        var target = collapse ? 1.0 : 0.0;
+        if (_heroAnimTimer?.IsRunning == true && Math.Abs(_heroAnimTarget - target) < 0.01)
+        {
+            return;
+        }
+
+        if (Math.Abs((_heroProgress < 0 ? 0 : _heroProgress) - target) < 0.01)
+        {
+            return;
+        }
+
+        AnimateHeroCollapse(target, lockByButton: false);
     }
 
     /// <summary>Eases <see cref="_heroProgress"/> from its current value to <paramref name="target"/>.</summary>
-    private void AnimateHeroCollapse(double target)
+    private void AnimateHeroCollapse(double target, bool lockByButton = false)
     {
         _heroAnimTimer?.Stop();
         _heroAnimStart = Math.Clamp(_heroProgress < 0 ? 0 : _heroProgress, 0, 1);
         _heroAnimTarget = target;
         _heroAnimStartTime = DateTime.UtcNow;
 
-        // The button hands the user explicit manual control: once pressed, scrolling has no
-        // further say over the hero at all, on any tab, for the rest of this page's life.
-        _heroLockedByButton = true;
+        if (lockByButton)
+        {
+            // The button hands the user explicit manual control: once pressed, scrolling has no
+            // further say over the hero at all, on any tab, for the rest of this page's life.
+            _heroLockedByButton = true;
+        }
+
+        SyncWebViewsHeroState(target > 0.5 ? "collapsing" : "expanding");
 
         _heroAnimTimer ??= DispatcherQueue.CreateTimer();
         _heroAnimTimer.Interval = TimeSpan.FromMilliseconds(15);
@@ -593,24 +623,39 @@ public sealed partial class ProjectDetailPage : Page
 
     private void HeroAnimTimer_Tick(object? sender, object e)
     {
-        const double durationMs = 250;
+        const double durationMs = 240;
         var t = Math.Clamp((DateTime.UtcNow - _heroAnimStartTime).TotalMilliseconds / durationMs, 0, 1);
         var eased = 1 - Math.Pow(1 - t, 3);
-        SetHeroCollapse(_heroAnimStart + ((_heroAnimTarget - _heroAnimStart) * eased));
+        SetHeroCollapse(t >= 1 ? _heroAnimTarget : _heroAnimStart + ((_heroAnimTarget - _heroAnimStart) * eased));
         if (t >= 1)
         {
             _heroAnimTimer!.Stop();
+            SyncWebViewsHeroState(_heroAnimTarget > 0.5 ? "collapsed" : "expanded");
+        }
+    }
+
+    private void SyncWebViewsHeroState(string state)
+    {
+        var lockedJs = _heroLockedByButton ? "true" : "false";
+        var script = $"window.__heroState = '{state}'; window.__heroLocked = {lockedJs};";
+        if (ReadmeView.CoreWebView2 is not null)
+        {
+            _ = ReadmeView.CoreWebView2.ExecuteScriptAsync(script);
+        }
+
+        if (FileView.CoreWebView2 is not null)
+        {
+            _ = FileView.CoreWebView2.ExecuteScriptAsync(script);
         }
     }
 
     /// <summary>
-    /// 0 = full hero, 1 = collapsed to just the title. Driven by content scrolling;
-    /// the decor logos grow and drift while the details fade out.
+    /// 0 = full hero, 1 = collapsed to just the title.
     /// </summary>
     private void SetHeroCollapse(double progress)
     {
         var p = Math.Clamp(progress, 0, 1);
-        if (Math.Abs(p - _heroProgress) < 0.01)
+        if (Math.Abs(p - _heroProgress) < 0.005 && p > 0.001 && p < 0.999)
         {
             return;
         }
@@ -618,42 +663,39 @@ public sealed partial class ProjectDetailPage : Page
         _heroProgress = p;
         var inv = 1 - p;
 
+        ProjectName.FontSize = 40 - (14 * p);
+        ProjectName.LineHeight = 52 - (18 * p);
+        HeroTitleStack.Spacing = 10 * inv;
+
         ProjectPath.Opacity = inv;
         ProjectPath.MaxHeight = (22 * inv) + 0.01;
         TechList.Opacity = inv;
         TechList.MaxHeight = (240 * inv) + 0.01;
 
-        // The IDE picker/Open/Explorer group (HeroQuickActions) stays visible and slides
-        // over to the right instead of fading with the rest of the row — only the remote
-        // button, which is still part of ActionsRow, fades out the old way.
         ActionsRow.MinHeight = 32 * inv;
+        ActionsRow.MaxHeight = (40 * inv) + 0.01;
         RemoteButton.Opacity = inv;
         RemoteButton.IsHitTestVisible = p < 0.5;
         HeroTopButtons.Opacity = inv;
         HeroTopButtons.MaxHeight = (480 * inv) + 0.01;
         HeroTopButtons.IsHitTestVisible = p < 0.5;
 
-        // The title StackPanel's Spacing still reserves a gap for each child even when
-        // faded/shrunk to near-zero; fully collapsing them removes that gap so the card
-        // truly shrinks to just the title, not the title plus three leftover gutters.
         var fullyCollapsed = p >= 0.999;
         ProjectPath.Visibility = fullyCollapsed ? Visibility.Collapsed : Visibility.Visible;
         TechList.Visibility = fullyCollapsed ? Visibility.Collapsed : Visibility.Visible;
+        ActionsRow.Visibility = fullyCollapsed ? Visibility.Collapsed : Visibility.Visible;
+        HeroTitleStack.VerticalAlignment = fullyCollapsed ? VerticalAlignment.Center : VerticalAlignment.Top;
 
-        // The content Grid's own top/bottom padding (24px each) was eating most of the
-        // "collapsed" budget regardless of HeroCard's height, so it shrinks too.
+        // Equal top, bottom, and left padding (24px expanded -> 12px collapsed) so the
+        // BackButton always has the exact same margin on top, bottom, and left when minimized.
         const double expandedPadding = 24;
-        const double collapsedPadding = 6;
-        var topBottomPadding = expandedPadding - ((expandedPadding - collapsedPadding) * p);
-        HeroContentGrid.Padding = new Thickness(24, topBottomPadding, 224, topBottomPadding);
+        const double collapsedPadding = 12;
+        var edgePadding = expandedPadding - ((expandedPadding - collapsedPadding) * p);
+        HeroContentGrid.Padding = new Thickness(edgePadding, edgePadding, 224, edgePadding);
 
         double heroCardHeight;
         if (p <= 0.001)
         {
-            // Fully expanded: let the card size itself to whatever this project actually
-            // needs (tech lines, subprojects...) instead of a fixed height that would
-            // either crop rich content or leave sparse content floating in extra space.
-            // MinHeight is the floor that keeps sparse-content cards from looking tiny.
             HeroCard.MinHeight = 150;
             HeroCard.Height = double.NaN;
             _expandedHeroHeightSnapshot = null;
@@ -661,43 +703,30 @@ public sealed partial class ProjectDetailPage : Page
         }
         else
         {
-            // Capture the natural height once, right as collapsing starts, so the
-            // animation shrinks from THIS project's real expanded height, not a guess.
             _expandedHeroHeightSnapshot ??=
                 HeroCard.ActualHeight > 0 ? HeroCard.ActualHeight : FallbackExpandedHeroHeight;
             var expanded = _expandedHeroHeightSnapshot.Value;
             heroCardHeight = expanded - ((expanded - CollapsedHeroHeight) * p);
 
-            // The MinHeight floor above would otherwise clamp the shrink target back up
-            // (MinHeight always wins over a smaller explicit Height), so it's lifted for
-            // as long as the card is collapsing.
             HeroCard.MinHeight = 0;
             HeroCard.Height = heroCardHeight;
         }
 
         UpdateHeroQuickActionsPosition(heroCardHeight);
 
-        // At rest, the button keeps its small default (natural) size, top-aligned next
-        // to the multi-line title block — no explicit Height. Once collapsing starts it
-        // grows (expressed as a plain number rather than VerticalAlignment=Stretch: a
-        // Stretch child with an unset Height inside this Auto-sized row gets measured
-        // with an effectively infinite available height, which blew both the button and
-        // the card up to a huge size) and re-centers on the now-single-line title,
-        // since Top alignment would otherwise dump all the leftover margin at the bottom.
-        const double naturalButtonSize = 32;
+        const double naturalButtonHeight = 32;
+        const double naturalButtonWidth = 36;
         if (p <= 0.001)
         {
             BackButton.Height = double.NaN;
+            BackButton.Width = double.NaN;
             BackButton.VerticalAlignment = VerticalAlignment.Top;
         }
         else
         {
-            // A small margin is left around the button even at full collapse, rather
-            // than filling every last pixel of the padded content height.
-            const double collapsedMargin = 8;
-            var availableContentHeight =
-                Math.Max(naturalButtonSize, heroCardHeight - (topBottomPadding * 2) - collapsedMargin);
-            BackButton.Height = naturalButtonSize + ((availableContentHeight - naturalButtonSize) * p);
+            var targetSize = Math.Max(naturalButtonHeight, CollapsedHeroHeight - (collapsedPadding * 2));
+            BackButton.Height = naturalButtonHeight + ((targetSize - naturalButtonHeight) * p);
+            BackButton.Width = naturalButtonWidth + ((targetSize - naturalButtonWidth) * p);
             BackButton.VerticalAlignment = p > 0.5 ? VerticalAlignment.Center : VerticalAlignment.Top;
         }
 
@@ -720,30 +749,50 @@ public sealed partial class ProjectDetailPage : Page
                 : Loc.T("Detail_ExpandHero", "Expand"));
     }
 
-    /// <summary>Bridges the WebView's scroll position out to the collapsing hero.</summary>
+    /// <summary>Bridges the WebView's wheel and scroll gestures out to the collapsing hero.</summary>
     private async Task HookWebViewScrollAsync(WebView2 view)
     {
         await view.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
             """
-            window.addEventListener('scroll', function () {
-                try { window.chrome.webview.postMessage(String(window.scrollY || 0)); } catch (e) { }
-            }, { passive: true });
+            (function () {
+                window.__heroState = 'expanded';
+                window.__heroLocked = false;
+                window.addEventListener('wheel', function (e) {
+                    try {
+                        if (window.__heroLocked) return;
+                        if (e.deltaY > 0) {
+                            if (window.__heroState === 'expanded' || window.__heroState === 'collapsing') {
+                                e.preventDefault();
+                                if (window.__heroState === 'expanded') {
+                                    window.__heroState = 'collapsing';
+                                    window.chrome.webview.postMessage('collapse');
+                                }
+                                return;
+                            }
+                        } else if (e.deltaY < 0 && (window.scrollY || 0) <= 2) {
+                            if (window.__heroState === 'collapsed' || window.__heroState === 'expanding') {
+                                e.preventDefault();
+                                if (window.__heroState === 'collapsed') {
+                                    window.__heroState = 'expanding';
+                                    window.chrome.webview.postMessage('expand');
+                                }
+                                return;
+                            }
+                        }
+                    } catch (err) { }
+                }, { passive: false });
+            })();
             """);
         view.CoreWebView2.WebMessageReceived += (_, e) =>
         {
-            if (double.TryParse(
-                e.TryGetWebMessageAsString(),
-                System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture,
-                out var y))
+            var msg = e.TryGetWebMessageAsString();
+            if (msg == "collapse")
             {
-                // Both ways, like before — unless the button has taken over (see
-                // AnimateHeroCollapse), in which case scroll no longer has any say.
-                var scrollProgress = y / HeroScrollBudget;
-                if (!_heroLockedByButton)
-                {
-                    SetHeroCollapse(scrollProgress);
-                }
+                RequestHeroCollapseFromScroll(collapse: true);
+            }
+            else if (msg == "expand")
+            {
+                RequestHeroCollapseFromScroll(collapse: false);
             }
         };
     }
@@ -877,14 +926,26 @@ public sealed partial class ProjectDetailPage : Page
 
         _graphScrollHooked = true;
         GraphList.LayoutUpdated -= GraphList_LayoutUpdated;
+        var lastGraphOffset = scrollViewer.VerticalOffset;
         scrollViewer.ViewChanged += (_, _) =>
         {
-            // Both ways, like before — unless the button has taken over (see
-            // AnimateHeroCollapse), in which case scroll no longer has any say.
-            var scrollProgress = scrollViewer.VerticalOffset / HeroScrollBudget;
-            if (!_heroLockedByButton)
+            if (!_heroLockedByButton && _heroProgress < 0.99 && scrollViewer.VerticalOffset > 0)
             {
-                SetHeroCollapse(scrollProgress);
+                RequestHeroCollapseFromScroll(collapse: true);
+                lastGraphOffset = 0;
+                scrollViewer.ChangeView(null, 0, null, disableAnimation: true);
+                return;
+            }
+
+            var delta = scrollViewer.VerticalOffset - lastGraphOffset;
+            lastGraphOffset = scrollViewer.VerticalOffset;
+            if (delta > 4)
+            {
+                RequestHeroCollapseFromScroll(collapse: true);
+            }
+            else if (delta < -4 && scrollViewer.VerticalOffset <= 8)
+            {
+                RequestHeroCollapseFromScroll(collapse: false);
             }
 
             if (scrollViewer.VerticalOffset >= scrollViewer.ScrollableHeight - 400)
@@ -1520,11 +1581,61 @@ public sealed partial class ProjectDetailPage : Page
         }
     }
 
-    private void OpenInTerminal_Click(object sender, RoutedEventArgs e)
+    private string GetActiveTerminalShell()
+    {
+        if (_project is not null
+            && _settings.Settings.ProjectTerminalShells.TryGetValue(_project.Path, out var projectShell)
+            && !string.IsNullOrWhiteSpace(projectShell))
+        {
+            return projectShell;
+        }
+
+        return string.IsNullOrWhiteSpace(_settings.Settings.DefaultTerminalShell)
+            ? "powershell"
+            : _settings.Settings.DefaultTerminalShell;
+    }
+
+    private void RebuildTerminalShellMenu()
+    {
+        TerminalShellFlyout.Items.Clear();
+        var activeShell = GetActiveTerminalShell();
+
+        foreach (var option in WindowsTerminalService.SupportedShells)
+        {
+            var item = new ToggleMenuFlyoutItem
+            {
+                Text = option.DisplayName,
+                Tag = option.Id,
+                IsChecked = string.Equals(option.Id, activeShell, StringComparison.OrdinalIgnoreCase),
+            };
+            item.Click += async (s, _) =>
+            {
+                if (_project is null || (s as FrameworkElement)?.Tag is not string shellId)
+                {
+                    return;
+                }
+
+                _settings.Settings.ProjectTerminalShells[_project.Path] = shellId;
+                await _settings.SaveAsync();
+                RebuildTerminalShellMenu();
+                _terminal.OpenTerminal(_project.Path, "", shellId);
+            };
+            TerminalShellFlyout.Items.Add(item);
+        }
+
+        var activeDisplayName = WindowsTerminalService.SupportedShells
+            .FirstOrDefault(s => string.Equals(s.Id, activeShell, StringComparison.OrdinalIgnoreCase))?.DisplayName
+            ?? "PowerShell";
+        ToolTipService.SetToolTip(
+            TerminalSplitButton,
+            $"{Loc.T("Detail_Terminal", "Terminal")} ({activeDisplayName})");
+    }
+
+    private void OpenInTerminal_Click(SplitButton sender, SplitButtonClickEventArgs args)
     {
         if (_project is not null)
         {
-            _terminal.OpenTerminal(_project.Path);
+            _terminal.OpenTerminal(_project.Path, "", GetActiveTerminalShell());
         }
     }
 
@@ -1893,7 +2004,14 @@ public sealed partial class ProjectDetailPage : Page
     /// </summary>
     private void UpdateHeroQuickActionsPosition(double? targetHeroHeight = null)
     {
-        if (HeroCard.ActualWidth <= 0 || HeroQuickActions.ActualWidth <= 0)
+        if (!_idePickerReady || HeroCard.ActualWidth <= 0 || HeroQuickActions.ActualWidth <= 0)
+        {
+            return;
+        }
+
+        var naturalX = TechList.TransformToVisual(HeroCard).TransformPoint(new Point(0, 0)).X;
+        var naturalY = ActionsRow.TransformToVisual(HeroCard).TransformPoint(new Point(0, 0)).Y;
+        if (naturalX <= 0 || naturalY <= 0)
         {
             return;
         }
@@ -1908,8 +2026,6 @@ public sealed partial class ProjectDetailPage : Page
         var heroCardHeight = targetHeroHeight
             ?? (HeroCard.ActualHeight > 0 ? HeroCard.ActualHeight : FallbackExpandedHeroHeight);
 
-        var naturalX = TechList.TransformToVisual(HeroCard).TransformPoint(new Point(0, 0)).X;
-        var naturalY = ActionsRow.TransformToVisual(HeroCard).TransformPoint(new Point(0, 0)).Y;
         var collapsedX = Math.Max(naturalX, HeroCard.ActualWidth - quickActionsRightMargin - qaWidth);
         var collapsedY = (heroCardHeight / 2) - (qaHeight / 2);
 

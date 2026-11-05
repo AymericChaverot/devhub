@@ -16,6 +16,8 @@ public sealed partial class ProjectsViewModel : ObservableObject
     private readonly IGitService _git;
     private readonly IFileOperations _fileOperations;
     private List<ProjectViewModel> _allProjects = [];
+    private bool _suppressFilter;
+    private string? _loadedFolderPath;
 
     public ProjectsViewModel(
         ISettingsService settings,
@@ -77,13 +79,31 @@ public sealed partial class ProjectsViewModel : ObservableObject
 
     public void ClearError() => ErrorMessage = null;
 
-    partial void OnSearchTextChanged(string value) => ApplyFilterAndSort();
+    partial void OnSearchTextChanged(string value)
+    {
+        if (!_suppressFilter)
+        {
+            ApplyFilterAndSort();
+        }
+    }
 
-    partial void OnSelectedTechnologyChanged(string value) => ApplyFilterAndSort();
+    partial void OnSelectedTechnologyChanged(string value)
+    {
+        if (!_suppressFilter)
+        {
+            ApplyFilterAndSort();
+        }
+    }
 
-    partial void OnSelectedSortChanged(string value) => ApplyFilterAndSort();
+    partial void OnSelectedSortChanged(string value)
+    {
+        if (!_suppressFilter)
+        {
+            ApplyFilterAndSort();
+        }
+    }
 
-    /// <summary>Shows the cached list instantly, then refreshes it with a background rescan.</summary>
+    /// <summary>Shows the cached list instantly; only runs an initial background scan once per folder.</summary>
     public async Task LoadAsync()
     {
         ProjectsFolderPath = _settings.Settings.ProjectsFolderPath;
@@ -92,32 +112,50 @@ public sealed partial class ProjectsViewModel : ObservableObject
             return;
         }
 
-        var cached = await _store.GetAllAsync();
-        ReplaceList(cached.Select(p => new ProjectViewModel(
-            p,
-            _settings.Settings.PinnedProjectPaths.Contains(p.Path, StringComparer.OrdinalIgnoreCase))));
+        // If already loaded for this folder during the current session, just sync pin/sort state without flashing.
+        if (_allProjects.Count > 0 && string.Equals(_loadedFolderPath, ProjectsFolderPath, StringComparison.OrdinalIgnoreCase))
+        {
+            ApplyFilterAndSort();
+            return;
+        }
 
-        await RescanAsync();
+        _loadedFolderPath = ProjectsFolderPath;
+        var cached = await _store.GetAllAsync();
+        if (cached.Count > 0)
+        {
+            ReplaceList(cached.Select(p => new ProjectViewModel(
+                p,
+                _settings.Settings.PinnedProjectPaths.Contains(p.Path, StringComparer.OrdinalIgnoreCase))));
+        }
+
+        await ScanCoreAsync(showBusyIndicator: cached.Count == 0);
     }
 
     /// <summary>Called after the user picked a folder (from this page or Settings).</summary>
     public async Task SetProjectsFolderAsync(string path)
     {
         _settings.Settings.ProjectsFolderPath = path;
+        _loadedFolderPath = null;
         await _settings.SaveAsync();
         await LoadAsync();
     }
 
     [RelayCommand]
-    public async Task RescanAsync()
+    public Task RescanAsync() => ScanCoreAsync(showBusyIndicator: true);
+
+    private async Task ScanCoreAsync(bool showBusyIndicator)
     {
         if (ProjectsFolderPath is null || IsBusy)
         {
             return;
         }
 
-        IsBusy = true;
-        BusyMessage = Loc.T("Proj_Scanning", "Scanning projects…");
+        if (showBusyIndicator)
+        {
+            IsBusy = true;
+            BusyMessage = Loc.T("Proj_Scanning", "Scanning projects…");
+        }
+
         try
         {
             var scanned = await _scanner.ScanAsync(ProjectsFolderPath);
@@ -133,8 +171,11 @@ public sealed partial class ProjectsViewModel : ObservableObject
         }
         finally
         {
-            IsBusy = false;
-            BusyMessage = null;
+            if (showBusyIndicator)
+            {
+                IsBusy = false;
+                BusyMessage = null;
+            }
         }
     }
 
@@ -225,27 +266,54 @@ public sealed partial class ProjectsViewModel : ObservableObject
     private void ReplaceList(IEnumerable<ProjectViewModel> items)
     {
         var ignored = _settings.Settings.IgnoredProjectPaths;
+        var existingByPath = _allProjects.ToDictionary(p => p.Path, StringComparer.OrdinalIgnoreCase);
+
         _allProjects = items
             .Where(p => !ignored.Contains(p.Path, StringComparer.OrdinalIgnoreCase))
-            .Select(p => p.WithBadges())
+            .Select(p =>
+            {
+                if (existingByPath.TryGetValue(p.Path, out var existing)
+                    && existing.Name == p.Name
+                    && existing.IsGitRepository == p.IsGitRepository
+                    && existing.GitRemoteUrl == p.GitRemoteUrl
+                    && existing.Project.Languages.Count == p.Project.Languages.Count
+                    && existing.Project.Frameworks.Count == p.Project.Frameworks.Count)
+                {
+                    existing.IsPinned = p.IsPinned;
+                    return existing;
+                }
+
+                return p.WithBadges();
+            })
             .ToList();
 
         var currentTech = SelectedTechnology;
-        var techs = _allProjects
+        var desiredTechs = new List<string> { AllTechnologies };
+        desiredTechs.AddRange(_allProjects
             .SelectMany(p => p.Project.Languages.Select(l => l.Language)
                 .Concat(p.Project.Frameworks.Select(f => f.Name)))
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(t => t, StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
+            .OrderBy(t => t, StringComparer.CurrentCultureIgnoreCase));
 
-        TechnologyOptions.Clear();
-        TechnologyOptions.Add(AllTechnologies);
-        foreach (var tech in techs)
+        _suppressFilter = true;
+        try
         {
-            TechnologyOptions.Add(tech);
+            if (!TechnologyOptions.SequenceEqual(desiredTechs, StringComparer.Ordinal))
+            {
+                TechnologyOptions.Clear();
+                foreach (var tech in desiredTechs)
+                {
+                    TechnologyOptions.Add(tech);
+                }
+            }
+
+            SelectedTechnology = TechnologyOptions.Contains(currentTech) ? currentTech : AllTechnologies;
+        }
+        finally
+        {
+            _suppressFilter = false;
         }
 
-        SelectedTechnology = TechnologyOptions.Contains(currentTech) ? currentTech : AllTechnologies;
         ApplyFilterAndSort();
     }
 
@@ -266,7 +334,7 @@ public sealed partial class ProjectsViewModel : ObservableObject
                 || p.HasTechnology(SelectedTechnology))
             .Where(p => term.Length == 0 || p.Matches(term));
 
-        IEnumerable<ProjectViewModel> sorted = SelectedSort == SortOptions[1]
+        var sortedList = (SelectedSort == SortOptions[1]
             ? filtered
                 .OrderByDescending(p => lastOpened.GetValueOrDefault(p.Path, DateTime.MinValue))
                 .ThenBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
@@ -274,10 +342,16 @@ public sealed partial class ProjectsViewModel : ObservableObject
                 ? filtered.OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
                 : filtered
                     .OrderByDescending(p => p.IsPinned)
-                    .ThenBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase);
+                    .ThenBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase))
+            .ToList();
+
+        if (Projects.SequenceEqual(sortedList))
+        {
+            return;
+        }
 
         Projects.Clear();
-        foreach (var item in sorted)
+        foreach (var item in sortedList)
         {
             Projects.Add(item);
         }
