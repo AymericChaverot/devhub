@@ -157,6 +157,12 @@
                     </StackPanel>
                 </Button>
                 <Button x:Uid="Detail_Explorer" Click="OpenInExplorer_Click" Content="Explorer" />
+                <Button x:Uid="Detail_TerminalTip" Click="OpenInTerminal_Click" ToolTipService.ToolTip="Open terminal here">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon FontSize="13" Glyph="&#xE756;" />
+                        <TextBlock x:Uid="Detail_Terminal" Text="Terminal" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
 
             <!-- Declared last so it stays on top of the stretched hero text for hit-testing -->
@@ -197,6 +203,12 @@
                             <MenuFlyout x:Name="RunFlyout" Placement="BottomEdgeAlignedRight" />
                         </SplitButton.Flyout>
                     </SplitButton>
+                    <Button x:Uid="Detail_PinTip" x:Name="PinProjectButton" Click="TogglePinProject_Click" ToolTipService.ToolTip="Pin / unpin project">
+                        <FontIcon x:Name="PinProjectIcon" FontSize="14" Glyph="&#xE734;" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                    </Button>
+                    <Button x:Uid="Detail_CleanDiskTip" Click="CleanProjectDisk_Click" ToolTipService.ToolTip="Disk usage &amp; clean dependencies/build artifacts">
+                        <FontIcon FontSize="14" Glyph="&#xEDA2;" />
+                    </Button>
                     <Button x:Uid="Detail_ManageSubprojectsTip" Click="ManageSubprojects_Click" ToolTipService.ToolTip="Manage subprojects">
                         <FontIcon FontSize="14" Glyph="&#xE71D;" />
                     </Button>
@@ -319,6 +331,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -353,6 +366,27 @@
                         <TextBlock Text="Push" />
                     </StackPanel>
                 </Button>
+                <Button x:Name="StashButton" Click="Stash_Click" ToolTipService.ToolTip="git stash push -u">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon FontSize="14" Glyph="&#xE7B8;" />
+                        <TextBlock Text="Stash" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="StashPopButton" Click="StashPop_Click" ToolTipService.ToolTip="git stash pop">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon FontSize="14" Glyph="&#xE8E5;" />
+                        <TextBlock x:Name="StashPopLabel" Text="Pop" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    x:Name="ToggleChangesButton"
+                    Click="ToggleWorkingChanges_Click"
+                    Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon FontSize="13" Glyph="&#xE70F;" />
+                        <TextBlock x:Name="ToggleChangesLabel" Text="Changes" />
+                    </StackPanel>
+                </Button>
                 <ProgressRing
                     x:Name="GitBusyRing"
                     Width="18"
@@ -381,9 +415,73 @@
                 Grid.Row="1"
                 IsOpen="False" />
 
+            <!-- Working tree changes & quick commit -->
+            <Border
+                x:Name="WorkingChangesCard"
+                Grid.Row="2"
+                MaxHeight="230"
+                Padding="12"
+                CornerRadius="{ThemeResource OverlayCornerRadius}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                Visibility="Collapsed">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="320" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" RowSpacing="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <ListView
+                            x:Name="WorkingChangesList"
+                            Grid.Row="0"
+                            SelectionMode="Single"
+                            SelectionChanged="WorkingChangesList_SelectionChanged" />
+
+                        <Grid Grid.Row="1" ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox
+                                x:Uid="Detail_CommitMessage"
+                                x:Name="QuickCommitMessageBox"
+                                Grid.Column="0"
+                                PlaceholderText="Commit message…" />
+                            <Button
+                                x:Uid="Detail_CommitAll"
+                                Grid.Column="1"
+                                Style="{StaticResource AccentButtonStyle}"
+                                Content="Commit"
+                                Click="QuickCommit_Click" />
+                        </Grid>
+                    </Grid>
+
+                    <Border
+                        Grid.Column="1"
+                        Padding="10"
+                        CornerRadius="6"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                            <RichTextBlock
+                                x:Name="WorkingDiffOutput"
+                                FontFamily="Cascadia Code, Consolas"
+                                FontSize="12"
+                                IsTextSelectionEnabled="True" />
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Border>
+
             <!-- Commit graph -->
             <Border
-                Grid.Row="2"
+                Grid.Row="3"
                 CornerRadius="{ThemeResource OverlayCornerRadius}"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"

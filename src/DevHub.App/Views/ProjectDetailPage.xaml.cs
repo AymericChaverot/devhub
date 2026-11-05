@@ -109,6 +109,7 @@ public sealed partial class ProjectDetailPage : Page
         ShowTechDecoration(project);
         ShowRemoteButton(project.GitRemoteUrl);
         SetupForgeTab(project);
+        RefreshPinState();
         RebuildRunMenu();
 
         // Position HeroQuickActions as soon as the header's own layout settles (before waiting
@@ -150,14 +151,31 @@ public sealed partial class ProjectDetailPage : Page
             ? configs
             : [];
 
-    /// <summary>Rebuilds the Run split-button flyout from the project's saved configurations.</summary>
+    /// <summary>Rebuilds the Run split-button flyout from the project's saved and auto-detected configurations.</summary>
     private void RebuildRunMenu()
     {
         RunFlyout.Items.Clear();
 
         var configs = RunConfigs;
+        var suggested = _project is not null
+            ? RunConfigDetector.Detect(_project.Path)
+                .Where(s => !configs.Any(c => string.Equals(c.Command, s.Command, StringComparison.OrdinalIgnoreCase)))
+                .ToList()
+            : [];
+
         var runLabel = Loc.T("Detail_Run", "Run");
-        RunButtonLabel.Text = configs.Count > 0 ? $"{runLabel} · {configs[0].Name}" : runLabel;
+        if (configs.Count > 0)
+        {
+            RunButtonLabel.Text = $"{runLabel} · {configs[0].Name}";
+        }
+        else if (suggested.Count > 0)
+        {
+            RunButtonLabel.Text = $"{runLabel} · {suggested[0].Name}";
+        }
+        else
+        {
+            RunButtonLabel.Text = runLabel;
+        }
 
         foreach (var config in configs)
         {
@@ -175,6 +193,28 @@ public sealed partial class ProjectDetailPage : Page
         if (configs.Count > 0)
         {
             RunFlyout.Items.Add(new MenuFlyoutSeparator());
+        }
+
+        if (suggested.Count > 0)
+        {
+            var suggestedMenu = new MenuFlyoutSubItem
+            {
+                Text = Loc.T("Detail_SuggestedConfigs", "Detected commands"),
+                Icon = new FontIcon { Glyph = "\uE945" },
+            };
+            foreach (var sug in suggested)
+            {
+                var item = new MenuFlyoutItem
+                {
+                    Text = $"{sug.Name}  ({sug.Command})",
+                    Icon = new FontIcon { Glyph = "\uE768" },
+                    Tag = sug,
+                };
+                item.Click += async (s, _) => await SaveAndRunSuggestedConfigAsync((RunConfig)((MenuFlyoutItem)s).Tag);
+                suggestedMenu.Items.Add(item);
+            }
+
+            RunFlyout.Items.Add(suggestedMenu);
         }
 
         var add = new MenuFlyoutItem
@@ -203,18 +243,50 @@ public sealed partial class ProjectDetailPage : Page
         }
     }
 
-    /// <summary>Main part of the split button: runs the default (first) configuration.</summary>
+    private async Task SaveAndRunSuggestedConfigAsync(RunConfig suggested)
+    {
+        if (_project is null)
+        {
+            return;
+        }
+
+        if (!_settings.Settings.ProjectRunConfigs.TryGetValue(_project.Path, out var configs))
+        {
+            configs = [];
+            _settings.Settings.ProjectRunConfigs[_project.Path] = configs;
+        }
+
+        if (!configs.Any(c => string.Equals(c.Command, suggested.Command, StringComparison.OrdinalIgnoreCase)))
+        {
+            configs.Add(suggested);
+            await _settings.SaveAsync();
+            RebuildRunMenu();
+        }
+
+        RunConfiguration(suggested);
+    }
+
+    /// <summary>Main part of the split button: runs the default (first) configuration or first detected command.</summary>
     private async void Run_Click(SplitButton sender, SplitButtonClickEventArgs args)
     {
         var configs = RunConfigs;
         if (configs.Count > 0)
         {
             RunConfiguration(configs[0]);
+            return;
         }
-        else
+
+        if (_project is not null)
         {
-            await AddRunConfigAsync(runAfterAdd: true);
+            var suggested = RunConfigDetector.Detect(_project.Path);
+            if (suggested.Count > 0)
+            {
+                await SaveAndRunSuggestedConfigAsync(suggested[0]);
+                return;
+            }
         }
+
+        await AddRunConfigAsync(runAfterAdd: true);
     }
 
     private void RunConfiguration(RunConfig config)
@@ -729,11 +801,35 @@ public sealed partial class ProjectDetailPage : Page
                 info.Untracked > 0 ? Loc.F("Detail_GitUntracked", "{0} untracked", info.Untracked) : "",
             ];
             GitStatusText.Text = string.Join(" · ", parts.Where(p => p.Length > 0));
+            ToggleChangesLabel.Text = $"{Loc.T("Detail_Changes", "Changes")} ({info.WorkingChanges.Count})";
+            ToggleChangesButton.Visibility = Visibility.Visible;
         }
         else
         {
             GitStatusText.Text = Loc.T("Detail_CleanTree", "Clean working tree");
+            ToggleChangesButton.Visibility = Visibility.Collapsed;
+            WorkingChangesCard.Visibility = Visibility.Collapsed;
         }
+
+        WorkingChangesList.Items.Clear();
+        WorkingDiffOutput.Blocks.Clear();
+        foreach (var change in info.WorkingChanges)
+        {
+            WorkingChangesList.Items.Add(new ListViewItem
+            {
+                Content = $"{change.StatusSymbol}  {change.RelativePath}",
+                Tag = change,
+                FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Cascadia Code, Consolas"),
+                FontSize = 12,
+            });
+        }
+
+        if (WorkingChangesList.Items.Count > 0)
+        {
+            WorkingChangesList.SelectedIndex = 0;
+        }
+
+        StashPopLabel.Text = info.StashCount > 0 ? $"Pop ({info.StashCount})" : "Pop";
 
         _graphCount = GraphPageSize;
         var graph = await _git.GetCommitGraphAsync(project.Path, _graphCount);
@@ -750,6 +846,8 @@ public sealed partial class ProjectDetailPage : Page
 
         var cliAvailable = await _git.IsGitCliAvailableAsync();
         FetchButton.IsEnabled = PullButton.IsEnabled = PushButton.IsEnabled = cliAvailable;
+        StashButton.IsEnabled = cliAvailable && info.IsDirty;
+        StashPopButton.IsEnabled = cliAvailable && info.StashCount > 0;
         if (!cliAvailable)
         {
             GitStatusText.Text += "  ·  " + Loc.T("Detail_NoGitCli", "git CLI not found — fetch/pull/push unavailable");
@@ -934,6 +1032,85 @@ public sealed partial class ProjectDetailPage : Page
     private void Pull_Click(object sender, RoutedEventArgs e) => _ = RunGitOperationAsync("Pull", _git.PullAsync);
 
     private void Push_Click(object sender, RoutedEventArgs e) => _ = RunGitOperationAsync("Push", _git.PushAsync);
+
+    private void Stash_Click(object sender, RoutedEventArgs e) => _ = RunGitOperationAsync("Stash", _git.StashAsync);
+
+    private void StashPop_Click(object sender, RoutedEventArgs e) => _ = RunGitOperationAsync("Stash pop", _git.StashPopAsync);
+
+    private void ToggleWorkingChanges_Click(object sender, RoutedEventArgs e)
+    {
+        WorkingChangesCard.Visibility = WorkingChangesCard.Visibility == Visibility.Visible
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+    }
+
+    private async void WorkingChangesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_project is null
+            || (WorkingChangesList.SelectedItem as ListViewItem)?.Tag is not GitWorkingChange change)
+        {
+            return;
+        }
+
+        WorkingDiffOutput.Blocks.Clear();
+        try
+        {
+            var diff = await _git.GetFileDiffAsync(_project.Path, change.RelativePath);
+            var removedBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 0xCF, 0x22, 0x2E));
+            var addedBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 0x2D, 0xA4, 0x4E));
+
+            foreach (var line in diff.Replace("\r\n", "\n").Split('\n').Take(400))
+            {
+                var paragraph = new Microsoft.UI.Xaml.Documents.Paragraph();
+                var run = new Microsoft.UI.Xaml.Documents.Run { Text = line };
+                if (line.StartsWith('+') && !line.StartsWith("+++", StringComparison.Ordinal))
+                {
+                    run.Foreground = addedBrush;
+                }
+                else if (line.StartsWith('-') && !line.StartsWith("---", StringComparison.Ordinal))
+                {
+                    run.Foreground = removedBrush;
+                }
+
+                paragraph.Inlines.Add(run);
+                WorkingDiffOutput.Blocks.Add(paragraph);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Could not load diff for {File}", change.RelativePath);
+        }
+    }
+
+    private async void QuickCommit_Click(object sender, RoutedEventArgs e)
+    {
+        if (_project is null)
+        {
+            return;
+        }
+
+        var message = QuickCommitMessageBox.Text.Trim();
+        if (message.Length == 0)
+        {
+            ShowGitResult(Loc.T("Detail_EmptyCommitMsg", "Enter a commit message first."), success: false);
+            return;
+        }
+
+        try
+        {
+            await _git.CommitAllAsync(_project.Path, message);
+            QuickCommitMessageBox.Text = "";
+            ShowGitResult(Loc.F("Detail_Committed", "Committed: {0}", message), success: true);
+            await LoadGitAsync(_project);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Quick commit failed");
+            ShowGitResult(ex.Message, success: false);
+        }
+    }
 
     private async Task RunGitOperationAsync(
         string operationName, Func<string, CancellationToken, Task<string>> operation)
@@ -1340,6 +1517,132 @@ public sealed partial class ProjectDetailPage : Page
         if (_project is not null)
         {
             Process.Start(new ProcessStartInfo("explorer.exe", $"\"{_project.Path}\"") { UseShellExecute = true });
+        }
+    }
+
+    private void OpenInTerminal_Click(object sender, RoutedEventArgs e)
+    {
+        if (_project is not null)
+        {
+            _terminal.OpenTerminal(_project.Path);
+        }
+    }
+
+    private void RefreshPinState()
+    {
+        if (_project is null)
+        {
+            return;
+        }
+
+        var isPinned = _settings.Settings.PinnedProjectPaths.Contains(_project.Path, StringComparer.OrdinalIgnoreCase);
+        PinProjectIcon.Glyph = isPinned ? "\uE735" : "\uE734";
+    }
+
+    private async void TogglePinProject_Click(object sender, RoutedEventArgs e)
+    {
+        if (_project is null)
+        {
+            return;
+        }
+
+        var pinned = _settings.Settings.PinnedProjectPaths;
+        var idx = pinned.FindIndex(p => string.Equals(p, _project.Path, StringComparison.OrdinalIgnoreCase));
+        if (idx >= 0)
+        {
+            pinned.RemoveAt(idx);
+        }
+        else
+        {
+            pinned.Add(_project.Path);
+        }
+
+        await _settings.SaveAsync();
+        RefreshPinState();
+        App.Services.GetRequiredService<ProjectsViewModel>().ApplyFilterAndSort();
+    }
+
+    private async void CleanProjectDisk_Click(object sender, RoutedEventArgs e)
+    {
+        if (_project is null)
+        {
+            return;
+        }
+
+        var report = await Task.Run(() => ProjectDiskAnalyzer.Analyze(_project.Path));
+        if (report.CleanableFolders.Count == 0)
+        {
+            await new ContentDialog
+            {
+                XamlRoot = XamlRoot,
+                Title = Loc.T("Detail_DiskUsageTitle", "Project disk usage"),
+                Content = Loc.F(
+                    "Detail_NoCleanableText",
+                    "Total size: {0}\n\nNo heavy dependency or build folders (node_modules, bin, obj, target, .venv…) were found.",
+                    report.FormattedTotalSize),
+                CloseButtonText = Loc.T("Common_Ok", "OK"),
+            }.ShowAsync();
+            return;
+        }
+
+        var panel = new StackPanel { Spacing = 8 };
+        panel.Children.Add(new TextBlock
+        {
+            Text = Loc.F(
+                "Detail_DiskSummary",
+                "Total project size: {0}  ·  Reclaimable: {1}",
+                report.FormattedTotalSize,
+                report.FormattedCleanableSize),
+            TextWrapping = TextWrapping.Wrap,
+        });
+
+        var checkboxes = new List<(CheckBox Box, CleanableFolderInfo Folder)>();
+        foreach (var folder in report.CleanableFolders)
+        {
+            var cb = new CheckBox
+            {
+                Content = $"{folder.RelativePath}  ({folder.FormattedSize} · {folder.Category})",
+                IsChecked = true,
+            };
+            checkboxes.Add((cb, folder));
+            panel.Children.Add(cb);
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = Loc.T("Detail_CleanDiskTitle", "Clean dependencies & build artifacts"),
+            Content = new ScrollViewer { Content = panel, MaxHeight = 420, MinWidth = 420 },
+            PrimaryButtonText = Loc.T("Proj_MoveToBin", "Move to Recycle Bin"),
+            CloseButtonText = Loc.T("Common_Cancel", "Cancel"),
+            DefaultButton = ContentDialogButton.Primary,
+        };
+
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+        {
+            return;
+        }
+
+        var selectedFolders = checkboxes.Where(c => c.Box.IsChecked == true).Select(c => c.Folder).ToList();
+        if (selectedFolders.Count == 0)
+        {
+            return;
+        }
+
+        var fileOperations = App.Services.GetRequiredService<IFileOperations>();
+        foreach (var folder in selectedFolders)
+        {
+            try
+            {
+                if (Directory.Exists(folder.FullPath))
+                {
+                    await fileOperations.RecycleAsync(folder.FullPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Could not recycle {Folder}", folder.FullPath);
+            }
         }
     }
 
