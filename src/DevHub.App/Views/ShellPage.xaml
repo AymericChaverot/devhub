@@ -16,34 +16,48 @@
             IsSettingsVisible="True"
             PaneDisplayMode="Left"
             SelectionChanged="Nav_SelectionChanged"
+            PaneOpening="Nav_PaneOpening"
+            PaneClosing="Nav_PaneClosing"
             Loaded="Nav_Loaded">
             <NavigationView.PaneCustomContent>
                 <Button
                     x:Uid="Shell_QuickSearchBtn"
-                    Margin="12,4,12,8"
+                    x:Name="QuickSearchButton"
+                    Height="36"
+                    Margin="4,2,4,6"
+                    Padding="11,0,11,0"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
                     Click="OpenCommandPalette_Click"
                     ToolTipService.ToolTip="Command palette (Ctrl+K)">
-                    <Grid ColumnSpacing="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <FontIcon Grid.Column="0" FontSize="13" Glyph="&#xE721;" />
-                        <TextBlock
-                            x:Uid="Shell_QuickSearchLabel"
-                            Grid.Column="1"
+                    <Grid>
+                        <Grid x:Name="QuickSearchExpandedGrid" ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Grid.Column="0" FontSize="15" VerticalAlignment="Center" Glyph="&#xE721;" />
+                            <TextBlock
+                                x:Uid="Shell_QuickSearchLabel"
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Text="Search…"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                FontSize="11"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Ctrl+K" />
+                        </Grid>
+                        <FontIcon
+                            x:Name="QuickSearchCompactIcon"
+                            FontSize="16"
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Text="Search…"
-                            TextTrimming="CharacterEllipsis" />
-                        <TextBlock
-                            Grid.Column="2"
-                            VerticalAlignment="Center"
-                            FontSize="11"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="Ctrl+K" />
+                            Glyph="&#xE721;"
+                            Visibility="Collapsed" />
                     </Grid>
                 </Button>
             </NavigationView.PaneCustomContent>

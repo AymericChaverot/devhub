@@ -7,8 +7,11 @@ namespace DevHub.App;
 
 public sealed partial class MainWindow : Window
 {
+    public static new MainWindow? Current { get; private set; }
+
     public MainWindow()
     {
+        Current = this;
         InitializeComponent();
 
         // Open at 85% of the screen's work area, centered. Sizes are physical pixels,
@@ -33,6 +36,11 @@ public sealed partial class MainWindow : Window
         RootGrid.ActualThemeChanged += (sender, _) => ApplyTitleBarButtonColors(sender.ActualTheme);
 
         RootFrame.Navigate(typeof(ShellPage));
+    }
+
+    public void SetTitleBarDimmed(bool dimmed)
+    {
+        TitleBarDimOverlay.Visibility = dimmed ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ApplyTitleBarButtonColors(ElementTheme theme)

@@ -74,6 +74,27 @@ public sealed partial class ShellPage : Page
     private void Nav_Loaded(object sender, RoutedEventArgs e)
     {
         Nav.SelectedItem = Nav.MenuItems[0];
+        UpdateQuickSearchButtonAppearance(Nav.IsPaneOpen);
+    }
+
+    private void Nav_PaneOpening(NavigationView sender, object args) =>
+        UpdateQuickSearchButtonAppearance(isOpen: true);
+
+    private void Nav_PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs args) =>
+        UpdateQuickSearchButtonAppearance(isOpen: false);
+
+    private void UpdateQuickSearchButtonAppearance(bool isOpen)
+    {
+        var openPaneWidth = Nav.OpenPaneLength > 0 ? Nav.OpenPaneLength : 320;
+        var compactPaneWidth = Nav.CompactPaneLength > 0 ? Nav.CompactPaneLength : 48;
+
+        QuickSearchExpandedGrid.Visibility = isOpen ? Visibility.Visible : Visibility.Collapsed;
+        QuickSearchExpandedGrid.Width = Math.Max(0, openPaneWidth - 30);
+        QuickSearchCompactIcon.Visibility = isOpen ? Visibility.Collapsed : Visibility.Visible;
+        QuickSearchButton.MinWidth = compactPaneWidth - 8;
+        QuickSearchButton.Width = (isOpen ? openPaneWidth : compactPaneWidth) - 8;
+        QuickSearchButton.Padding = isOpen ? new Thickness(11, 0, 11, 0) : new Thickness(0);
+        QuickSearchButton.HorizontalContentAlignment = isOpen ? HorizontalAlignment.Stretch : HorizontalAlignment.Center;
     }
 
     private void Nav_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -125,12 +146,14 @@ public sealed partial class ShellPage : Page
         CommandPaletteSearchBox.Text = "";
         FilterPaletteItems("");
         CommandPaletteOverlay.Visibility = Visibility.Visible;
+        MainWindow.Current?.SetTitleBarDimmed(true);
         CommandPaletteSearchBox.Focus(FocusState.Programmatic);
     }
 
     private void HideCommandPalette()
     {
         CommandPaletteOverlay.Visibility = Visibility.Collapsed;
+        MainWindow.Current?.SetTitleBarDimmed(false);
     }
 
     private void CommandPaletteBackdrop_Tapped(object sender, TappedRoutedEventArgs e) =>

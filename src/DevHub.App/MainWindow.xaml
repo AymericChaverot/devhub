@@ -28,6 +28,14 @@
             </StackPanel>
         </Grid>
 
+        <!-- Dim overlay over the title bar when the Command Palette (Ctrl+K) is open -->
+        <Border
+            x:Name="TitleBarDimOverlay"
+            Grid.Row="0"
+            Background="#80000000"
+            Visibility="Collapsed"
+            IsHitTestVisible="False" />
+
         <Frame x:Name="RootFrame" Grid.Row="1" />
     </Grid>
 </Window>
