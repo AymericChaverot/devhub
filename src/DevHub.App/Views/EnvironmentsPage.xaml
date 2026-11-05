@@ -206,10 +206,25 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                                <TextBlock
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind SelectedVariant.StatusText, Mode=OneWay}" />
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon
+                                        FontSize="12"
+                                        VerticalAlignment="Center"
+                                        Glyph="&#xE823;"
+                                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                        Visibility="{x:Bind SelectedVariant.IsQueued, Mode=OneWay}" />
+                                    <ProgressRing
+                                        Width="12"
+                                        Height="12"
+                                        VerticalAlignment="Center"
+                                        IsActive="{x:Bind SelectedVariant.IsWorking, Mode=OneWay}"
+                                        Visibility="{x:Bind SelectedVariant.IsWorking, Mode=OneWay}" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind SelectedVariant.StatusText, Mode=OneWay}" />
+                                </StackPanel>
                                 <TextBlock
                                     Style="{StaticResource CaptionTextBlockStyle}"
                                     Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
@@ -217,7 +232,8 @@
                                     Visibility="{x:Bind SelectedVariant.CanUpdate, Mode=OneWay}" />
                                 <ProgressBar
                                     IsIndeterminate="True"
-                                    Visibility="{x:Bind SelectedVariant.IsWorking, Mode=OneWay}" />
+                                    ShowPaused="{x:Bind SelectedVariant.IsQueued, Mode=OneWay}"
+                                    Visibility="{x:Bind SelectedVariant.IsBusy, Mode=OneWay}" />
                             </StackPanel>
 
                             <Button

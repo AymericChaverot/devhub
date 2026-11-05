@@ -46,6 +46,8 @@ public sealed partial class ToolVariantViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(StatusText))]
     [NotifyPropertyChangedFor(nameof(DisplayLabel))]
     [NotifyPropertyChangedFor(nameof(IsWorking))]
+    [NotifyPropertyChangedFor(nameof(IsQueued))]
+    [NotifyPropertyChangedFor(nameof(IsBusy))]
     [NotifyPropertyChangedFor(nameof(CanInstall))]
     [NotifyPropertyChangedFor(nameof(CanUninstall))]
     [NotifyPropertyChangedFor(nameof(CanUpdate))]
@@ -64,7 +66,11 @@ public sealed partial class ToolVariantViewModel : ObservableObject
     /// <summary>Version-picker entry text; a check mark flags installed versions.</summary>
     public string DisplayLabel => State == PackageState.Installed ? $"{Label}  ✓" : Label;
 
-    public bool IsWorking => State is PackageState.Working or PackageState.Queued;
+    public bool IsWorking => State == PackageState.Working;
+
+    public bool IsQueued => State == PackageState.Queued;
+
+    public bool IsBusy => State is PackageState.Working or PackageState.Queued;
 
     public bool CanInstall => State == PackageState.NotInstalled;
 

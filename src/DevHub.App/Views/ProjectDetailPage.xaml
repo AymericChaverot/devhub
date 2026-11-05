@@ -78,7 +78,7 @@
                         Style="{StaticResource CaptionTextBlockStyle}"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
-                    <ItemsControl x:Name="TechList">
+                    <ItemsControl x:Name="TechList" SizeChanged="HeroLayout_SizeChanged">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Vertical" Spacing="6" />
@@ -102,7 +102,14 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <StackPanel x:Name="ActionsRow" Orientation="Horizontal" Spacing="8" Margin="0,6,0,0">
+                    <StackPanel
+                        x:Name="ActionsRow"
+                        MinHeight="32"
+                        HorizontalAlignment="Left"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        Margin="0,6,0,0"
+                        SizeChanged="HeroLayout_SizeChanged">
                         <Button
                             x:Name="RemoteButton"
                             Visibility="Collapsed"
@@ -129,7 +136,9 @@
                 Orientation="Horizontal"
                 Spacing="8"
                 HorizontalAlignment="Left"
-                VerticalAlignment="Top">
+                VerticalAlignment="Top"
+                Opacity="0"
+                SizeChanged="HeroLayout_SizeChanged">
                 <StackPanel.RenderTransform>
                     <TranslateTransform x:Name="HeroQuickActionsTransform" />
                 </StackPanel.RenderTransform>

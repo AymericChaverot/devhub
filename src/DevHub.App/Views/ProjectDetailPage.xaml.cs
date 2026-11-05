@@ -95,7 +95,7 @@ public sealed partial class ProjectDetailPage : Page
         }
 
         _project = project;
-        await RecordProjectOpenedAsync(project);
+        HeroQuickActions.Opacity = 0;
         ProjectName.Text = project.Name;
         ProjectPath.Text = relativeDisplay ?? project.Path;
         RefreshSubprojectButtons();
@@ -111,27 +111,29 @@ public sealed partial class ProjectDetailPage : Page
         SetupForgeTab(project);
         RebuildRunMenu();
 
-        await PopulateIdePickerAsync(project);
-        await LoadGitAsync(project);
-        await LoadReadmeAsync(project.Path);
-
-        // HeroQuickActions (the IDE picker/Open/Explorer group) is positioned entirely by
-        // SetHeroCollapse, measured against TechList's real, laid-out position. Without an
-        // initial call it sits at its default (0,0) transform — overlapping the back button —
-        // until the first scroll or button click. A single deferred DispatcherQueue tick isn't
-        // always enough: for projects with a README, LoadReadmeAsync's WebView2 startup above
-        // yields long enough for layout to settle; for projects without one (a fresh scaffold —
-        // "go mod init" etc. leave no README) that await returns almost instantly, so the queued
-        // tick could still fire before TechList's ItemsSource has actually been arranged.
-        // LayoutUpdated fires once the pending layout pass (including that ItemsSource change)
-        // has completed, so it's used instead of a fixed number of ticks.
+        // Position HeroQuickActions as soon as the header's own layout settles (before waiting
+        // on Git / README / WebView2 initialization) so it never flashes at (0,0) in the top-left.
         void OnHeroLayoutSettled(object? layoutSender, object? layoutArgs)
         {
+            if (HeroCard.ActualWidth <= 0 || HeroQuickActions.ActualWidth <= 0)
+            {
+                return;
+            }
+
             TechList.LayoutUpdated -= OnHeroLayoutSettled;
             SetHeroCollapse(0);
+            UpdateHeroQuickActionsPosition();
         }
 
         TechList.LayoutUpdated += OnHeroLayoutSettled;
+
+        await PopulateIdePickerAsync(project);
+        UpdateHeroQuickActionsPosition();
+
+        await Task.WhenAll(
+            RecordProjectOpenedAsync(project),
+            LoadGitAsync(project),
+            LoadReadmeAsync(project.Path));
     }
 
     /// <summary>Stamps the project as "last opened now"; the dashboard's recent list reads this.</summary>
@@ -552,6 +554,7 @@ public sealed partial class ProjectDetailPage : Page
         // The IDE picker/Open/Explorer group (HeroQuickActions) stays visible and slides
         // over to the right instead of fading with the rest of the row — only the remote
         // button, which is still part of ActionsRow, fades out the old way.
+        ActionsRow.MinHeight = 32 * inv;
         RemoteButton.Opacity = inv;
         RemoteButton.IsHitTestVisible = p < 0.5;
         HeroTopButtons.Opacity = inv;
@@ -600,31 +603,7 @@ public sealed partial class ProjectDetailPage : Page
             HeroCard.Height = heroCardHeight;
         }
 
-        // HeroQuickActions is a free-floating sibling (not part of the title's vertical
-        // flow) so it can end up right-aligned in the slim collapsed bar without needing to
-        // shrink/clip actual controls. At p=0 its measured target is exactly where ActionsRow
-        // itself starts — that row used to open with these same controls, so this lines its
-        // left edge up with ActionsRow's, not its own trailing edge — and it slides from
-        // there to the right-aligned collapsed spot. ActionsRow (now just the remote button)
-        // still starts at that same X in its own normal flow, unaware of this floating
-        // sibling, so its left margin is pushed out by however much room this still needs,
-        // shrinking back to 0 as this slides away and stops needing it.
-        const double quickActionsSpacing = 8;
-        const double quickActionsRightMargin = 54;
-        var qaWidth = HeroQuickActions.ActualWidth > 0 ? HeroQuickActions.ActualWidth : 360;
-        var qaHeight = HeroQuickActions.ActualHeight > 0 ? HeroQuickActions.ActualHeight : 32;
-
-        // X comes from TechList, not ActionsRow: ActionsRow's own left margin is what gets
-        // pushed out below to reserve room for this, so measuring X from it here would feed
-        // that adjustment back into next frame's "natural" position and drift the group
-        // right on every call. TechList shares the same column and is never touched.
-        var naturalX = TechList.TransformToVisual(HeroCard).TransformPoint(new Point(0, 0)).X;
-        var naturalY = ActionsRow.TransformToVisual(HeroCard).TransformPoint(new Point(0, 0)).Y;
-        var collapsedX = Math.Max(naturalX, HeroCard.ActualWidth - quickActionsRightMargin - qaWidth);
-        var collapsedY = (heroCardHeight / 2) - (qaHeight / 2);
-        HeroQuickActionsTransform.X = naturalX + (p * (collapsedX - naturalX));
-        HeroQuickActionsTransform.Y = naturalY + (p * (collapsedY - naturalY));
-        ActionsRow.Margin = new Thickness((qaWidth + quickActionsSpacing) * inv, 6, 0, 0);
+        UpdateHeroQuickActionsPosition(heroCardHeight);
 
         // At rest, the button keeps its small default (natural) size, top-aligned next
         // to the multi-line title block — no explicit Height. Once collapsing starts it
@@ -1598,6 +1577,49 @@ public sealed partial class ProjectDetailPage : Page
         {
             Rect = new Windows.Foundation.Rect(0, 0, e.NewSize.Width, e.NewSize.Height),
         };
+        UpdateHeroQuickActionsPosition();
+    }
+
+    private void HeroLayout_SizeChanged(object sender, SizeChangedEventArgs e) =>
+        UpdateHeroQuickActionsPosition();
+
+    /// <summary>
+    /// Positions <see cref="HeroQuickActions"/> relative to <see cref="TechList"/> and
+    /// <see cref="ActionsRow"/>, keeping it hidden until layout metrics are valid so it
+    /// never flashes at (0,0) in the top-left of the hero card.
+    /// </summary>
+    private void UpdateHeroQuickActionsPosition(double? targetHeroHeight = null)
+    {
+        if (HeroCard.ActualWidth <= 0 || HeroQuickActions.ActualWidth <= 0)
+        {
+            return;
+        }
+
+        var p = Math.Clamp(_heroProgress < 0 ? 0 : _heroProgress, 0, 1);
+        var inv = 1 - p;
+
+        const double quickActionsSpacing = 8;
+        const double quickActionsRightMargin = 54;
+        var qaWidth = HeroQuickActions.ActualWidth;
+        var qaHeight = HeroQuickActions.ActualHeight > 0 ? HeroQuickActions.ActualHeight : 32;
+        var heroCardHeight = targetHeroHeight
+            ?? (HeroCard.ActualHeight > 0 ? HeroCard.ActualHeight : FallbackExpandedHeroHeight);
+
+        var naturalX = TechList.TransformToVisual(HeroCard).TransformPoint(new Point(0, 0)).X;
+        var naturalY = ActionsRow.TransformToVisual(HeroCard).TransformPoint(new Point(0, 0)).Y;
+        var collapsedX = Math.Max(naturalX, HeroCard.ActualWidth - quickActionsRightMargin - qaWidth);
+        var collapsedY = (heroCardHeight / 2) - (qaHeight / 2);
+
+        HeroQuickActionsTransform.X = naturalX + (p * (collapsedX - naturalX));
+        HeroQuickActionsTransform.Y = naturalY + (p * (collapsedY - naturalY));
+
+        var targetLeftMargin = (qaWidth + quickActionsSpacing) * inv;
+        if (Math.Abs(ActionsRow.Margin.Left - targetLeftMargin) > 0.5)
+        {
+            ActionsRow.Margin = new Thickness(targetLeftMargin, 6, 0, 0);
+        }
+
+        HeroQuickActions.Opacity = 1;
     }
 
     private void Back_Click(object sender, RoutedEventArgs e)
