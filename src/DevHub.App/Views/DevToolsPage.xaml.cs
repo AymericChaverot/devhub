@@ -10,11 +10,22 @@ namespace DevHub.App.Views;
 public sealed partial class DevToolsPage : Page
 {
     private static readonly HttpClient ApiClient = CreateApiClient();
+    private IReadOnlyList<LocalPortInfo> _allPorts = [];
+
+    /// <summary>Optional tool index requested by the global Command Palette before navigating.</summary>
+    public static int? PendingToolIndex { get; set; }
 
     public DevToolsPage()
     {
         InitializeComponent();
-        ToolsList.SelectedIndex = 0;
+        var initialIndex = PendingToolIndex ?? 0;
+        PendingToolIndex = null;
+        ToolsList.SelectedIndex = Math.Clamp(initialIndex, 0, ToolsList.Items.Count - 1);
+    }
+
+    public void SelectTool(int index)
+    {
+        ToolsList.SelectedIndex = Math.Clamp(index, 0, ToolsList.Items.Count - 1);
     }
 
     private static HttpClient CreateApiClient()
@@ -37,6 +48,12 @@ public sealed partial class DevToolsPage : Page
         ColorPanel.Visibility = index == 7 ? Visibility.Visible : Visibility.Collapsed;
         PasswordPanel.Visibility = index == 8 ? Visibility.Visible : Visibility.Collapsed;
         ApiPanel.Visibility = index == 9 ? Visibility.Visible : Visibility.Collapsed;
+        PortsPanel.Visibility = index == 10 ? Visibility.Visible : Visibility.Collapsed;
+
+        if (index == 10 && _allPorts.Count == 0)
+        {
+            _ = LoadPortsAsync();
+        }
     }
 
     private static void CopyToClipboard(string text)
@@ -461,6 +478,187 @@ public sealed partial class DevToolsPage : Page
         {
             ApiSendButton.IsEnabled = true;
             ApiProgress.IsActive = false;
+        }
+    }
+
+    // ============ Local ports ============
+
+    private void RefreshPorts_Click(object sender, RoutedEventArgs e) => _ = LoadPortsAsync();
+
+    private void PortsFilter_Changed(object sender, object e)
+    {
+        if (PortsList is null)
+        {
+            return;
+        }
+
+        RenderPortsList();
+    }
+
+    private async Task LoadPortsAsync()
+    {
+        try
+        {
+            _allPorts = await LocalPortScanner.GetListeningPortsAsync();
+            RenderPortsList();
+        }
+        catch (Exception ex)
+        {
+            PortsInfoBar.Severity = InfoBarSeverity.Error;
+            PortsInfoBar.Message = ex.Message;
+            PortsInfoBar.IsOpen = true;
+        }
+    }
+
+    private void RenderPortsList()
+    {
+        PortsList.Items.Clear();
+        var term = PortsSearchBox?.Text.Trim() ?? "";
+        var devOnly = PortsDevOnlyCheck?.IsChecked == true;
+
+        var filtered = _allPorts
+            .Where(p => !devOnly || p.IsCommonDevPort)
+            .Where(p => term.Length == 0
+                || p.Port.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)
+                || p.ProcessName.Contains(term, StringComparison.OrdinalIgnoreCase)
+                || p.ProcessId.ToString().Contains(term, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        PortsCountText.Text = Loc.F("Tools_PortsCount", "{0} port(s) listening", filtered.Count);
+
+        foreach (var item in filtered)
+        {
+            var row = new Grid
+            {
+                ColumnSpacing = 12,
+                Padding = new Thickness(10, 6, 10, 6),
+                CornerRadius = new CornerRadius(6),
+            };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(90) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(130) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var portBadge = new Border
+            {
+                Padding = new Thickness(8, 3, 8, 3),
+                CornerRadius = new CornerRadius(6),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center,
+                Background = item.IsCommonDevPort
+                    ? (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["AccentFillColorDefaultBrush"]
+                    : (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["SubtleFillColorSecondaryBrush"],
+                Child = new TextBlock
+                {
+                    Text = $":{item.Port}",
+                    FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Cascadia Code, Consolas"),
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    Foreground = item.IsCommonDevPort
+                        ? (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextOnAccentFillColorPrimaryBrush"]
+                        : (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorPrimaryBrush"],
+                },
+            };
+            Grid.SetColumn(portBadge, 0);
+
+            var procPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing = 8,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            procPanel.Children.Add(new TextBlock
+            {
+                Text = item.ProcessName,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                VerticalAlignment = VerticalAlignment.Center,
+            });
+            procPanel.Children.Add(new TextBlock
+            {
+                Text = $"PID {item.ProcessId}",
+                FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Cascadia Code, Consolas"),
+                FontSize = 12,
+                Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+                VerticalAlignment = VerticalAlignment.Center,
+            });
+            Grid.SetColumn(procPanel, 1);
+
+            var addrText = new TextBlock
+            {
+                Text = item.LocalAddress,
+                FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Cascadia Code, Consolas"),
+                FontSize = 12,
+                Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            Grid.SetColumn(addrText, 2);
+
+            var actions = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6 };
+            var copyBtn = new Button
+            {
+                Content = new FontIcon { FontSize = 13, Glyph = "\uE8C8" },
+                Tag = $"{item.Port}",
+            };
+            ToolTipService.SetToolTip(copyBtn, Loc.T("Tools_CopyPortTip", "Copy port"));
+            copyBtn.Click += (s, _) => CopyToClipboard((string)((Button)s).Tag);
+            actions.Children.Add(copyBtn);
+
+            if (item.ProcessId > 4)
+            {
+                var killBtn = new Button
+                {
+                    Content = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 6,
+                        Children =
+                        {
+                            new FontIcon { FontSize = 12, Glyph = "\uE711" },
+                            new TextBlock { Text = Loc.T("Tools_KillProcess", "Kill") },
+                        },
+                    },
+                    Tag = item,
+                };
+                ToolTipService.SetToolTip(killBtn, Loc.F("Tools_KillProcessTip", "Terminate {0} (PID {1})", item.ProcessName, item.ProcessId));
+                killBtn.Click += KillProcess_Click;
+                actions.Children.Add(killBtn);
+            }
+
+            Grid.SetColumn(actions, 3);
+
+            row.Children.Add(portBadge);
+            row.Children.Add(procPanel);
+            row.Children.Add(addrText);
+            row.Children.Add(actions);
+            PortsList.Items.Add(row);
+        }
+    }
+
+    private async void KillProcess_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is not LocalPortInfo info)
+        {
+            return;
+        }
+
+        try
+        {
+            LocalPortScanner.KillProcess(info.ProcessId);
+            PortsInfoBar.Severity = InfoBarSeverity.Success;
+            PortsInfoBar.Message = Loc.F(
+                "Tools_ProcessKilled",
+                "Terminated {0} (PID {1}) on port {2}.",
+                info.ProcessName,
+                info.ProcessId,
+                info.Port);
+            PortsInfoBar.IsOpen = true;
+            await Task.Delay(250);
+            await LoadPortsAsync();
+        }
+        catch (Exception ex)
+        {
+            PortsInfoBar.Severity = InfoBarSeverity.Error;
+            PortsInfoBar.Message = ex.Message;
+            PortsInfoBar.IsOpen = true;
         }
     }
 }
