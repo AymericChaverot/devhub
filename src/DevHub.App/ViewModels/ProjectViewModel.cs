@@ -1,13 +1,15 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using DevHub.Core.Models;
 
 namespace DevHub.App.ViewModels;
 
-/// <summary>One row of the Projects list. Immutable — the list is rebuilt on every rescan.</summary>
-public sealed class ProjectViewModel
+/// <summary>One row of the Projects list.</summary>
+public sealed partial class ProjectViewModel : ObservableObject
 {
-    public ProjectViewModel(Project project)
+    public ProjectViewModel(Project project, bool isPinned = false)
     {
         Project = project;
+        IsPinned = isPinned;
     }
 
     public Project Project { get; }
@@ -19,6 +21,12 @@ public sealed class ProjectViewModel
     public bool IsGitRepository => Project.IsGitRepository;
 
     public string? GitRemoteUrl => Project.GitRemoteUrl;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PinGlyph))]
+    public partial bool IsPinned { get; set; }
+
+    public string PinGlyph => IsPinned ? "\uE735" : "\uE734";
 
     /// <summary>"github.com" for https and ssh remotes; empty when there is no remote.</summary>
     public string RemoteHost
@@ -56,4 +64,15 @@ public sealed class ProjectViewModel
         ];
         return this;
     }
+
+    public bool Matches(string searchTerm) =>
+        Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+        || Path.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+        || RemoteHost.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+        || Project.Languages.Any(l => l.Language.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+        || Project.Frameworks.Any(f => f.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    public bool HasTechnology(string techName) =>
+        Project.Languages.Any(l => string.Equals(l.Language, techName, StringComparison.OrdinalIgnoreCase))
+        || Project.Frameworks.Any(f => string.Equals(f.Name, techName, StringComparison.OrdinalIgnoreCase));
 }

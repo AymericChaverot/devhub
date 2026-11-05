@@ -647,6 +647,12 @@
                                 Click="RecentProject_Click">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon
+                                            FontSize="12"
+                                            VerticalAlignment="Center"
+                                            Glyph="&#xE735;"
+                                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                            Visibility="{x:Bind IsPinned, Mode=OneWay}" />
                                         <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind Name}" />
                                         <FontIcon
                                             FontSize="12"

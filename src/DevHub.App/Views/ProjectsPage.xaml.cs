@@ -78,6 +78,14 @@ public sealed partial class ProjectsPage : Page
         }
     }
 
+    private async void TogglePin_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is ProjectViewModel project)
+        {
+            await ViewModel.TogglePinAsync(project);
+        }
+    }
+
     private async void RemoveFromList_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as FrameworkElement)?.Tag is ProjectViewModel project)

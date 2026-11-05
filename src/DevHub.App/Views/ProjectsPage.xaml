@@ -25,39 +25,60 @@
         <StackPanel
             Grid.Row="1"
             Margin="0,16,0,0"
-            Orientation="Horizontal"
-            Spacing="8"
+            Spacing="10"
             Visibility="{x:Bind ViewModel.HasProjectsFolder, Mode=OneWay}">
-            <Button Style="{StaticResource AccentButtonStyle}" Click="NewProject_Click">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon FontSize="14" Glyph="&#xE710;" />
-                    <TextBlock x:Uid="Proj_NewProject" Text="New Project" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Style="{StaticResource AccentButtonStyle}" Click="NewProject_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE710;" />
+                        <TextBlock x:Uid="Proj_NewProject" Text="New Project" />
+                    </StackPanel>
+                </Button>
+                <Button Click="AddFromGit_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE8AB;" />
+                        <TextBlock x:Uid="Proj_AddFromGit" Text="Add from Git" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{x:Bind ViewModel.RescanCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                        <TextBlock x:Uid="Proj_Rescan" Text="Rescan" />
+                    </StackPanel>
+                </Button>
+                <Button x:Uid="Proj_ChangeFolder" Click="ChangeFolder_Click" Content="Change folder…" />
+                <StackPanel
+                    Margin="8,0,0,0"
+                    Orientation="Horizontal"
+                    Spacing="8"
+                    VerticalAlignment="Center"
+                    Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}">
+                    <ProgressRing Width="16" Height="16" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+                    <TextBlock
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.BusyMessage, Mode=OneWay}" />
                 </StackPanel>
-            </Button>
-            <Button Click="AddFromGit_Click">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon FontSize="14" Glyph="&#xE8AB;" />
-                    <TextBlock x:Uid="Proj_AddFromGit" Text="Add from Git" />
-                </StackPanel>
-            </Button>
-            <Button Command="{x:Bind ViewModel.RescanCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon FontSize="14" Glyph="&#xE72C;" />
-                    <TextBlock x:Uid="Proj_Rescan" Text="Rescan" />
-                </StackPanel>
-            </Button>
-            <Button x:Uid="Proj_ChangeFolder" Click="ChangeFolder_Click" Content="Change folder…" />
-            <StackPanel
-                Margin="8,0,0,0"
-                Orientation="Horizontal"
-                Spacing="8"
-                VerticalAlignment="Center"
-                Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}">
-                <ProgressRing Width="16" Height="16" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
-                <TextBlock
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{x:Bind ViewModel.BusyMessage, Mode=OneWay}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <AutoSuggestBox
+                    x:Uid="Proj_Search"
+                    Width="280"
+                    VerticalAlignment="Center"
+                    PlaceholderText="Search projects…"
+                    QueryIcon="Find"
+                    Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" />
+                <ComboBox
+                    MinWidth="180"
+                    VerticalAlignment="Center"
+                    ItemsSource="{x:Bind ViewModel.TechnologyOptions, Mode=OneWay}"
+                    SelectedItem="{x:Bind ViewModel.SelectedTechnology, Mode=TwoWay}" />
+                <ComboBox
+                    MinWidth="170"
+                    VerticalAlignment="Center"
+                    ItemsSource="{x:Bind ViewModel.SortOptions}"
+                    SelectedItem="{x:Bind ViewModel.SelectedSort, Mode=TwoWay}" />
             </StackPanel>
         </StackPanel>
 
@@ -186,6 +207,17 @@
                             Text="{x:Bind RemoteHost}" />
 
                         <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4">
+                            <Button
+                                x:Uid="Proj_PinButton"
+                                VerticalAlignment="Center"
+                                Click="TogglePin_Click"
+                                Tag="{x:Bind}"
+                                ToolTipService.ToolTip="Pin / unpin project">
+                                <FontIcon
+                                    FontSize="14"
+                                    Glyph="{x:Bind PinGlyph, Mode=OneWay}"
+                                    Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                            </Button>
                             <Button
                                 x:Uid="Proj_OpenExplorerButton"
                                 VerticalAlignment="Center"

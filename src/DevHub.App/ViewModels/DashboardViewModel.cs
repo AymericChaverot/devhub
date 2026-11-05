@@ -402,17 +402,21 @@ public sealed partial class DashboardViewModel : ObservableObject
         {
             var opened = _settings.Settings.ProjectLastOpened;
             var ignored = _settings.Settings.IgnoredProjectPaths;
+            var pinned = _settings.Settings.PinnedProjectPaths;
             var projects = (await _store.GetAllAsync())
                 .Where(p => !ignored.Contains(p.Path, StringComparer.OrdinalIgnoreCase))
-                .Where(p => opened.ContainsKey(p.Path))
-                .OrderByDescending(p => opened[p.Path])
+                .Where(p => opened.ContainsKey(p.Path) || pinned.Contains(p.Path, StringComparer.OrdinalIgnoreCase))
+                .OrderByDescending(p => pinned.Contains(p.Path, StringComparer.OrdinalIgnoreCase))
+                .ThenByDescending(p => opened.GetValueOrDefault(p.Path, DateTime.MinValue))
+                .ThenBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
                 .Take(6)
                 .ToList();
 
             RecentProjects.Clear();
             foreach (var project in projects)
             {
-                RecentProjects.Add(new ProjectViewModel(project).WithBadges());
+                var isPinned = pinned.Contains(project.Path, StringComparer.OrdinalIgnoreCase);
+                RecentProjects.Add(new ProjectViewModel(project, isPinned).WithBadges());
             }
 
             HasRecentProjects = RecentProjects.Count > 0;
