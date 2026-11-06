@@ -199,12 +199,57 @@
                                 Text="{x:Bind Path}" />
                         </StackPanel>
 
-                        <TextBlock
+                        <!--  Git at a glance: branch, uncommitted changes, commits to push / pull, then the host.  -->
+                        <StackPanel
                             Grid.Column="2"
                             VerticalAlignment="Center"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind RemoteHost}" />
+                            Orientation="Horizontal"
+                            Spacing="12">
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="10"
+                                Visibility="{x:Bind HasGitStatus, Mode=OneWay}">
+                                <TextBlock
+                                    MaxWidth="160"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind BranchName, Mode=OneWay}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    Spacing="5"
+                                    ToolTipService.ToolTip="{x:Bind ChangesToolTip, Mode=OneWay}"
+                                    Visibility="{x:Bind HasChanges, Mode=OneWay}">
+                                    <Ellipse
+                                        Width="7"
+                                        Height="7"
+                                        VerticalAlignment="Center"
+                                        Fill="{ThemeResource SystemFillColorCautionBrush}" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Text="{x:Bind ChangesText, Mode=OneWay}" />
+                                </StackPanel>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind AheadText, Mode=OneWay}"
+                                    ToolTipService.ToolTip="{x:Bind AheadToolTip, Mode=OneWay}"
+                                    Visibility="{x:Bind HasAhead, Mode=OneWay}" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind BehindText, Mode=OneWay}"
+                                    ToolTipService.ToolTip="{x:Bind BehindToolTip, Mode=OneWay}"
+                                    Visibility="{x:Bind HasBehind, Mode=OneWay}" />
+                            </StackPanel>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind RemoteHost}" />
+                        </StackPanel>
 
                         <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4">
                             <Button

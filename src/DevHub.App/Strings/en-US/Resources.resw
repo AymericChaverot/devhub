@@ -441,6 +441,9 @@
   <data name="Proj_SortPinnedName" xml:space="preserve"><value>Pinned &amp; Name</value></data>
   <data name="Proj_SortRecent" xml:space="preserve"><value>Recently opened</value></data>
   <data name="Proj_SortName" xml:space="preserve"><value>Name (A–Z)</value></data>
+  <data name="Proj_GitChanges" xml:space="preserve"><value>{0} changed file(s)</value></data>
+  <data name="Proj_GitAhead" xml:space="preserve"><value>{0} commit(s) to push</value></data>
+  <data name="Proj_GitBehind" xml:space="preserve"><value>{0} commit(s) to pull</value></data>
   <data name="Proj_Search.PlaceholderText" xml:space="preserve"><value>Search projects…</value></data>
   <data name="Proj_PinButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Pin / unpin project</value></data>
   <data name="Detail_Terminal.Text" xml:space="preserve"><value>Terminal</value></data>

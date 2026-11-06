@@ -441,6 +441,9 @@
   <data name="Proj_SortPinnedName" xml:space="preserve"><value>Épinglés &amp; Nom</value></data>
   <data name="Proj_SortRecent" xml:space="preserve"><value>Ouverts récemment</value></data>
   <data name="Proj_SortName" xml:space="preserve"><value>Nom (A–Z)</value></data>
+  <data name="Proj_GitChanges" xml:space="preserve"><value>{0} fichier(s) modifié(s)</value></data>
+  <data name="Proj_GitAhead" xml:space="preserve"><value>{0} commit(s) à pousser</value></data>
+  <data name="Proj_GitBehind" xml:space="preserve"><value>{0} commit(s) à tirer</value></data>
   <data name="Proj_Search.PlaceholderText" xml:space="preserve"><value>Rechercher un projet…</value></data>
   <data name="Proj_PinButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Épingler / désépingler le projet</value></data>
   <data name="Detail_Terminal.Text" xml:space="preserve"><value>Terminal</value></data>

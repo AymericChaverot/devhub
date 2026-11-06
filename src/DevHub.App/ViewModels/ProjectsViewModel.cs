@@ -18,6 +18,7 @@ public sealed partial class ProjectsViewModel : ObservableObject
     private List<ProjectViewModel> _allProjects = [];
     private bool _suppressFilter;
     private string? _loadedFolderPath;
+    private CancellationTokenSource? _gitStatusRefresh;
 
     public ProjectsViewModel(
         ISettingsService settings,
@@ -116,6 +117,9 @@ public sealed partial class ProjectsViewModel : ObservableObject
         if (_allProjects.Count > 0 && string.Equals(_loadedFolderPath, ProjectsFolderPath, StringComparison.OrdinalIgnoreCase))
         {
             ApplyFilterAndSort();
+
+            // Coming back to the page: repositories may have changed meanwhile.
+            _ = RefreshGitStatusesAsync();
             return;
         }
 
@@ -315,6 +319,51 @@ public sealed partial class ProjectsViewModel : ObservableObject
         }
 
         ApplyFilterAndSort();
+        _ = RefreshGitStatusesAsync();
+    }
+
+    /// <summary>
+    /// Fills in each repository's branch and sync state in the background, a few at a time.
+    /// A newer refresh cancels the previous one, so only the latest list gets updated.
+    /// </summary>
+    private async Task RefreshGitStatusesAsync()
+    {
+        const int MaxConcurrentRepositories = 4;
+
+        _gitStatusRefresh?.Cancel();
+        var refresh = _gitStatusRefresh = new CancellationTokenSource();
+        using var throttle = new SemaphoreSlim(MaxConcurrentRepositories);
+
+        await Task.WhenAll(_allProjects.Where(p => p.IsGitRepository).Select(async project =>
+        {
+            await throttle.WaitAsync();
+            try
+            {
+                if (refresh.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                // Resumes on the UI thread, so the row can be updated directly.
+                var status = await _git.GetStatusSummaryAsync(project.Path, refresh.Token);
+                if (!refresh.IsCancellationRequested)
+                {
+                    project.GitStatus = status;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Superseded by a newer refresh.
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Could not read git status of {Path}", project.Path);
+            }
+            finally
+            {
+                throttle.Release();
+            }
+        }));
     }
 
     public void ApplyFilterAndSort()

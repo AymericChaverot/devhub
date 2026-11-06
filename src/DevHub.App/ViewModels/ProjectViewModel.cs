@@ -52,6 +52,44 @@ public sealed partial class ProjectViewModel : ObservableObject
 
     public bool HasRemote => RemoteHost.Length > 0;
 
+    /// <summary>Branch and sync state; null until loaded in the background (or not a repository).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasGitStatus))]
+    [NotifyPropertyChangedFor(nameof(BranchName))]
+    [NotifyPropertyChangedFor(nameof(HasChanges))]
+    [NotifyPropertyChangedFor(nameof(ChangesText))]
+    [NotifyPropertyChangedFor(nameof(ChangesToolTip))]
+    [NotifyPropertyChangedFor(nameof(HasAhead))]
+    [NotifyPropertyChangedFor(nameof(AheadText))]
+    [NotifyPropertyChangedFor(nameof(AheadToolTip))]
+    [NotifyPropertyChangedFor(nameof(HasBehind))]
+    [NotifyPropertyChangedFor(nameof(BehindText))]
+    [NotifyPropertyChangedFor(nameof(BehindToolTip))]
+    public partial GitStatusSummary? GitStatus { get; set; }
+
+    public bool HasGitStatus => GitStatus is not null;
+
+    public string BranchName => GitStatus?.Branch ?? "";
+
+    public bool HasChanges => GitStatus?.IsDirty == true;
+
+    public string ChangesText => $"{GitStatus?.ChangedFiles ?? 0}";
+
+    public string ChangesToolTip =>
+        Loc.F("Proj_GitChanges", "{0} changed file(s)", GitStatus?.ChangedFiles ?? 0);
+
+    public bool HasAhead => GitStatus?.Ahead > 0;
+
+    public string AheadText => $"↑{GitStatus?.Ahead ?? 0}";
+
+    public string AheadToolTip => Loc.F("Proj_GitAhead", "{0} commit(s) to push", GitStatus?.Ahead ?? 0);
+
+    public bool HasBehind => GitStatus?.Behind > 0;
+
+    public string BehindText => $"↓{GitStatus?.Behind ?? 0}";
+
+    public string BehindToolTip => Loc.F("Proj_GitBehind", "{0} commit(s) to pull", GitStatus?.Behind ?? 0);
+
     public IReadOnlyList<Badge> Badges { get; private set; } = [];
 
     /// <summary>Badge construction touches XAML brushes, so it runs lazily on the UI thread.</summary>
