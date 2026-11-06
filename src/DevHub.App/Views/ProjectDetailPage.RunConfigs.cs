@@ -106,25 +106,31 @@ public sealed partial class ProjectDetailPage
 
     private async Task SaveAndRunSuggestedConfigAsync(RunConfig suggested)
     {
+        if (!RunConfigs.Any(c => string.Equals(c.Command, suggested.Command, StringComparison.OrdinalIgnoreCase)))
+        {
+            await SaveRunConfigAsync(suggested);
+        }
+
+        RunConfiguration(suggested);
+    }
+
+    /// <summary>Appends a configuration to the project's saved list, persists it, and refreshes the menu.</summary>
+    private async Task SaveRunConfigAsync(RunConfig config)
+    {
         if (_project is null)
         {
             return;
         }
 
-        if (!_settings.Settings.ProjectRunConfigs.TryGetValue(_project.Path, out var configs))
+        var allConfigs = _settings.Settings.ProjectRunConfigs;
+        if (!allConfigs.TryGetValue(_project.Path, out var configs))
         {
-            configs = [];
-            _settings.Settings.ProjectRunConfigs[_project.Path] = configs;
+            allConfigs[_project.Path] = configs = [];
         }
 
-        if (!configs.Any(c => string.Equals(c.Command, suggested.Command, StringComparison.OrdinalIgnoreCase)))
-        {
-            configs.Add(suggested);
-            await _settings.SaveAsync();
-            RebuildRunMenu();
-        }
-
-        RunConfiguration(suggested);
+        configs.Add(config);
+        await _settings.SaveAsync();
+        RebuildRunMenu();
     }
 
     /// <summary>Main part of the split button: runs the default (first) configuration or first detected command.</summary>
@@ -208,15 +214,7 @@ public sealed partial class ProjectDetailPage
             Command = commandBox.Text.Trim(),
         };
 
-        if (!_settings.Settings.ProjectRunConfigs.TryGetValue(_project.Path, out var configs))
-        {
-            configs = [];
-            _settings.Settings.ProjectRunConfigs[_project.Path] = configs;
-        }
-
-        configs.Add(config);
-        await _settings.SaveAsync();
-        RebuildRunMenu();
+        await SaveRunConfigAsync(config);
 
         if (runAfterAdd)
         {
