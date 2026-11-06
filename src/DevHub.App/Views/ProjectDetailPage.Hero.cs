@@ -36,6 +36,62 @@ public sealed partial class ProjectDetailPage
         AnimateHeroCollapse(_heroProgress < 0.5 ? 1 : 0, lockByButton: true);
     }
 
+    /// <summary>
+    /// Lets a group of scroll viewers drive the hero both ways — unless the collapse button
+    /// has taken over (see <see cref="AnimateHeroCollapse"/>), after which scrolling has no
+    /// say at all. While the hero is still open, the first scroll step collapses it instead
+    /// of moving the content. The group drives ONE hero, so it only re-expands once every
+    /// member is back near its top; otherwise a barely-touched column would snap it open.
+    /// Collapsing the hero grows the star-sized content row, which can clamp a viewer's
+    /// offset and re-fire ViewChanged without any user scroll; reacting to that would resize
+    /// the hero again and loop into a LayoutCycleException. A real gesture never changes the
+    /// viewport height, so a viewport change is ignored.
+    /// </summary>
+    /// <param name="scrolled">Runs after each genuine scroll step (e.g. to page in more data).</param>
+    private void CollapseHeroOnScroll(IReadOnlyList<ScrollViewer> group, Action<ScrollViewer>? scrolled = null)
+    {
+        const double scrollStepThreshold = 4;
+        const double nearTopOffset = 8;
+
+        foreach (var scrollViewer in group)
+        {
+            var lastOffset = scrollViewer.VerticalOffset;
+            var lastViewportHeight = scrollViewer.ViewportHeight;
+
+            scrollViewer.ViewChanged += (_, _) =>
+            {
+                var viewportChanged = Math.Abs(scrollViewer.ViewportHeight - lastViewportHeight) > 0.5;
+                lastViewportHeight = scrollViewer.ViewportHeight;
+                if (viewportChanged)
+                {
+                    lastOffset = scrollViewer.VerticalOffset;
+                    return;
+                }
+
+                if (!_heroLockedByButton && _heroProgress < 0.99 && scrollViewer.VerticalOffset > 0)
+                {
+                    RequestHeroCollapseFromScroll(collapse: true);
+                    lastOffset = 0;
+                    scrollViewer.ChangeView(null, 0, null, disableAnimation: true);
+                    return;
+                }
+
+                var delta = scrollViewer.VerticalOffset - lastOffset;
+                lastOffset = scrollViewer.VerticalOffset;
+                if (delta > scrollStepThreshold)
+                {
+                    RequestHeroCollapseFromScroll(collapse: true);
+                }
+                else if (delta < -scrollStepThreshold && group.All(sv => sv.VerticalOffset <= nearTopOffset))
+                {
+                    RequestHeroCollapseFromScroll(collapse: false);
+                }
+
+                scrolled?.Invoke(scrollViewer);
+            };
+        }
+    }
+
     private void RequestHeroCollapseFromScroll(bool collapse)
     {
         if (_heroLockedByButton)

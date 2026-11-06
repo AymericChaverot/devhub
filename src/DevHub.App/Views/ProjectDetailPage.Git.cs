@@ -148,33 +148,13 @@ public sealed partial class ProjectDetailPage
 
         _graphScrollHooked = true;
         GraphList.LayoutUpdated -= GraphList_LayoutUpdated;
-        var lastGraphOffset = scrollViewer.VerticalOffset;
-        scrollViewer.ViewChanged += (_, _) =>
+        CollapseHeroOnScroll([scrollViewer], scrolled: sv =>
         {
-            if (!_heroLockedByButton && _heroProgress < 0.99 && scrollViewer.VerticalOffset > 0)
-            {
-                RequestHeroCollapseFromScroll(collapse: true);
-                lastGraphOffset = 0;
-                scrollViewer.ChangeView(null, 0, null, disableAnimation: true);
-                return;
-            }
-
-            var delta = scrollViewer.VerticalOffset - lastGraphOffset;
-            lastGraphOffset = scrollViewer.VerticalOffset;
-            if (delta > 4)
-            {
-                RequestHeroCollapseFromScroll(collapse: true);
-            }
-            else if (delta < -4 && scrollViewer.VerticalOffset <= 8)
-            {
-                RequestHeroCollapseFromScroll(collapse: false);
-            }
-
-            if (scrollViewer.VerticalOffset >= scrollViewer.ScrollableHeight - 400)
+            if (sv.VerticalOffset >= sv.ScrollableHeight - 400)
             {
                 _ = LoadMoreGraphAsync();
             }
-        };
+        });
     }
 
     private void GraphList_LayoutUpdated(object? sender, object e) => HookGraphScroll();

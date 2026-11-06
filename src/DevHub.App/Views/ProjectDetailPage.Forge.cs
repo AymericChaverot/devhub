@@ -108,63 +108,13 @@ public sealed partial class ProjectDetailPage
     private void ForgeOpenRepo_Click(object sender, RoutedEventArgs e) =>
         ShellLauncher.Open(_forgeWebUrl ?? _remoteWebUrl?.ToString());
 
-    /// <summary>
-    /// Same auto-collapse as the Git/README tabs: the columns' scroll drives the hero, both
-    /// ways, exactly like scrolling a column's offset up or down always did before — unless
-    /// the button has taken over (see AnimateHeroCollapse), in which case scroll has no say
-    /// over the hero at all anymore. All three columns drive the SAME hero, so whichever is
-    /// furthest along wins — otherwise a barely-touched column sitting near its own top
-    /// would snap the hero back open the moment the pointer moved to it. Collapsing the hero
-    /// also grows this same box (Grid.Row="1" is star-sized), which shrinks a column's
-    /// ScrollableHeight and can force-clamp its VerticalOffset, re-firing ViewChanged
-    /// without the user having scrolled; reacting to that resizes the hero again and can
-    /// loop within a layout pass into a LayoutCycleException crash. A real scroll gesture
-    /// never changes the viewport height, only the offset, so that's the signal that tells
-    /// the two apart.
-    /// </summary>
+    /// <summary>The PR, issue, and CI columns all drive the same collapsing hero.</summary>
     private void HookForgeScroll()
     {
-        if (_forgeScrollHooked)
+        if (!_forgeScrollHooked)
         {
-            return;
-        }
-
-        _forgeScrollHooked = true;
-        var scrollViewers = new[] { ForgePrScroll, ForgeIssueScroll, ForgeRunScroll };
-        var lastOffsets = scrollViewers.ToDictionary(sv => sv, sv => sv.VerticalOffset);
-        var lastViewportHeights = scrollViewers.ToDictionary(sv => sv, sv => sv.ViewportHeight);
-
-        foreach (var scrollViewer in scrollViewers)
-        {
-            scrollViewer.ViewChanged += (_, _) =>
-            {
-                var viewportChanged = Math.Abs(scrollViewer.ViewportHeight - lastViewportHeights[scrollViewer]) > 0.5;
-                lastViewportHeights[scrollViewer] = scrollViewer.ViewportHeight;
-                if (viewportChanged)
-                {
-                    lastOffsets[scrollViewer] = scrollViewer.VerticalOffset;
-                    return;
-                }
-
-                var delta = scrollViewer.VerticalOffset - lastOffsets[scrollViewer];
-                if (!_heroLockedByButton && _heroProgress < 0.99 && scrollViewer.VerticalOffset > 0)
-                {
-                    RequestHeroCollapseFromScroll(collapse: true);
-                    lastOffsets[scrollViewer] = 0;
-                    scrollViewer.ChangeView(null, 0, null, disableAnimation: true);
-                    return;
-                }
-
-                lastOffsets[scrollViewer] = scrollViewer.VerticalOffset;
-                if (delta > 4)
-                {
-                    RequestHeroCollapseFromScroll(collapse: true);
-                }
-                else if (delta < -4 && scrollViewers.All(sv => sv.VerticalOffset <= 8))
-                {
-                    RequestHeroCollapseFromScroll(collapse: false);
-                }
-            };
+            _forgeScrollHooked = true;
+            CollapseHeroOnScroll([ForgePrScroll, ForgeIssueScroll, ForgeRunScroll]);
         }
     }
 }
