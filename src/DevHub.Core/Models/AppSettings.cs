@@ -52,6 +52,39 @@ public sealed class AppSettings
 
     /// <summary>Per-project terminal shell override (project path → shell id).</summary>
     public Dictionary<string, string> ProjectTerminalShells { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Re-keys every per-project setting after a project folder was moved or renamed.
+    /// Returns true when anything changed (i.e. the settings need saving).
+    /// </summary>
+    public bool MoveProjectPath(string oldPath, string newPath)
+    {
+        var changed = MoveKey(ProjectIdePreferences, oldPath, newPath);
+        changed |= MoveKey(ProjectSubprojects, oldPath, newPath);
+        changed |= MoveKey(ProjectLastOpened, oldPath, newPath);
+        changed |= MoveKey(ProjectRunConfigs, oldPath, newPath);
+        changed |= MoveKey(ProjectTerminalShells, oldPath, newPath);
+
+        var pinIndex = PinnedProjectPaths.FindIndex(p => string.Equals(p, oldPath, StringComparison.OrdinalIgnoreCase));
+        if (pinIndex >= 0)
+        {
+            PinnedProjectPaths[pinIndex] = newPath;
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static bool MoveKey<TValue>(Dictionary<string, TValue> map, string oldKey, string newKey)
+    {
+        if (!map.Remove(oldKey, out var value))
+        {
+            return false;
+        }
+
+        map[newKey] = value;
+        return true;
+    }
 }
 
 /// <summary>A completed Pomodoro session recorded in user settings.</summary>

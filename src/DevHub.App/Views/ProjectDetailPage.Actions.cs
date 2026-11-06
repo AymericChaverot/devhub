@@ -336,20 +336,7 @@ public sealed partial class ProjectDetailPage
             Log.Information("Renamed {OldPath} to {NewPath}", _project.Path, newPath);
 
             // Cascade: per-project settings are keyed by path.
-            var settingsChanged = false;
-            if (_settings.Settings.ProjectIdePreferences.Remove(_project.Path, out var ideId))
-            {
-                _settings.Settings.ProjectIdePreferences[newPath] = ideId;
-                settingsChanged = true;
-            }
-
-            if (_settings.Settings.ProjectSubprojects.Remove(_project.Path, out var subprojects))
-            {
-                _settings.Settings.ProjectSubprojects[newPath] = subprojects;
-                settingsChanged = true;
-            }
-
-            if (settingsChanged)
+            if (_settings.Settings.MoveProjectPath(_project.Path, newPath))
             {
                 await _settings.SaveAsync();
             }
