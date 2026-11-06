@@ -53,4 +53,31 @@ public static class ForgeUrls
         repoFullName = path;
         return true;
     }
+
+    /// <summary>
+    /// Turns a git remote into a browsable https URL, or null when it isn't one.
+    /// "git@github.com:user/repo.git" / "https://github.com/user/repo.git" → "https://github.com/user/repo".
+    /// </summary>
+    public static Uri? ToWebUrl(string? remoteUrl)
+    {
+        if (string.IsNullOrWhiteSpace(remoteUrl))
+        {
+            return null;
+        }
+
+        var url = remoteUrl.Trim();
+        if (url.EndsWith(".git", StringComparison.OrdinalIgnoreCase))
+        {
+            url = url[..^4];
+        }
+
+        var at = url.IndexOf('@');
+        var colon = url.IndexOf(':', at + 1);
+        if (at >= 0 && colon > at && !url.Contains("://"))
+        {
+            url = $"https://{url[(at + 1)..colon]}/{url[(colon + 1)..]}";
+        }
+
+        return Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https" ? uri : null;
+    }
 }

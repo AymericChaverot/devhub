@@ -1431,7 +1431,7 @@ public sealed partial class ProjectDetailPage : Page
 
     private void ShowRemoteButton(string? remoteUrl)
     {
-        _remoteWebUrl = ToWebUrl(remoteUrl);
+        _remoteWebUrl = ForgeUrls.ToWebUrl(remoteUrl);
         if (_remoteWebUrl is null)
         {
             return;
@@ -1455,30 +1455,6 @@ public sealed partial class ProjectDetailPage : Page
 
     private void Remote_Click(object sender, RoutedEventArgs e) =>
         ShellLauncher.Open(_remoteWebUrl?.ToString());
-
-    /// <summary>"git@github.com:user/repo.git" / "https://github.com/user/repo.git" → browsable https URL.</summary>
-    internal static Uri? ToWebUrl(string? remoteUrl)
-    {
-        if (remoteUrl is null)
-        {
-            return null;
-        }
-
-        var url = remoteUrl.Trim();
-        if (url.EndsWith(".git", StringComparison.OrdinalIgnoreCase))
-        {
-            url = url[..^4];
-        }
-
-        var at = url.IndexOf('@');
-        var colon = url.IndexOf(':', at + 1);
-        if (at >= 0 && colon > at && !url.Contains("://"))
-        {
-            url = $"https://{url[(at + 1)..colon]}/{url[(colon + 1)..]}";
-        }
-
-        return Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https" ? uri : null;
-    }
 
     private async Task PopulateIdePickerAsync(Project project)
     {
