@@ -81,13 +81,16 @@
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
                     <!-- Fixed-height host: the title shrinks through a scale, never a re-layout of its text. -->
+                    <!-- Tight line bounds (cap height to baseline) centre the title optically on the
+                         buttons; the negative margins give accents and descenders room so the host's
+                         layout clip never cuts them. -->
                     <Grid x:Name="ProjectNameHost" Height="40">
                         <TextBlock
                             x:Name="ProjectName"
+                            Margin="0,-24,0,-24"
                             VerticalAlignment="Center"
                             FontSize="38"
                             FontWeight="SemiBold"
-                            LineHeight="46"
                             TextLineBounds="Tight"
                             TextTrimming="CharacterEllipsis">
                             <TextBlock.RenderTransform>
