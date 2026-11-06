@@ -178,6 +178,62 @@ public sealed class LibGit2GitServiceTests : IDisposable
         Assert.Equal("feat: quick commit", infoAfter.Commits[0].Message);
     }
 
+    [Fact]
+    public async Task GetStatusSummary_NonRepository_ReturnsNull()
+    {
+        var plain = Directory.CreateDirectory(Path.Combine(_root, "plain-summary")).FullName;
+
+        Assert.Null(await new LibGit2GitService().GetStatusSummaryAsync(plain));
+    }
+
+    [Fact]
+    public async Task GetStatusSummary_CountsChangedFiles()
+    {
+        var repoPath = CreateRepositoryWithCommits("repo-summary", "first commit");
+        File.WriteAllText(Path.Combine(repoPath, "untracked.txt"), "new");
+        File.WriteAllText(Path.Combine(repoPath, "file0.txt"), "changed content");
+
+        var summary = await new LibGit2GitService().GetStatusSummaryAsync(repoPath);
+
+        Assert.NotNull(summary);
+        Assert.Equal(2, summary.ChangedFiles);
+        Assert.True(summary.IsDirty);
+        Assert.Equal(0, summary.Ahead);
+        Assert.Equal(0, summary.Behind);
+        Assert.False(string.IsNullOrEmpty(summary.Branch));
+    }
+
+    [Fact]
+    public async Task GetStatusSummary_ReportsAheadAndBehindUpstream()
+    {
+        var originPath = CreateRepositoryWithCommits("origin-summary", "c1", "c2");
+        var clonePath = Repository.Clone(originPath, Path.Combine(_root, "clone-summary"));
+        var author = new Signature("Test", "test@example.com", DateTimeOffset.Now);
+
+        // One new commit on each side: the clone is 1 ahead and, after fetching, 1 behind.
+        using (var origin = new Repository(originPath))
+        {
+            File.WriteAllText(Path.Combine(originPath, "remote.txt"), "remote");
+            Commands.Stage(origin, "remote.txt");
+            origin.Commit("remote change", author, author);
+        }
+
+        using (var clone = new Repository(clonePath))
+        {
+            File.WriteAllText(Path.Combine(clone.Info.WorkingDirectory, "local.txt"), "local");
+            Commands.Stage(clone, "local.txt");
+            clone.Commit("local change", author, author);
+            Commands.Fetch(clone, "origin", [], null, null);
+        }
+
+        var summary = await new LibGit2GitService().GetStatusSummaryAsync(clonePath);
+
+        Assert.NotNull(summary);
+        Assert.Equal(1, summary.Ahead);
+        Assert.Equal(1, summary.Behind);
+        Assert.False(summary.IsDirty);
+    }
+
     private string CreateRepositoryWithCommits(string name, params string[] messages)
     {
         var path = Directory.CreateDirectory(Path.Combine(_root, name)).FullName;

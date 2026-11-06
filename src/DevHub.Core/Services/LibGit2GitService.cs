@@ -7,6 +7,33 @@ public sealed class LibGit2GitService : IGitService
 {
     static LibGit2GitService() => GitEnvironment.Configure();
 
+    public Task<GitStatusSummary?> GetStatusSummaryAsync(string path, CancellationToken cancellationToken = default)
+    {
+        return Task.Run<GitStatusSummary?>(() =>
+        {
+            if (!Repository.IsValid(path))
+            {
+                return null;
+            }
+
+            using var repository = new Repository(path);
+            var head = repository.Head;
+            var status = repository.RetrieveStatus(new StatusOptions
+            {
+                IncludeIgnored = false,
+                RecurseIgnoredDirs = false,
+                DetectRenamesInIndex = false,
+                DetectRenamesInWorkDir = false,
+            });
+
+            return new GitStatusSummary(
+                repository.Info.IsHeadDetached ? head.Tip?.Sha[..7] ?? "HEAD" : head.FriendlyName,
+                head.TrackingDetails?.AheadBy ?? 0,
+                head.TrackingDetails?.BehindBy ?? 0,
+                status.Count(e => e.State is not (FileStatus.Ignored or FileStatus.Unaltered)));
+        }, cancellationToken);
+    }
+
     public Task<GitRepositoryInfo?> GetRepositoryInfoAsync(
         string path, int historyCount = 20, CancellationToken cancellationToken = default)
     {

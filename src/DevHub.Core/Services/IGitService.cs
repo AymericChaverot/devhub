@@ -15,6 +15,12 @@ public interface IGitService
     Task<Models.GitRepositoryInfo?> GetRepositoryInfoAsync(
         string path, int historyCount = 20, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Current branch, ahead/behind its upstream and the number of changed files.
+    /// Null when the folder is not a git repository.
+    /// </summary>
+    Task<Models.GitStatusSummary?> GetStatusSummaryAsync(string path, CancellationToken cancellationToken = default);
+
     /// <summary>Checks out a local branch. Throws when the working tree conflicts.</summary>
     Task CheckoutAsync(string path, string branchName, CancellationToken cancellationToken = default);
 

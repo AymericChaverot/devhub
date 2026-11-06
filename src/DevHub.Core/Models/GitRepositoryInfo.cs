@@ -42,3 +42,12 @@ public sealed record GitBranchInfo(string Name, bool IsCurrent, bool IsRemote = 
 public sealed record GitCommitInfo(string ShortSha, string Message, string Author, DateTimeOffset When);
 
 public sealed record GitWorkingChange(string RelativePath, string StatusSymbol, string StatusLabel);
+
+/// <summary>
+/// The at-a-glance state shown on a project row: cheap to compute for every project,
+/// unlike <see cref="GitRepositoryInfo"/> which also walks history and branches.
+/// </summary>
+public sealed record GitStatusSummary(string Branch, int Ahead, int Behind, int ChangedFiles)
+{
+    public bool IsDirty => ChangedFiles > 0;
+}
