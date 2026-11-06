@@ -66,6 +66,8 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <!-- Used when the window is too narrow: the actions take row 1, the details move here. -->
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Button
@@ -175,6 +177,7 @@
 
                 <!-- Primary actions: the only ones that stay when the hero is collapsed. -->
                 <StackPanel
+                    x:Name="HeroActions"
                     Grid.Column="2"
                     VerticalAlignment="Top"
                     Orientation="Horizontal"
@@ -215,7 +218,7 @@
                     <SplitButton x:Name="OpenInIdeButton" Height="32" Click="OpenInIde_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Image x:Name="OpenInIdeIcon" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock x:Uid="Detail_Open" VerticalAlignment="Center" Text="Open" />
+                            <TextBlock x:Uid="Detail_Open" x:Name="OpenInIdeLabel" VerticalAlignment="Center" Text="Open" />
                             <TextBlock
                                 x:Name="OpenInIdeName"
                                 VerticalAlignment="Center"
@@ -295,11 +298,11 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
-                    <Button Style="{StaticResource SubtleButtonStyle}" Click="OpenInExplorer_Click">
+                <StackPanel x:Name="HeroTools" Grid.Column="0" Orientation="Horizontal" Spacing="4">
+                    <Button x:Name="ExplorerButton" Style="{StaticResource SubtleButtonStyle}" Click="OpenInExplorer_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon FontSize="14" Glyph="&#xE838;" />
-                            <TextBlock x:Uid="Detail_ExplorerLabel" Text="Explorer" />
+                            <TextBlock x:Uid="Detail_ExplorerLabel" x:Name="ExplorerLabel" Text="Explorer" />
                         </StackPanel>
                     </Button>
                     <SplitButton
@@ -309,7 +312,7 @@
                         ToolTipService.ToolTip="Open terminal here">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon FontSize="13" Glyph="&#xE756;" />
-                            <TextBlock x:Uid="Detail_Terminal" Text="Terminal" />
+                            <TextBlock x:Uid="Detail_Terminal" x:Name="TerminalLabel" Text="Terminal" />
                             <TextBlock x:Name="TerminalShellName" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </StackPanel>
                         <SplitButton.Flyout>
@@ -397,6 +400,7 @@
 
                 <Button
                     x:Uid="Detail_PinTip"
+                    x:Name="PinProjectButton"
                     Grid.Column="2"
                     Style="{StaticResource SubtleButtonStyle}"
                     Click="TogglePinProject_Click"

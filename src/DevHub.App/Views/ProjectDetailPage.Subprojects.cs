@@ -27,6 +27,8 @@ public sealed partial class ProjectDetailPage
             .ToList();
 
         SubprojectsPanel.Visibility = names.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        UpdateHeroDensity();
+
         var dark = ActualTheme == ElementTheme.Dark;
 
         foreach (var name in names)

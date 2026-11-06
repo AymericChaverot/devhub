@@ -24,19 +24,8 @@ public sealed partial class ProjectDetailPage
                 .ToList()
             : [];
 
-        var runLabel = Loc.T("Detail_Run", "Run");
-        if (configs.Count > 0)
-        {
-            RunButtonLabel.Text = $"{runLabel} · {configs[0].Name}";
-        }
-        else if (suggested.Count > 0)
-        {
-            RunButtonLabel.Text = $"{runLabel} · {suggested[0].Name}";
-        }
-        else
-        {
-            RunButtonLabel.Text = runLabel;
-        }
+        _runConfigName = configs.FirstOrDefault()?.Name ?? suggested.FirstOrDefault()?.Name;
+        UpdateHeroDensity();
 
         foreach (var config in configs)
         {

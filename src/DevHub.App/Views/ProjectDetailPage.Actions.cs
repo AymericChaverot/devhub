@@ -38,6 +38,7 @@ public sealed partial class ProjectDetailPage
             ? BadgeVisuals.WhiteIcon(slug)
             : BadgeVisuals.ColorIcon(slug);
         RemoteButton.Visibility = Visibility.Visible;
+        UpdateHeroDensity();
     }
 
     private void Remote_Click(object sender, RoutedEventArgs e) =>
@@ -82,6 +83,7 @@ public sealed partial class ProjectDetailPage
         OpenInIdeName.Text = _selectedIde?.DisplayName ?? Loc.T("Detail_NoIde", "No IDE detected");
         OpenInIdeIcon.Source = _selectedIde is null ? null : IdeIcon(_selectedIde);
         OpenInIdeIcon.Visibility = OpenInIdeIcon.Source is null ? Visibility.Collapsed : Visibility.Visible;
+        UpdateHeroDensity();
     }
 
     private SvgImageSource? IdeIcon(IdeInfo ide) =>
@@ -173,6 +175,7 @@ public sealed partial class ProjectDetailPage
         TerminalShellName.Text = WindowsTerminalService.SupportedShells
             .FirstOrDefault(s => string.Equals(s.Id, activeShell, StringComparison.OrdinalIgnoreCase))?.DisplayName
             ?? "PowerShell";
+        UpdateHeroDensity();
     }
 
     private void OpenInTerminal_Click(SplitButton sender, SplitButtonClickEventArgs args)

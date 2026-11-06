@@ -182,6 +182,12 @@ public sealed partial class ProjectDetailPage
         HeroCard.Clip = new RectangleGeometry { Rect = new Rect(0, 0, e.NewSize.Width, e.NewSize.Height) };
         PlaceDecorations(e.NewSize);
 
+        // Only a width change can make the buttons fit differently (the fold changes the height).
+        if (e.NewSize.Width != e.PreviousSize.Width)
+        {
+            UpdateHeroDensity();
+        }
+
         if (_heroInTransition)
         {
             // Render-only: the body tracks the hero's bottom edge without a layout pass.
