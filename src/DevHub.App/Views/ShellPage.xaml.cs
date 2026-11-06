@@ -71,31 +71,14 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    private void Nav_Loaded(object sender, RoutedEventArgs e)
+    private void Nav_Loaded(object sender, RoutedEventArgs e) => NavigateTo("home");
+
+    private async void Nav_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
-        Nav.SelectedItem = Nav.MenuItems[0];
-        UpdateQuickSearchButtonAppearance(Nav.IsPaneOpen);
-    }
-
-    private void Nav_PaneOpening(NavigationView sender, object args) =>
-        UpdateQuickSearchButtonAppearance(isOpen: true);
-
-    private void Nav_PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs args) =>
-        UpdateQuickSearchButtonAppearance(isOpen: false);
-
-    private void UpdateQuickSearchButtonAppearance(bool isOpen)
-    {
-        var openPaneWidth = Nav.OpenPaneLength > 0 ? Nav.OpenPaneLength : 320;
-        var compactPaneWidth = Nav.CompactPaneLength > 0 ? Nav.CompactPaneLength : 48;
-
-        // The expanded grid stretches inside the button's padding; a fixed width here would
-        // overflow that content area and clip the trailing "Ctrl+K" hint.
-        QuickSearchExpandedGrid.Visibility = isOpen ? Visibility.Visible : Visibility.Collapsed;
-        QuickSearchCompactIcon.Visibility = isOpen ? Visibility.Collapsed : Visibility.Visible;
-        QuickSearchButton.MinWidth = compactPaneWidth - 8;
-        QuickSearchButton.Width = (isOpen ? openPaneWidth : compactPaneWidth) - 8;
-        QuickSearchButton.Padding = isOpen ? new Thickness(11, 0, 11, 0) : new Thickness(0);
-        QuickSearchButton.HorizontalContentAlignment = isOpen ? HorizontalAlignment.Stretch : HorizontalAlignment.Center;
+        if (args.InvokedItemContainer == QuickSearchItem)
+        {
+            await ToggleCommandPaletteAsync();
+        }
     }
 
     private void Nav_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -131,9 +114,6 @@ public sealed partial class ShellPage : Page
         args.Handled = true;
         await ToggleCommandPaletteAsync();
     }
-
-    private async void OpenCommandPalette_Click(object sender, RoutedEventArgs e) =>
-        await ToggleCommandPaletteAsync();
 
     public async Task ToggleCommandPaletteAsync()
     {
