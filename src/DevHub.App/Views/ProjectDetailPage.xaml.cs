@@ -73,11 +73,12 @@ public sealed partial class ProjectDetailPage : Page
             LoadReadmeAsync(project.Path));
     }
 
-    /// <summary>Stamps the project as "last opened now"; the dashboard's recent list reads this.</summary>
+    /// <summary>Stamps the project as "last opened now"; the dashboard and the jump list read this.</summary>
     private async Task RecordProjectOpenedAsync(Project project)
     {
         _settings.Settings.ProjectLastOpened[project.Path] = DateTime.UtcNow;
         await _settings.SaveAsync();
+        await App.Services.GetRequiredService<JumpListUpdater>().UpdateAsync();
     }
 
     private void SectionBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)

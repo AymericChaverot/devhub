@@ -444,6 +444,8 @@
   <data name="Proj_GitChanges" xml:space="preserve"><value>{0} fichier(s) modifié(s)</value></data>
   <data name="Proj_GitAhead" xml:space="preserve"><value>{0} commit(s) à pousser</value></data>
   <data name="Proj_GitBehind" xml:space="preserve"><value>{0} commit(s) à tirer</value></data>
+  <data name="Jump_RecentGroup" xml:space="preserve"><value>Projets récents</value></data>
+  <data name="Jump_Palette" xml:space="preserve"><value>Palette de commandes</value></data>
   <data name="Proj_Search.PlaceholderText" xml:space="preserve"><value>Rechercher un projet…</value></data>
   <data name="Proj_PinButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Épingler / désépingler le projet</value></data>
   <data name="Detail_Terminal.Text" xml:space="preserve"><value>Terminal</value></data>

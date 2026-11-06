@@ -68,6 +68,7 @@ public partial class App : Application
 
         // Silent update check; the dashboard banner appears if a release is newer.
         _ = Services.GetRequiredService<ViewModels.UpdateViewModel>().CheckSilentlyAsync();
+        _ = Services.GetRequiredService<JumpListUpdater>().UpdateAsync();
     }
 
     private static Window? _mainWindow;
@@ -125,6 +126,7 @@ public partial class App : Application
         services.AddSingleton<IEnvironmentVariableService, EnvironmentVariableService>();
         services.AddSingleton<ViewModels.EnvVariablesViewModel>();
         services.AddSingleton<ViewModels.UpdateViewModel>();
+        services.AddSingleton<JumpListUpdater>();
         services.AddSingleton<ViewModels.PomodoroViewModel>();
         services.AddSingleton<IForgeService, GitHubForgeService>();
         services.AddSingleton<IForgeService, GitLabForgeService>();
