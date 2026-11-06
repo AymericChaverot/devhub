@@ -13,6 +13,11 @@ public sealed class JumpListUpdater(ISettingsService settings, IProjectStore sto
 {
     private const int MaxRecentProjects = 5;
 
+    // Without a logo Windows draws a blank document icon. The files are scale-qualified
+    // (Folder.scale-100.png …); the resource system picks the one matching the display.
+    private static readonly Uri ProjectLogo = new("ms-appx:///Assets/JumpList/Folder.png");
+    private static readonly Uri PaletteLogo = new("ms-appx:///Assets/JumpList/Search.png");
+
     public async Task UpdateAsync()
     {
         try
@@ -33,13 +38,16 @@ public sealed class JumpListUpdater(ISettingsService settings, IProjectStore sto
                 var item = JumpListItem.CreateWithArguments(LaunchCommand.ProjectArguments(path), name);
                 item.Description = path;
                 item.GroupName = recentGroup;
+                item.Logo = ProjectLogo;
                 jumpList.Items.Add(item);
             }
 
             // No group name: Windows lists it under "Tasks".
-            jumpList.Items.Add(JumpListItem.CreateWithArguments(
+            var palette = JumpListItem.CreateWithArguments(
                 LaunchCommand.PaletteArguments,
-                Loc.T("Jump_Palette", "Command palette")));
+                Loc.T("Jump_Palette", "Command palette"));
+            palette.Logo = PaletteLogo;
+            jumpList.Items.Add(palette);
 
             await jumpList.SaveAsync();
         }
