@@ -14,7 +14,8 @@ public sealed record CommandPaletteItem(
     string Title,
     string Subtitle,
     string Category,
-    Func<Task> ExecuteAsync);
+    Func<Task> ExecuteAsync,
+    double Boost = 0);
 
 public sealed partial class ShellPage : Page
 {
@@ -184,16 +185,27 @@ public sealed partial class ShellPage : Page
         }
     }
 
+    /// <summary>
+    /// Fuzzy-matches every item and ranks the best first. The title counts most; the subtitle
+    /// (a project's path) and the category only help an item surface, never outrank a title match.
+    /// </summary>
     private void FilterPaletteItems(string query)
     {
-        var term = query.Trim();
-        var matches = term.Length == 0
+        const int SubtitlePenalty = 300;
+        const int CategoryPenalty = 400;
+
+        var matches = string.IsNullOrWhiteSpace(query)
             ? _allPaletteItems
             : _allPaletteItems
-                .Where(i =>
-                    i.Title.Contains(term, StringComparison.OrdinalIgnoreCase)
-                    || i.Subtitle.Contains(term, StringComparison.OrdinalIgnoreCase)
-                    || i.Category.Contains(term, StringComparison.OrdinalIgnoreCase))
+                .Select(item => (Item: item, Score: new[]
+                {
+                    FuzzyMatcher.Score(query, item.Title),
+                    FuzzyMatcher.Score(query, item.Subtitle) - SubtitlePenalty,
+                    FuzzyMatcher.Score(query, item.Category) - CategoryPenalty,
+                }.Max()))
+                .Where(m => m.Score is not null)
+                .OrderByDescending(m => m.Score + m.Item.Boost)
+                .Select(m => m.Item)
                 .ToList();
 
         CommandPaletteList.ItemsSource = matches;
@@ -201,6 +213,18 @@ public sealed partial class ShellPage : Page
         {
             CommandPaletteList.SelectedIndex = 0;
         }
+    }
+
+    /// <summary>Favours pinned projects, then recently opened ones, fading over a few days.</summary>
+    private static double ProjectBoost(bool pinned, DateTime? lastOpenedUtc)
+    {
+        const double PinnedBoost = 30;
+        const double RecentBoost = 60;
+
+        var recency = lastOpenedUtc is { } opened
+            ? RecentBoost / (1 + Math.Max(0, (DateTime.UtcNow - opened).TotalDays))
+            : 0;
+        return (pinned ? PinnedBoost : 0) + recency;
     }
 
     private async Task<List<CommandPaletteItem>> BuildPaletteItemsAsync()
@@ -219,13 +243,21 @@ public sealed partial class ShellPage : Page
         var allProjects = await store.GetAllAsync();
         var ignored = settings.Settings.IgnoredProjectPaths;
         var pinned = settings.Settings.PinnedProjectPaths;
+        var lastOpened = settings.Settings.ProjectLastOpened;
 
-        foreach (var project in allProjects
+        // Before anything is typed: pinned first, then most recently opened, then by name.
+        foreach (var entry in allProjects
             .Where(p => !ignored.Contains(p.Path, StringComparer.OrdinalIgnoreCase))
-            .OrderByDescending(p => pinned.Contains(p.Path, StringComparer.OrdinalIgnoreCase))
-            .ThenBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase))
+            .Select(p => (
+                Project: p,
+                Pinned: pinned.Contains(p.Path, StringComparer.OrdinalIgnoreCase),
+                Opened: lastOpened.TryGetValue(p.Path, out var at) ? at : (DateTime?)null))
+            .OrderByDescending(e => e.Pinned)
+            .ThenByDescending(e => e.Opened ?? DateTime.MinValue)
+            .ThenBy(e => e.Project.Name, StringComparer.CurrentCultureIgnoreCase))
         {
-            var p = project;
+            var p = entry.Project;
+            var boost = ProjectBoost(entry.Pinned, entry.Opened);
             items.Add(new CommandPaletteItem(
                 "\uE8B7",
                 p.Name,
@@ -235,7 +267,8 @@ public sealed partial class ShellPage : Page
                 {
                     OpenProjectDetail(p);
                     return Task.CompletedTask;
-                }));
+                },
+                boost));
 
             items.Add(new CommandPaletteItem(
                 "\uE8A7",
@@ -254,7 +287,8 @@ public sealed partial class ShellPage : Page
                         ?? settings.Settings.PreferredIdeId;
                     var ide = installed.FirstOrDefault(i => i.Id == preferredId) ?? installed[0];
                     await ides.OpenAsync(ide, p.Path);
-                }));
+                },
+                boost));
 
             items.Add(new CommandPaletteItem(
                 "\uE756",
@@ -265,7 +299,8 @@ public sealed partial class ShellPage : Page
                 {
                     terminal.OpenTerminal(p.Path);
                     return Task.CompletedTask;
-                }));
+                },
+                boost));
         }
 
         // 2. Navigation
