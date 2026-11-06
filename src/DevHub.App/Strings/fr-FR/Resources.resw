@@ -93,7 +93,7 @@
   <data name="Detail_FilesTab.Text" xml:space="preserve"><value>Fichiers</value></data>
   <data name="Detail_NoReadme.Text" xml:space="preserve"><value>Aucun README trouvé dans ce projet.</value></data>
   <data name="Detail_NewBranchTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Créer une branche sur HEAD et basculer dessus</value></data>
-  <data name="Detail_Branch.Text" xml:space="preserve"><value>Branche</value></data>
+  <data name="Detail_NewBranchTip.Label" xml:space="preserve"><value>Branche</value></data>
   <data name="Detail_FilePreviewHint.Text" xml:space="preserve"><value>Sélectionnez un fichier pour l&apos;afficher</value></data>
   <data name="Detail_NothingOpen.Text" xml:space="preserve"><value>Rien d&apos;ouvert.</value></data>
   <data name="Detail_NoRuns.Text" xml:space="preserve"><value>Aucune exécution pour le moment.</value></data>

@@ -9,6 +9,7 @@ namespace DevHub.App.Views;
 public sealed partial class ProjectDetailPage
 {
     private const int GraphPageSize = 100;
+    private const string SummarySeparator = "  ·  ";
 
     private readonly System.Collections.ObjectModel.ObservableCollection<GraphCommitRow> _graphRows = [];
     private bool _initializingBranches;
@@ -46,12 +47,12 @@ public sealed partial class ProjectDetailPage
         BranchPicker.IsEnabled = !info.IsDetached && info.Branches.Count > 1;
         _initializingBranches = false;
 
-        AheadBehindText.Text = (info.Ahead, info.Behind) switch
+        AheadBehindRun.Text = (info.Ahead, info.Behind) switch
         {
             (0, 0) => "",
-            (var a, 0) => $"↑{a}",
-            (0, var b) => $"↓{b}",
-            var (a, b) => $"↑{a} ↓{b}",
+            (var a, 0) => $"↑{a}{SummarySeparator}",
+            (0, var b) => $"↓{b}{SummarySeparator}",
+            var (a, b) => $"↑{a} ↓{b}{SummarySeparator}",
         };
 
         var branchWord = info.Branches.Count == 1
@@ -60,26 +61,30 @@ public sealed partial class ProjectDetailPage
         var commitWord = info.TotalCommits == 1
             ? Loc.T("Detail_CommitWord", "commit")
             : Loc.T("Detail_CommitsWord", "commits");
-        GitCountsText.Text = $"{info.TotalCommits:N0} {commitWord} · {info.Branches.Count} {branchWord}";
+        var summary = new List<string>
+        {
+            $"{info.TotalCommits:N0} {commitWord}",
+            $"{info.Branches.Count} {branchWord}",
+        };
 
         if (info.IsDirty)
         {
-            string[] parts =
+            (int Count, string Text)[] changes =
             [
-                info.Modified > 0 ? Loc.F("Detail_GitModified", "{0} modified", info.Modified) : "",
-                info.Added > 0 ? Loc.F("Detail_GitAdded", "{0} added", info.Added) : "",
-                info.Removed > 0 ? Loc.F("Detail_GitRemoved", "{0} removed", info.Removed) : "",
-                info.Untracked > 0 ? Loc.F("Detail_GitUntracked", "{0} untracked", info.Untracked) : "",
+                (info.Modified, Loc.F("Detail_GitModified", "{0} modified", info.Modified)),
+                (info.Added, Loc.F("Detail_GitAdded", "{0} added", info.Added)),
+                (info.Removed, Loc.F("Detail_GitRemoved", "{0} removed", info.Removed)),
+                (info.Untracked, Loc.F("Detail_GitUntracked", "{0} untracked", info.Untracked)),
             ];
-            GitStatusText.Text = string.Join(" · ", parts.Where(p => p.Length > 0));
+            summary.AddRange(changes.Where(c => c.Count > 0).Select(c => c.Text));
             ToggleChangesLabel.Text = $"{Loc.T("Detail_Changes", "Changes")} ({info.WorkingChanges.Count})";
             ToggleChangesButton.Visibility = Visibility.Visible;
         }
         else
         {
-            GitStatusText.Text = Loc.T("Detail_CleanTree", "Clean working tree");
+            summary.Add(Loc.T("Detail_CleanTree", "Clean working tree"));
             ToggleChangesButton.Visibility = Visibility.Collapsed;
-            WorkingChangesCard.Visibility = Visibility.Collapsed;
+            ShowWorkingChanges(false);
         }
 
         WorkingChangesList.Items.Clear();
@@ -100,7 +105,7 @@ public sealed partial class ProjectDetailPage
             WorkingChangesList.SelectedIndex = 0;
         }
 
-        StashPopLabel.Text = info.StashCount > 0 ? $"Pop ({info.StashCount})" : "Pop";
+        StashPopButton.Label = info.StashCount > 0 ? $"Pop ({info.StashCount})" : "Pop";
 
         _graphCount = GraphPageSize;
         var graph = await _git.GetCommitGraphAsync(project.Path, _graphCount);
@@ -121,8 +126,10 @@ public sealed partial class ProjectDetailPage
         StashPopButton.IsEnabled = cliAvailable && info.StashCount > 0;
         if (!cliAvailable)
         {
-            GitStatusText.Text += "  ·  " + Loc.T("Detail_NoGitCli", "git CLI not found — fetch/pull/push unavailable");
+            summary.Add(Loc.T("Detail_NoGitCli", "git CLI not found — fetch/pull/push unavailable"));
         }
+
+        GitDetailsRun.Text = string.Join(SummarySeparator, summary);
     }
 
     /// <summary>
@@ -300,11 +307,14 @@ public sealed partial class ProjectDetailPage
 
     private void StashPop_Click(object sender, RoutedEventArgs e) => _ = RunGitOperationAsync("Stash pop", _git.StashPopAsync);
 
-    private void ToggleWorkingChanges_Click(object sender, RoutedEventArgs e)
+    private void ToggleWorkingChanges_Click(object sender, RoutedEventArgs e) =>
+        ShowWorkingChanges(ToggleChangesButton.IsChecked == true);
+
+    /// <summary>Opens or closes the changes card, keeping its toggle button in step.</summary>
+    private void ShowWorkingChanges(bool show)
     {
-        WorkingChangesCard.Visibility = WorkingChangesCard.Visibility == Visibility.Visible
-            ? Visibility.Collapsed
-            : Visibility.Visible;
+        ToggleChangesButton.IsChecked = show;
+        WorkingChangesCard.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private async void WorkingChangesList_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -463,93 +463,134 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <!-- Toolbar -->
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                <!--
+                    Toolbar: the branch picker, then a native command bar whose buttons move into
+                    its "…" overflow menu when the window is too narrow to show them all.
+                -->
+                <Grid Grid.Row="0" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
                     <ComboBox
                         x:Name="BranchPicker"
                         MinWidth="170"
                         VerticalAlignment="Center"
                         SelectionChanged="BranchPicker_SelectionChanged" />
-                    <Button x:Uid="Detail_NewBranchTip" x:Name="NewBranchButton" Click="NewBranch_Click" ToolTipService.ToolTip="Create a branch at HEAD and switch to it">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon FontSize="14" Glyph="&#xE710;" />
-                            <TextBlock x:Uid="Detail_Branch" Text="Branch" />
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="FetchButton" Click="Fetch_Click" ToolTipService.ToolTip="git fetch --all --prune">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon FontSize="14" Glyph="&#xE895;" />
-                            <TextBlock Text="Fetch" />
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="PullButton" Click="Pull_Click" ToolTipService.ToolTip="git pull">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon FontSize="14" Glyph="&#xE896;" />
-                            <TextBlock Text="Pull" />
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="PushButton" Click="Push_Click" ToolTipService.ToolTip="git push">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon FontSize="14" Glyph="&#xE898;" />
-                            <TextBlock Text="Push" />
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="StashButton" Click="Stash_Click" ToolTipService.ToolTip="git stash push -u">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon FontSize="14" Glyph="&#xE7B8;" />
-                            <TextBlock Text="Stash" />
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="StashPopButton" Click="StashPop_Click" ToolTipService.ToolTip="git stash pop">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon FontSize="14" Glyph="&#xE8E5;" />
-                            <TextBlock x:Name="StashPopLabel" Text="Pop" />
-                        </StackPanel>
-                    </Button>
-                    <Button
+                    <CommandBar
+                        Grid.Column="1"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        DefaultLabelPosition="Right"
+                        IsDynamicOverflowEnabled="True">
+                        <AppBarButton
+                            x:Uid="Detail_NewBranchTip"
+                            x:Name="NewBranchButton"
+                            Click="NewBranch_Click"
+                            Label="Branch"
+                            ToolTipService.ToolTip="Create a branch at HEAD and switch to it">
+                            <AppBarButton.Icon>
+                                <FontIcon Glyph="&#xE710;" />
+                            </AppBarButton.Icon>
+                        </AppBarButton>
+                        <AppBarSeparator />
+                        <AppBarButton
+                            x:Name="FetchButton"
+                            Click="Fetch_Click"
+                            Label="Fetch"
+                            ToolTipService.ToolTip="git fetch --all --prune">
+                            <AppBarButton.Icon>
+                                <FontIcon Glyph="&#xE895;" />
+                            </AppBarButton.Icon>
+                        </AppBarButton>
+                        <AppBarButton
+                            x:Name="PullButton"
+                            Click="Pull_Click"
+                            Label="Pull"
+                            ToolTipService.ToolTip="git pull">
+                            <AppBarButton.Icon>
+                                <FontIcon Glyph="&#xE896;" />
+                            </AppBarButton.Icon>
+                        </AppBarButton>
+                        <AppBarButton
+                            x:Name="PushButton"
+                            Click="Push_Click"
+                            Label="Push"
+                            ToolTipService.ToolTip="git push">
+                            <AppBarButton.Icon>
+                                <FontIcon Glyph="&#xE898;" />
+                            </AppBarButton.Icon>
+                        </AppBarButton>
+                        <AppBarSeparator />
+                        <AppBarButton
+                            x:Name="StashButton"
+                            Click="Stash_Click"
+                            Label="Stash"
+                            ToolTipService.ToolTip="git stash push -u">
+                            <AppBarButton.Icon>
+                                <FontIcon Glyph="&#xE7B8;" />
+                            </AppBarButton.Icon>
+                        </AppBarButton>
+                        <AppBarButton
+                            x:Name="StashPopButton"
+                            Click="StashPop_Click"
+                            Label="Pop"
+                            ToolTipService.ToolTip="git stash pop">
+                            <AppBarButton.Icon>
+                                <FontIcon Glyph="&#xE8E5;" />
+                            </AppBarButton.Icon>
+                        </AppBarButton>
+                    </CommandBar>
+                </Grid>
+
+                <!--  Status line: wraps instead of being cut off; the changes toggle stays on the right.  -->
+                <Grid Grid.Row="1" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        x:Name="GitSummaryText"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextWrapping="Wrap">
+                        <Run x:Name="AheadBehindRun" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" /><Run x:Name="GitDetailsRun" />
+                    </TextBlock>
+                    <ProgressRing
+                        x:Name="GitBusyRing"
+                        Grid.Column="1"
+                        Width="16"
+                        Height="16"
+                        VerticalAlignment="Center"
+                        IsActive="False" />
+                    <ToggleButton
                         x:Name="ToggleChangesButton"
+                        Grid.Column="2"
                         Click="ToggleWorkingChanges_Click"
                         Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon FontSize="13" Glyph="&#xE70F;" />
                             <TextBlock x:Name="ToggleChangesLabel" Text="Changes" />
                         </StackPanel>
-                    </Button>
-                    <ProgressRing
-                        x:Name="GitBusyRing"
-                        Width="18"
-                        Height="18"
-                        VerticalAlignment="Center"
-                        IsActive="False" />
-                    <TextBlock
-                        x:Name="AheadBehindText"
-                        VerticalAlignment="Center"
-                        Style="{StaticResource CaptionTextBlockStyle}"
-                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                    <TextBlock
-                        x:Name="GitCountsText"
-                        VerticalAlignment="Center"
-                        Style="{StaticResource CaptionTextBlockStyle}"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <TextBlock
-                        x:Name="GitStatusText"
-                        VerticalAlignment="Center"
-                        Style="{StaticResource CaptionTextBlockStyle}"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                </StackPanel>
+                    </ToggleButton>
+                </Grid>
 
                 <InfoBar
                     x:Name="GitOpInfo"
-                    Grid.Row="1"
+                    Grid.Row="2"
                     IsOpen="False" />
 
                 <!-- Working tree changes & quick commit -->
                 <Border
                     x:Name="WorkingChangesCard"
-                    Grid.Row="2"
+                    Grid.Row="3"
                     MaxHeight="230"
                     Padding="12"
                     CornerRadius="{ThemeResource OverlayCornerRadius}"
@@ -612,7 +653,7 @@
 
                 <!-- Commit graph -->
                 <Border
-                    Grid.Row="3"
+                    Grid.Row="4"
                     CornerRadius="{ThemeResource OverlayCornerRadius}"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
