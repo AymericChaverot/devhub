@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using DevHub.App.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -74,7 +73,7 @@ public sealed partial class ProjectsPage : Page
     {
         if ((sender as FrameworkElement)?.Tag is ProjectViewModel project)
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", $"\"{project.Path}\"") { UseShellExecute = true });
+            ShellLauncher.OpenFolder(project.Path);
         }
     }
 

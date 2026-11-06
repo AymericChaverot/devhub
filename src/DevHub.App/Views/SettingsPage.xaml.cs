@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Reflection;
 using DevHub.App.ViewModels;
 using DevHub.Core.Services;
@@ -151,6 +150,6 @@ public sealed partial class SettingsPage : Page
     private static void OpenInExplorer(string path)
     {
         Directory.CreateDirectory(path);
-        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{path}\"") { UseShellExecute = true });
+        ShellLauncher.OpenFolder(path);
     }
 }

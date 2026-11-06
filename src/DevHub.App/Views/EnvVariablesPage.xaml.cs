@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using DevHub.App.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -161,8 +160,7 @@ public sealed partial class EnvVariablesPage : Page
         ViewModel.StatusMessage = Loc.T("EnvVar_Copied", "Copied to clipboard.");
     }
 
-    private static void OpenInExplorer(string path) =>
-        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{path}\"") { UseShellExecute = true });
+    private static void OpenInExplorer(string path) => ShellLauncher.OpenFolder(path);
 
     private async Task<string?> PromptForPathAsync(string title, string initialText)
     {

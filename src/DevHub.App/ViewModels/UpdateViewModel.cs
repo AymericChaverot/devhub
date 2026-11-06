@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -111,7 +110,7 @@ public sealed partial class UpdateViewModel : ObservableObject
             Log.Information("Launching update installer {Path}", installerPath);
 
             // App Installer takes over: it shows the update UI and asks to close DevHub.
-            Process.Start(new ProcessStartInfo(installerPath) { UseShellExecute = true });
+            ShellLauncher.Open(installerPath);
         }
         catch (Exception ex)
         {
@@ -127,10 +126,7 @@ public sealed partial class UpdateViewModel : ObservableObject
     [RelayCommand]
     private void OpenReleasePage()
     {
-        if (Available is { ReleaseUrl.Length: > 0 })
-        {
-            Process.Start(new ProcessStartInfo(Available.ReleaseUrl) { UseShellExecute = true });
-        }
+        ShellLauncher.Open(Available?.ReleaseUrl);
     }
 
     [RelayCommand]

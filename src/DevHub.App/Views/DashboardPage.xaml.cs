@@ -86,11 +86,7 @@ public sealed partial class DashboardPage : Page
 
     private void OpenReview_Click(object sender, RoutedEventArgs e)
     {
-        if ((sender as FrameworkElement)?.Tag is string url && url.Length > 0)
-        {
-            System.Diagnostics.Process.Start(
-                new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
-        }
+        ShellLauncher.Open((sender as FrameworkElement)?.Tag as string);
     }
 
     // ============ Sky decoration ============

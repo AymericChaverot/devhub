@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using DevHub.App.ViewModels;
 using DevHub.Core.Models;
 using DevHub.Core.Services;
@@ -462,22 +461,11 @@ public sealed partial class ProjectDetailPage : Page
         }
     }
 
-    private void ForgeItem_Click(object sender, RoutedEventArgs e)
-    {
-        if ((sender as FrameworkElement)?.Tag is string url && url.Length > 0)
-        {
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-        }
-    }
+    private void ForgeItem_Click(object sender, RoutedEventArgs e) =>
+        ShellLauncher.Open((sender as FrameworkElement)?.Tag as string);
 
-    private void ForgeOpenRepo_Click(object sender, RoutedEventArgs e)
-    {
-        var url = _forgeWebUrl ?? _remoteWebUrl?.ToString();
-        if (url is { Length: > 0 })
-        {
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-        }
-    }
+    private void ForgeOpenRepo_Click(object sender, RoutedEventArgs e) =>
+        ShellLauncher.Open(_forgeWebUrl ?? _remoteWebUrl?.ToString());
 
     private void SectionBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
     {
@@ -1465,13 +1453,8 @@ public sealed partial class ProjectDetailPage : Page
         RemoteButton.Visibility = Visibility.Visible;
     }
 
-    private void Remote_Click(object sender, RoutedEventArgs e)
-    {
-        if (_remoteWebUrl is not null)
-        {
-            Process.Start(new ProcessStartInfo(_remoteWebUrl.ToString()) { UseShellExecute = true });
-        }
-    }
+    private void Remote_Click(object sender, RoutedEventArgs e) =>
+        ShellLauncher.Open(_remoteWebUrl?.ToString());
 
     /// <summary>"git@github.com:user/repo.git" / "https://github.com/user/repo.git" → browsable https URL.</summary>
     internal static Uri? ToWebUrl(string? remoteUrl)
@@ -1577,7 +1560,7 @@ public sealed partial class ProjectDetailPage : Page
     {
         if (_project is not null)
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", $"\"{_project.Path}\"") { UseShellExecute = true });
+            ShellLauncher.OpenFolder(_project.Path);
         }
     }
 
@@ -2074,7 +2057,7 @@ public sealed partial class ProjectDetailPage : Page
                 if (navArgs.Uri?.StartsWith("http", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     navArgs.Cancel = true;
-                    Process.Start(new ProcessStartInfo(navArgs.Uri) { UseShellExecute = true });
+                    ShellLauncher.Open(navArgs.Uri);
                 }
             };
             ReadmeView.CoreWebView2.NewWindowRequested += (_, windowArgs) =>
@@ -2082,7 +2065,7 @@ public sealed partial class ProjectDetailPage : Page
                 windowArgs.Handled = true;
                 if (windowArgs.Uri?.StartsWith("http", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    Process.Start(new ProcessStartInfo(windowArgs.Uri) { UseShellExecute = true });
+                    ShellLauncher.Open(windowArgs.Uri);
                 }
             };
 
