@@ -30,9 +30,12 @@ public sealed partial class ProjectDetailPage : Page
         _terminal = App.Services.GetRequiredService<ITerminalService>();
         InitializeComponent();
 
-        // Win2D canvases must be torn down explicitly or they leak their device.
         Unloaded += (_, _) =>
         {
+            // A running fold would keep the page alive through the per-frame callback.
+            _heroAnimator?.Stop();
+
+            // Win2D canvases must be torn down explicitly or they leak their device.
             LangDecor.RemoveFromVisualTree();
             IdeDecor.RemoveFromVisualTree();
         };
@@ -53,31 +56,17 @@ public sealed partial class ProjectDetailPage : Page
         }
 
         _project = project;
-        _idePickerReady = false;
-        HeroQuickActions.Opacity = 0;
-        ProjectName.Text = project.Name;
-        ProjectPath.Text = relativeDisplay ?? project.Path;
-        RefreshSubprojectButtons();
-        var dark = ActualTheme == ElementTheme.Dark;
-        TechList.ItemsSource = new List<TechLine>(
-        [
-            .. project.Languages.Select(l => TechLine.For(l, dark)),
-            .. project.Frameworks.Select(f => TechLine.For(f, dark)),
-        ]);
-
-        ShowTechDecoration(project);
+        ShowProjectIdentity(project, relativeDisplay ?? project.Path);
+        ShowTechStack(project);
         ShowRemoteButton(project.GitRemoteUrl);
         SetupForgeTab(project);
         RefreshPinState();
+        RefreshSubprojectButtons();
         RebuildRunMenu();
         RebuildTerminalShellMenu();
-        SetHeroCollapse(0);
+        ResetHero();
 
-        await PopulateIdePickerAsync(project);
-        _idePickerReady = true;
-        UpdateLayout();
-        UpdateHeroQuickActionsPosition();
-
+        await PopulateIdeMenuAsync(project);
         await Task.WhenAll(
             RecordProjectOpenedAsync(project),
             LoadGitAsync(project),

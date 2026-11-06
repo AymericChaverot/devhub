@@ -4,7 +4,7 @@ using DevHub.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Serilog;
 
 namespace DevHub.App.Views;
@@ -12,8 +12,8 @@ namespace DevHub.App.Views;
 public sealed partial class ProjectDetailPage
 {
     private Uri? _remoteWebUrl;
-    private bool _initializingIdePicker;
-    private bool _idePickerReady;
+    private IReadOnlyList<IdeInfo> _installedIdes = [];
+    private IdeInfo? _selectedIde;
 
     private void ShowRemoteButton(string? remoteUrl)
     {
@@ -23,15 +23,16 @@ public sealed partial class ProjectDetailPage
             return;
         }
 
-        var (label, slug) = _remoteWebUrl.Host.ToLowerInvariant() switch
+        var (name, slug) = _remoteWebUrl.Host.ToLowerInvariant() switch
         {
-            var h when h.Contains("github") => ("View on GitHub", "github"),
-            var h when h.Contains("gitlab") => ("View on GitLab", "gitlab"),
-            var h when h.Contains("bitbucket") => ("View on Bitbucket", "bitbucket"),
-            _ => ("View remote", "git"),
+            var h when h.Contains("github") => ("GitHub", "github"),
+            var h when h.Contains("gitlab") => ("GitLab", "gitlab"),
+            var h when h.Contains("bitbucket") => ("Bitbucket", "bitbucket"),
+            _ => (Loc.T("Detail_Remote", "Remote"), "git"),
         };
 
-        RemoteLabel.Text = label;
+        RemoteLabel.Text = name;
+        ToolTipService.SetToolTip(RemoteButton, Loc.F("Detail_ViewOn", "View on {0}", name));
         // Dark buttons take the white glyph; light theme reads better with the brand color.
         RemoteIcon.Source = ActualTheme == ElementTheme.Dark
             ? BadgeVisuals.WhiteIcon(slug)
@@ -42,76 +43,77 @@ public sealed partial class ProjectDetailPage
     private void Remote_Click(object sender, RoutedEventArgs e) =>
         ShellLauncher.Open(_remoteWebUrl?.ToString());
 
-    private async Task PopulateIdePickerAsync(Project project)
+    private async Task PopulateIdeMenuAsync(Project project)
     {
-        var ides = await _ides.GetInstalledIdesAsync();
-        _initializingIdePicker = true;
-        IdePicker.ItemsSource = ides.Select(i => i.DisplayName).ToList();
-        IdePicker.Tag = ides;
-
-        if (ides.Count == 0)
-        {
-            IdePicker.PlaceholderText = Loc.T("Detail_NoIde", "No IDE detected");
-            OpenInIdeButton.IsEnabled = false;
-            _initializingIdePicker = false;
-            return;
-        }
-
+        _installedIdes = await _ides.GetInstalledIdesAsync();
         var preferredId = _settings.Settings.ProjectIdePreferences.GetValueOrDefault(project.Path);
-        var index = ides.ToList().FindIndex(i => i.Id == preferredId);
-        IdePicker.SelectedIndex = index >= 0 ? index : 0;
-        _initializingIdePicker = false;
+        _selectedIde = _installedIdes.FirstOrDefault(i => i.Id == preferredId) ?? _installedIdes.FirstOrDefault();
 
-        // First display: no animation, the decoration just appears with the page.
-        _ideDecorPath = BadgeVisuals.DecorSvgPath(BadgeVisuals.IdeSlug(ides[IdePicker.SelectedIndex].Id));
-        _ideSvg = null;
-        IdeDecor.Invalidate();
+        RebuildIdeMenu();
+        ShowSelectedIde();
+        ShowIdeDecoration(_selectedIde);
     }
 
-    private async void IdePicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void RebuildIdeMenu()
     {
-        if (_initializingIdePicker || _project is null || SelectedIde() is not { } ide)
+        IdeFlyout.Items.Clear();
+        foreach (var ide in _installedIdes)
+        {
+            var item = new RadioMenuFlyoutItem
+            {
+                Text = ide.DisplayName,
+                GroupName = "ide",
+                IsChecked = ide == _selectedIde,
+                Tag = ide,
+            };
+            if (IdeIcon(ide) is { } icon)
+            {
+                item.Icon = new ImageIcon { Source = icon };
+            }
+
+            item.Click += async (s, _) => await SelectAndOpenIdeAsync((IdeInfo)((FrameworkElement)s).Tag);
+            IdeFlyout.Items.Add(item);
+        }
+    }
+
+    private void ShowSelectedIde()
+    {
+        OpenInIdeButton.IsEnabled = _selectedIde is not null;
+        OpenInIdeName.Text = _selectedIde?.DisplayName ?? Loc.T("Detail_NoIde", "No IDE detected");
+        OpenInIdeIcon.Source = _selectedIde is null ? null : IdeIcon(_selectedIde);
+        OpenInIdeIcon.Visibility = OpenInIdeIcon.Source is null ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private SvgImageSource? IdeIcon(IdeInfo ide) =>
+        BadgeVisuals.TechIcon(BadgeVisuals.IdeSlug(ide.Id), ActualTheme == ElementTheme.Dark);
+
+    /// <summary>Picking an IDE in the menu makes it this project's default and opens the project in it.</summary>
+    private async Task SelectAndOpenIdeAsync(IdeInfo ide)
+    {
+        if (_project is null)
         {
             return;
         }
 
-        _settings.Settings.ProjectIdePreferences[_project.Path] = ide.Id;
-        await _settings.SaveAsync();
+        var changed = ide != _selectedIde;
+        _selectedIde = ide;
+        ShowSelectedIde();
+        await OpenSelectedIdeAsync();
 
-        // Smooth swap: fade the decoration out, repoint it, fade it back in.
-        await AnimateOpacityAsync(IdeDecor, 0, TimeSpan.FromMilliseconds(140));
-        _ideDecorPath = BadgeVisuals.DecorSvgPath(BadgeVisuals.IdeSlug(ide.Id));
-        _ideSvg = null;
-        IdeDecor.Invalidate();
-        await AnimateOpacityAsync(IdeDecor, 0.20, TimeSpan.FromMilliseconds(280));
-    }
-
-    private static Task AnimateOpacityAsync(UIElement element, double to, TimeSpan duration)
-    {
-        var completion = new TaskCompletionSource();
-        var animation = new DoubleAnimation
+        if (changed)
         {
-            To = to,
-            Duration = duration,
-            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut },
-        };
-        Storyboard.SetTarget(animation, element);
-        Storyboard.SetTargetProperty(animation, "Opacity");
-
-        var storyboard = new Storyboard { Children = { animation } };
-        storyboard.Completed += (_, _) => completion.TrySetResult();
-        storyboard.Begin();
-        return completion.Task;
+            _settings.Settings.ProjectIdePreferences[_project.Path] = ide.Id;
+            await _settings.SaveAsync();
+            await CrossfadeIdeDecorationAsync(ide);
+        }
     }
 
-    private IdeInfo? SelectedIde() =>
-        IdePicker.Tag is IReadOnlyList<IdeInfo> ides && IdePicker.SelectedIndex >= 0 && IdePicker.SelectedIndex < ides.Count
-            ? ides[IdePicker.SelectedIndex]
-            : null;
+    private async void OpenInIde_Click(SplitButton sender, SplitButtonClickEventArgs args) =>
+        await OpenSelectedIdeAsync();
 
-    private async void OpenInIde_Click(object sender, RoutedEventArgs e)
+    private async Task OpenSelectedIdeAsync()
     {
-        if (_project is not null && SelectedIde() is { } ide)
+        if (_project is not null && _selectedIde is { } ide)
         {
             Log.Information("Opening {Path} in {Ide}", _project.Path, ide.Id);
             await _ides.OpenAsync(ide, _project.Path);
@@ -168,12 +170,9 @@ public sealed partial class ProjectDetailPage
             TerminalShellFlyout.Items.Add(item);
         }
 
-        var activeDisplayName = WindowsTerminalService.SupportedShells
+        TerminalShellName.Text = WindowsTerminalService.SupportedShells
             .FirstOrDefault(s => string.Equals(s.Id, activeShell, StringComparison.OrdinalIgnoreCase))?.DisplayName
             ?? "PowerShell";
-        ToolTipService.SetToolTip(
-            TerminalSplitButton,
-            $"{Loc.T("Detail_Terminal", "Terminal")} ({activeDisplayName})");
     }
 
     private void OpenInTerminal_Click(SplitButton sender, SplitButtonClickEventArgs args)
@@ -342,8 +341,7 @@ public sealed partial class ProjectDetailPage
             }
 
             _project = _project with { Name = newName, Path = newPath };
-            ProjectName.Text = newName;
-            ProjectPath.Text = newPath;
+            ShowProjectIdentity(_project, newPath);
 
             // The list keeps its own snapshot; refresh it in the background.
             _ = App.Services.GetRequiredService<ProjectsViewModel>().RescanAsync();

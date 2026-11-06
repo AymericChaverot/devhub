@@ -81,10 +81,15 @@
   <data name="Detail_CollapseHero" xml:space="preserve"><value>Réduire</value></data>
   <data name="Detail_ExpandHero" xml:space="preserve"><value>Agrandir</value></data>
   <data name="Detail_Open.Text" xml:space="preserve"><value>Ouvrir</value></data>
-  <data name="Detail_Explorer.Content" xml:space="preserve"><value>Explorateur</value></data>
+  <data name="Detail_ExplorerLabel.Text" xml:space="preserve"><value>Explorateur</value></data>
+  <data name="Detail_MoreActionsTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Plus d'actions</value></data>
+  <data name="Detail_ManageSubprojectsItem.Text" xml:space="preserve"><value>Gérer les sous-projets…</value></data>
+  <data name="Detail_CleanDiskItem.Text" xml:space="preserve"><value>Espace disque et nettoyage…</value></data>
+  <data name="Detail_RenameItem.Text" xml:space="preserve"><value>Renommer le projet…</value></data>
+  <data name="Detail_SubprojectsLabel.Text" xml:space="preserve"><value>Sous-projets</value></data>
+  <data name="Detail_ViewOn" xml:space="preserve"><value>Voir sur {0}</value></data>
+  <data name="Detail_Remote" xml:space="preserve"><value>Dépôt distant</value></data>
   <data name="Detail_RunTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Exécuter ce projet dans un terminal</value></data>
-  <data name="Detail_ManageSubprojectsTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Gérer les sous-projets</value></data>
-  <data name="Detail_RenameTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Renommer le projet</value></data>
   <data name="Detail_FilesTab.Text" xml:space="preserve"><value>Fichiers</value></data>
   <data name="Detail_NoReadme.Text" xml:space="preserve"><value>Aucun README trouvé dans ce projet.</value></data>
   <data name="Detail_NewBranchTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Créer une branche sur HEAD et basculer dessus</value></data>
@@ -441,7 +446,6 @@
   <data name="Detail_Terminal.Text" xml:space="preserve"><value>Terminal</value></data>
   <data name="Detail_TerminalTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Ouvrir un terminal ici</value></data>
   <data name="Detail_PinTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Épingler / désépingler le projet</value></data>
-  <data name="Detail_CleanDiskTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Espace disque &amp; nettoyage des dépendances/caches</value></data>
   <data name="Detail_SuggestedConfigs" xml:space="preserve"><value>Commandes détectées</value></data>
   <data name="Detail_Changes" xml:space="preserve"><value>Modifications</value></data>
   <data name="Detail_CommitMessage.PlaceholderText" xml:space="preserve"><value>Message de commit…</value></data>

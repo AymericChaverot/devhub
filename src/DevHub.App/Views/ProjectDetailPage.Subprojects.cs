@@ -26,7 +26,7 @@ public sealed partial class ProjectDetailPage
             .Where(name => Directory.Exists(Path.Combine(_project.Path, name)))
             .ToList();
 
-        SubprojectsList.Visibility = names.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        SubprojectsPanel.Visibility = names.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         var dark = ActualTheme == ElementTheme.Dark;
 
         foreach (var name in names)

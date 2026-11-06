@@ -7,217 +7,198 @@
     xmlns:controls="using:DevHub.App.Controls"
     xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml">
 
+    <!--
+        Hero and body share one cell: the hero sits on top, the body starts below it through its
+        top margin. While the hero folds, the body follows it with a render-only translation, so
+        the README / graph views are resized once per transition instead of on every frame.
+    -->
     <Grid Margin="36,16,36,0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <!-- Hero -->
+        <!-- Hero: identity + primary actions, then a tool bar that folds away when collapsed. -->
         <Grid
             x:Name="HeroCard"
-            Grid.Row="0"
-            MinHeight="150"
+            Canvas.ZIndex="1"
+            VerticalAlignment="Top"
             CornerRadius="{ThemeResource OverlayCornerRadius}"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
             SizeChanged="HeroCard_SizeChanged">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            <!-- Decorative brand logos, gaussian-blurred with Win2D. -->
-            <canvas:CanvasControl
-                x:Name="LangDecor"
-                Width="300"
-                Height="300"
-                Margin="8,0,0,-70"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Bottom"
-                Opacity="0.20"
-                Draw="LangDecor_Draw"
-                RenderTransformOrigin="0.5,0.5">
-                <canvas:CanvasControl.RenderTransform>
-                    <CompositeTransform x:Name="LangDecorTransform" Rotation="-10" />
-                </canvas:CanvasControl.RenderTransform>
-            </canvas:CanvasControl>
-            <canvas:CanvasControl
-                x:Name="IdeDecor"
-                Width="240"
-                Height="240"
-                Margin="0,-50,24,0"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Opacity="0.20"
-                Draw="IdeDecor_Draw"
-                RenderTransformOrigin="0.5,0.5">
-                <canvas:CanvasControl.RenderTransform>
-                    <CompositeTransform x:Name="IdeDecorTransform" Rotation="10" />
-                </canvas:CanvasControl.RenderTransform>
-            </canvas:CanvasControl>
+            <!-- Decorative brand logos (stack, chosen IDE), gaussian-blurred with Win2D. A Canvas takes
+                 no layout space, so the oversized logos never set the card height; they are placed
+                 against the card edges in code (see PlaceDecorations). -->
+            <Canvas Grid.RowSpan="2" IsHitTestVisible="False">
+                <canvas:CanvasControl
+                    x:Name="LangDecor"
+                    Width="300"
+                    Height="300"
+                    Opacity="0.20"
+                    Draw="LangDecor_Draw"
+                    RenderTransformOrigin="0.5,0.5">
+                    <canvas:CanvasControl.RenderTransform>
+                        <CompositeTransform x:Name="LangDecorTransform" Rotation="-10" />
+                    </canvas:CanvasControl.RenderTransform>
+                </canvas:CanvasControl>
+                <canvas:CanvasControl
+                    x:Name="IdeDecor"
+                    Width="240"
+                    Height="240"
+                    Opacity="0.20"
+                    Draw="IdeDecor_Draw"
+                    RenderTransformOrigin="0.5,0.5">
+                    <canvas:CanvasControl.RenderTransform>
+                        <CompositeTransform x:Name="IdeDecorTransform" Rotation="10" />
+                    </canvas:CanvasControl.RenderTransform>
+                </canvas:CanvasControl>
+            </Canvas>
 
-            <Grid x:Name="HeroContentGrid" Padding="24,24,224,24" ColumnSpacing="16">
+            <!-- Top: back, identity, primary actions. Its padding shrinks as the hero collapses. -->
+            <Grid x:Name="HeroTop" Grid.Row="0" Padding="24,22,24,22" ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
                 <Button
                     x:Uid="Detail_BackTip"
-                    x:Name="BackButton"
+                    x:Name="HeroBackButton"
                     Grid.Column="0"
+                    Height="32"
                     VerticalAlignment="Top"
                     Click="Back_Click"
                     ToolTipService.ToolTip="Back to projects">
                     <FontIcon FontSize="14" Glyph="&#xE72B;" />
                 </Button>
 
-                <StackPanel x:Name="HeroTitleStack" Grid.Column="1" Spacing="10">
-                    <TextBlock x:Name="ProjectName" Style="{StaticResource TitleLargeTextBlockStyle}" />
-                    <TextBlock
-                        x:Name="ProjectPath"
-                        Style="{StaticResource CaptionTextBlockStyle}"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                    <!-- Fixed-height host: the title shrinks through a scale, never a re-layout of its text. -->
+                    <Grid x:Name="ProjectNameHost" Height="40">
+                        <TextBlock
+                            x:Name="ProjectName"
+                            VerticalAlignment="Center"
+                            FontSize="38"
+                            FontWeight="SemiBold"
+                            LineHeight="46"
+                            TextLineBounds="Tight"
+                            TextTrimming="CharacterEllipsis">
+                            <TextBlock.RenderTransform>
+                                <ScaleTransform x:Name="ProjectNameScale" />
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Grid>
 
-                    <ItemsControl x:Name="TechList" SizeChanged="HeroLayout_SizeChanged">
+                    <!-- Stack reminder that fades in once the chips are folded away. -->
+                    <ItemsControl
+                        x:Name="HeroMiniStack"
+                        VerticalAlignment="Center"
+                        IsHitTestVisible="False"
+                        Opacity="0">
+                        <ItemsControl.RenderTransform>
+                            <TranslateTransform x:Name="HeroMiniStackTranslate" />
+                        </ItemsControl.RenderTransform>
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <StackPanel Orientation="Vertical" Spacing="6" />
+                                <StackPanel Orientation="Horizontal" Spacing="6" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:TechLine">
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <Image
-                                        Width="20"
-                                        Height="20"
-                                        VerticalAlignment="Center"
-                                        Source="{x:Bind Icon}"
-                                        Visibility="{x:Bind HasIcon}" />
-                                    <TextBlock
-                                        VerticalAlignment="Center"
-                                        Style="{StaticResource BodyTextBlockStyle}"
-                                        Text="{x:Bind Text}" />
-                                </StackPanel>
+                                <Image Width="16" Height="16" Source="{x:Bind Icon}" Visibility="{x:Bind HasIcon}" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-
-                    <StackPanel
-                        x:Name="ActionsRow"
-                        MinHeight="32"
-                        HorizontalAlignment="Left"
-                        Orientation="Horizontal"
-                        Spacing="8"
-                        Margin="0,6,0,0"
-                        SizeChanged="HeroLayout_SizeChanged">
-                        <Button
-                            x:Name="RemoteButton"
-                            Visibility="Collapsed"
-                            Click="Remote_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image x:Name="RemoteIcon" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock x:Name="RemoteLabel" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-
                 </StackPanel>
-            </Grid>
 
-            <!-- IDE picker / Open / Explorer: visually part of ActionsRow's row (immediately
-                 to its left) when expanded, but unlike the rest of that row, these stay
-                 usable when the hero collapses instead of fading out. Living here as a
-                 free-floating HeroCard child — positioned entirely by SetHeroCollapse via
-                 HeroQuickActionsTransform, measured against ActionsRow's real position —
-                 means the expanded state can match "before" exactly while still being able
-                 to slide over to a right-aligned spot as the hero shrinks. -->
-            <StackPanel
-                x:Name="HeroQuickActions"
-                Orientation="Horizontal"
-                Spacing="8"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Opacity="0"
-                SizeChanged="HeroLayout_SizeChanged">
-                <StackPanel.RenderTransform>
-                    <TranslateTransform x:Name="HeroQuickActionsTransform" />
-                </StackPanel.RenderTransform>
-                <ComboBox
-                    x:Name="IdePicker"
-                    MinWidth="180"
-                    VerticalAlignment="Center"
-                    SelectionChanged="IdePicker_SelectionChanged" />
-                <Button
-                    x:Name="OpenInIdeButton"
-                    Style="{StaticResource AccentButtonStyle}"
-                    Click="OpenInIde_Click">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon FontSize="14" Glyph="&#xE8A7;" />
-                        <TextBlock x:Uid="Detail_Open" Text="Open" />
-                    </StackPanel>
-                </Button>
-                <Button x:Uid="Detail_Explorer" Click="OpenInExplorer_Click" Content="Explorer" />
-                <SplitButton
-                    x:Uid="Detail_TerminalTip"
-                    x:Name="TerminalSplitButton"
-                    Click="OpenInTerminal_Click"
-                    ToolTipService.ToolTip="Open terminal here">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon FontSize="13" Glyph="&#xE756;" />
-                        <TextBlock x:Uid="Detail_Terminal" x:Name="TerminalButtonLabel" Text="Terminal" />
-                    </StackPanel>
-                    <SplitButton.Flyout>
-                        <MenuFlyout x:Name="TerminalShellFlyout" Placement="BottomEdgeAlignedLeft" />
-                    </SplitButton.Flyout>
-                </SplitButton>
-            </StackPanel>
+                <!-- Folds away when collapsed. Spans under the primary actions to use the full width. -->
+                <StackPanel
+                    x:Name="HeroDetails"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Padding="0,8,0,0"
+                    Spacing="12">
+                    <TextBlock
+                        x:Name="ProjectPath"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap" />
 
-            <!-- Declared last so it stays on top of the stretched hero text for hit-testing -->
-            <StackPanel
-                x:Name="HeroTopButtons"
-                Margin="0,12,12,12"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Spacing="8">
-                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="4">
+                    <ItemsControl x:Name="TechList" IsTabStop="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <controls:WrapPanel HorizontalSpacing="8" VerticalSpacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TechLine">
+                                <Border
+                                    Height="28"
+                                    Padding="5,0,11,0"
+                                    CornerRadius="14"
+                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1">
+                                    <StackPanel Orientation="Horizontal" Spacing="7">
+                                        <Image
+                                            Width="18"
+                                            Height="18"
+                                            VerticalAlignment="Center"
+                                            Source="{x:Bind Icon}"
+                                            Visibility="{x:Bind HasIcon}" />
+                                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            FontFamily="Cascadia Code, Consolas"
+                                            FontSize="12"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind Version}"
+                                            Visibility="{x:Bind HasVersion}" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- Primary actions: the only ones that stay when the hero is collapsed. -->
+                <StackPanel
+                    Grid.Column="2"
+                    VerticalAlignment="Top"
+                    Orientation="Horizontal"
+                    Spacing="8">
                     <SplitButton
                         x:Uid="Detail_RunTip"
                         x:Name="RunButton"
-                        Margin="0,0,4,0"
-                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                        Height="32"
                         Click="Run_Click"
                         ToolTipService.ToolTip="Run this project in a terminal">
-                        <!-- Lightweight styling: repaint every SplitButton state with the
-                             accent-button brushes so hover/pressed stay on-brand. -->
+                        <!-- Lightweight styling: repaint every SplitButton state with the accent brushes. -->
                         <SplitButton.Resources>
                             <StaticResource x:Key="SplitButtonBackground" ResourceKey="AccentFillColorDefaultBrush" />
                             <StaticResource x:Key="SplitButtonBackgroundPointerOver" ResourceKey="AccentFillColorSecondaryBrush" />
                             <StaticResource x:Key="SplitButtonBackgroundPressed" ResourceKey="AccentFillColorTertiaryBrush" />
                             <StaticResource x:Key="SplitButtonBackgroundDisabled" ResourceKey="AccentFillColorDisabledBrush" />
-                            <StaticResource x:Key="SplitButtonBackgroundSecondary" ResourceKey="AccentFillColorDefaultBrush" />
-                            <StaticResource x:Key="SplitButtonBackgroundSecondaryPointerOver" ResourceKey="AccentFillColorSecondaryBrush" />
-                            <StaticResource x:Key="SplitButtonBackgroundSecondaryPressed" ResourceKey="AccentFillColorTertiaryBrush" />
-                            <StaticResource x:Key="SplitButtonBackgroundSecondaryDisabled" ResourceKey="AccentFillColorDisabledBrush" />
                             <StaticResource x:Key="SplitButtonForeground" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
                             <StaticResource x:Key="SplitButtonForegroundPointerOver" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
                             <StaticResource x:Key="SplitButtonForegroundPressed" ResourceKey="TextOnAccentFillColorSecondaryBrush" />
                             <StaticResource x:Key="SplitButtonForegroundDisabled" ResourceKey="TextOnAccentFillColorDisabledBrush" />
                             <StaticResource x:Key="SplitButtonForegroundSecondary" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
-                            <StaticResource x:Key="SplitButtonForegroundSecondaryPointerOver" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
                             <StaticResource x:Key="SplitButtonForegroundSecondaryPressed" ResourceKey="TextOnAccentFillColorSecondaryBrush" />
-                            <StaticResource x:Key="SplitButtonForegroundSecondaryDisabled" ResourceKey="TextOnAccentFillColorDisabledBrush" />
-                            <StaticResource x:Key="SplitButtonSecondaryForeground" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
-                            <StaticResource x:Key="SplitButtonSecondaryForegroundPointerOver" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
-                            <StaticResource x:Key="SplitButtonSecondaryForegroundPressed" ResourceKey="TextOnAccentFillColorSecondaryBrush" />
-                            <StaticResource x:Key="SplitButtonSecondaryForegroundDisabled" ResourceKey="TextOnAccentFillColorDisabledBrush" />
                             <StaticResource x:Key="SplitButtonBorderBrush" ResourceKey="AccentControlElevationBorderBrush" />
                             <StaticResource x:Key="SplitButtonBorderBrushPointerOver" ResourceKey="AccentControlElevationBorderBrush" />
                             <StaticResource x:Key="SplitButtonBorderBrushPressed" ResourceKey="AccentFillColorTertiaryBrush" />
                             <StaticResource x:Key="SplitButtonBorderBrushDisabled" ResourceKey="AccentFillColorDisabledBrush" />
-                            <StaticResource x:Key="SplitButtonBorderBrushSecondary" ResourceKey="AccentControlElevationBorderBrush" />
-                            <StaticResource x:Key="SplitButtonBorderBrushSecondaryPointerOver" ResourceKey="AccentControlElevationBorderBrush" />
-                            <StaticResource x:Key="SplitButtonBorderBrushSecondaryPressed" ResourceKey="AccentFillColorTertiaryBrush" />
-                            <StaticResource x:Key="SplitButtonBorderBrushSecondaryDisabled" ResourceKey="AccentFillColorDisabledBrush" />
+                            <StaticResource x:Key="SplitButtonBorderBrushDivider" ResourceKey="ControlStrokeColorOnAccentSecondaryBrush" />
                         </SplitButton.Resources>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon FontSize="13" Glyph="&#xE768;" />
@@ -227,542 +208,501 @@
                             <MenuFlyout x:Name="RunFlyout" Placement="BottomEdgeAlignedRight" />
                         </SplitButton.Flyout>
                     </SplitButton>
-                    <Button x:Uid="Detail_PinTip" x:Name="PinProjectButton" Click="TogglePinProject_Click" ToolTipService.ToolTip="Pin / unpin project">
-                        <FontIcon x:Name="PinProjectIcon" FontSize="14" Glyph="&#xE734;" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+
+                    <SplitButton x:Name="OpenInIdeButton" Height="32" Click="OpenInIde_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Image x:Name="OpenInIdeIcon" Width="16" Height="16" VerticalAlignment="Center" />
+                            <TextBlock x:Uid="Detail_Open" VerticalAlignment="Center" Text="Open" />
+                            <TextBlock
+                                x:Name="OpenInIdeName"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <SplitButton.Flyout>
+                            <MenuFlyout x:Name="IdeFlyout" Placement="BottomEdgeAlignedRight" />
+                        </SplitButton.Flyout>
+                    </SplitButton>
+
+                    <Button x:Uid="Detail_MoreActionsTip" Height="32" ToolTipService.ToolTip="More actions">
+                        <FontIcon FontSize="14" Glyph="&#xE712;" />
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuFlyoutItem x:Uid="Detail_ManageSubprojectsItem" Text="Manage subprojects…" Click="ManageSubprojects_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE71D;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Uid="Detail_CleanDiskItem" Text="Disk usage &amp; cleanup…" Click="CleanProjectDisk_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xEDA2;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem x:Uid="Detail_RenameItem" Text="Rename project…" Click="Rename_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE8AC;" />
+                                    </MenuFlyoutItem.Icon>
+                                    <MenuFlyoutItem.KeyboardAccelerators>
+                                        <KeyboardAccelerator Key="F2" />
+                                    </MenuFlyoutItem.KeyboardAccelerators>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </Button.Flyout>
                     </Button>
-                    <Button x:Uid="Detail_CleanDiskTip" Click="CleanProjectDisk_Click" ToolTipService.ToolTip="Disk usage &amp; clean dependencies/build artifacts">
-                        <FontIcon FontSize="14" Glyph="&#xEDA2;" />
+
+                    <!-- Collapses/expands the hero; the chevron turns over with the animation. -->
+                    <Button
+                        x:Name="HeroCollapseButton"
+                        Width="32"
+                        Height="32"
+                        Padding="0"
+                        Style="{StaticResource SubtleButtonStyle}"
+                        Click="ToggleHero_Click">
+                        <FontIcon FontSize="12" Glyph="&#xE70E;" RenderTransformOrigin="0.5,0.5">
+                            <FontIcon.RenderTransform>
+                                <RotateTransform x:Name="HeroCollapseIconRotation" />
+                            </FontIcon.RenderTransform>
+                        </FontIcon>
                     </Button>
-                    <Button x:Uid="Detail_ManageSubprojectsTip" Click="ManageSubprojects_Click" ToolTipService.ToolTip="Manage subprojects">
-                        <FontIcon FontSize="14" Glyph="&#xE71D;" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Tool bar: secondary actions and subprojects. Folds away when collapsed. -->
+            <Grid
+                x:Name="HeroBar"
+                Grid.Row="1"
+                Padding="16,8,16,8"
+                ColumnSpacing="8"
+                Background="{ThemeResource SubtleFillColorTertiaryBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,1,0,0">
+                <Grid.Resources>
+                    <!-- Flat, toolbar-style split button (no fill or border until hovered). -->
+                    <StaticResource x:Key="SplitButtonBackground" ResourceKey="SubtleFillColorTransparentBrush" />
+                    <StaticResource x:Key="SplitButtonBackgroundPointerOver" ResourceKey="SubtleFillColorSecondaryBrush" />
+                    <StaticResource x:Key="SplitButtonBackgroundPressed" ResourceKey="SubtleFillColorTertiaryBrush" />
+                    <StaticResource x:Key="SplitButtonBorderBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+                    <StaticResource x:Key="SplitButtonBorderBrushPointerOver" ResourceKey="SubtleFillColorTransparentBrush" />
+                    <StaticResource x:Key="SplitButtonBorderBrushPressed" ResourceKey="SubtleFillColorTransparentBrush" />
+                    <StaticResource x:Key="SplitButtonBorderBrushDivider" ResourceKey="SubtleFillColorTransparentBrush" />
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
+                    <Button Style="{StaticResource SubtleButtonStyle}" Click="OpenInExplorer_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="14" Glyph="&#xE838;" />
+                            <TextBlock x:Uid="Detail_ExplorerLabel" Text="Explorer" />
+                        </StackPanel>
                     </Button>
-                    <Button x:Uid="Detail_RenameTip" Click="Rename_Click" ToolTipService.ToolTip="Rename project">
-                        <FontIcon FontSize="14" Glyph="&#xE8AC;" />
+                    <SplitButton
+                        x:Uid="Detail_TerminalTip"
+                        x:Name="TerminalSplitButton"
+                        Click="OpenInTerminal_Click"
+                        ToolTipService.ToolTip="Open terminal here">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="13" Glyph="&#xE756;" />
+                            <TextBlock x:Uid="Detail_Terminal" Text="Terminal" />
+                            <TextBlock x:Name="TerminalShellName" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <SplitButton.Flyout>
+                            <MenuFlyout x:Name="TerminalShellFlyout" Placement="BottomEdgeAlignedLeft" />
+                        </SplitButton.Flyout>
+                    </SplitButton>
+                    <Button
+                        x:Name="RemoteButton"
+                        Style="{StaticResource SubtleButtonStyle}"
+                        Visibility="Collapsed"
+                        Click="Remote_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Image x:Name="RemoteIcon" Width="16" Height="16" VerticalAlignment="Center" />
+                            <TextBlock x:Name="RemoteLabel" VerticalAlignment="Center" />
+                        </StackPanel>
                     </Button>
                 </StackPanel>
 
-                <!-- Subproject shortcuts: regular buttons, folder + name + stack icons -->
-                <ItemsControl x:Name="SubprojectsList" Visibility="Collapsed">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Vertical" Spacing="4" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:SubprojectItem">
-                            <Button
-                                Width="200"
-                                HorizontalContentAlignment="Stretch"
-                                Click="Subproject_ButtonClick"
-                                Tag="{x:Bind}"
-                                ToolTipService.ToolTip="{x:Bind Name}">
-                                <Grid ColumnSpacing="8">
+                <!-- Subproject shortcuts: folder + name + stack icons. -->
+                <Grid
+                    x:Name="SubprojectsPanel"
+                    Grid.Column="1"
+                    Margin="8,0,0,0"
+                    Padding="12,0,0,0"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1,0,0,0"
+                    ColumnSpacing="10"
+                    Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        x:Uid="Detail_SubprojectsLabel"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="Subprojects" />
+                    <ScrollViewer
+                        Grid.Column="1"
+                        HorizontalScrollBarVisibility="Hidden"
+                        HorizontalScrollMode="Enabled"
+                        VerticalScrollBarVisibility="Disabled"
+                        VerticalScrollMode="Disabled">
+                        <ItemsControl x:Name="SubprojectsList" VerticalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="6" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SubprojectItem">
+                                    <Button
+                                        Height="28"
+                                        Padding="8,0,10,0"
+                                        Click="Subproject_ButtonClick"
+                                        Tag="{x:Bind}"
+                                        ToolTipService.ToolTip="{x:Bind Name}">
+                                        <StackPanel Orientation="Horizontal" Spacing="7">
+                                            <FontIcon FontSize="12" VerticalAlignment="Center" Glyph="&#xE8B7;" />
+                                            <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
+                                            <ItemsControl
+                                                VerticalAlignment="Center"
+                                                ItemsSource="{x:Bind Icons}"
+                                                IsHitTestVisible="False"
+                                                Visibility="{x:Bind HasIcons}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="4" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="imaging:SvgImageSource">
+                                                        <Image Width="13" Height="13" Source="{x:Bind}" />
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+
+                <Button
+                    x:Uid="Detail_PinTip"
+                    Grid.Column="2"
+                    Style="{StaticResource SubtleButtonStyle}"
+                    Click="TogglePinProject_Click"
+                    ToolTipService.ToolTip="Pin / unpin project">
+                    <FontIcon
+                        x:Name="PinProjectIcon"
+                        FontSize="14"
+                        Glyph="&#xE734;"
+                        Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                </Button>
+            </Grid>
+        </Grid>
+
+        <!-- Body: section tabs + the selected section. Positioned below the hero by code. -->
+        <Grid x:Name="BodyPanel">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Section tabs -->
+            <SelectorBar
+                x:Name="SectionBar"
+                Grid.Row="0"
+                Margin="4,10,0,0"
+                SelectionChanged="SectionBar_SelectionChanged">
+                <SelectorBarItem x:Name="ReadmeTab" Text="README" IsSelected="True" />
+                <SelectorBarItem x:Name="GitTab" Text="Git" Visibility="Collapsed" />
+                <SelectorBarItem x:Uid="Detail_FilesTab" x:Name="FilesTab" Text="Files" />
+                <!-- Text becomes "GitHub"/"GitLab"; only shown when the remote matches a connected account. -->
+                <SelectorBarItem x:Name="ForgeTab" Text="GitHub" Visibility="Collapsed" />
+            </SelectorBar>
+
+            <!-- README -->
+            <Grid x:Name="ReadmeContainer" Grid.Row="1" Margin="0,12,0,24">
+                <Border
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+                    <Grid>
+                        <WebView2 x:Name="ReadmeView" Visibility="Collapsed" />
+                        <TextBlock
+                            x:Uid="Detail_NoReadme"
+                            x:Name="NoReadmeText"
+                            Margin="24"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource BodyTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="No README found in this project." />
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Git -->
+            <Grid
+                x:Name="GitContainer"
+                Grid.Row="1"
+                Margin="0,12,0,24"
+                RowSpacing="8"
+                Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Toolbar -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                    <ComboBox
+                        x:Name="BranchPicker"
+                        MinWidth="170"
+                        VerticalAlignment="Center"
+                        SelectionChanged="BranchPicker_SelectionChanged" />
+                    <Button x:Uid="Detail_NewBranchTip" x:Name="NewBranchButton" Click="NewBranch_Click" ToolTipService.ToolTip="Create a branch at HEAD and switch to it">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="14" Glyph="&#xE710;" />
+                            <TextBlock x:Uid="Detail_Branch" Text="Branch" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="FetchButton" Click="Fetch_Click" ToolTipService.ToolTip="git fetch --all --prune">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="14" Glyph="&#xE895;" />
+                            <TextBlock Text="Fetch" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="PullButton" Click="Pull_Click" ToolTipService.ToolTip="git pull">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="14" Glyph="&#xE896;" />
+                            <TextBlock Text="Pull" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="PushButton" Click="Push_Click" ToolTipService.ToolTip="git push">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="14" Glyph="&#xE898;" />
+                            <TextBlock Text="Push" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="StashButton" Click="Stash_Click" ToolTipService.ToolTip="git stash push -u">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon FontSize="14" Glyph="&#xE7B8;" />
+                            <TextBlock Text="Stash" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="StashPopButton" Click="StashPop_Click" ToolTipService.ToolTip="git stash pop">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon FontSize="14" Glyph="&#xE8E5;" />
+                            <TextBlock x:Name="StashPopLabel" Text="Pop" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        x:Name="ToggleChangesButton"
+                        Click="ToggleWorkingChanges_Click"
+                        Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon FontSize="13" Glyph="&#xE70F;" />
+                            <TextBlock x:Name="ToggleChangesLabel" Text="Changes" />
+                        </StackPanel>
+                    </Button>
+                    <ProgressRing
+                        x:Name="GitBusyRing"
+                        Width="18"
+                        Height="18"
+                        VerticalAlignment="Center"
+                        IsActive="False" />
+                    <TextBlock
+                        x:Name="AheadBehindText"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                    <TextBlock
+                        x:Name="GitCountsText"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock
+                        x:Name="GitStatusText"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+
+                <InfoBar
+                    x:Name="GitOpInfo"
+                    Grid.Row="1"
+                    IsOpen="False" />
+
+                <!-- Working tree changes & quick commit -->
+                <Border
+                    x:Name="WorkingChangesCard"
+                    Grid.Row="2"
+                    MaxHeight="230"
+                    Padding="12"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    Visibility="Collapsed">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="320" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Column="0" RowSpacing="8">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <ListView
+                                x:Name="WorkingChangesList"
+                                Grid.Row="0"
+                                SelectionMode="Single"
+                                SelectionChanged="WorkingChangesList_SelectionChanged" />
+
+                            <Grid Grid.Row="1" ColumnSpacing="6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox
+                                    x:Uid="Detail_CommitMessage"
+                                    x:Name="QuickCommitMessageBox"
+                                    Grid.Column="0"
+                                    PlaceholderText="Commit message…" />
+                                <Button
+                                    x:Uid="Detail_CommitAll"
+                                    Grid.Column="1"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Content="Commit"
+                                    Click="QuickCommit_Click" />
+                            </Grid>
+                        </Grid>
+
+                        <Border
+                            Grid.Column="1"
+                            Padding="10"
+                            CornerRadius="6"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                                <RichTextBlock
+                                    x:Name="WorkingDiffOutput"
+                                    FontFamily="Cascadia Code, Consolas"
+                                    FontSize="12"
+                                    IsTextSelectionEnabled="True" />
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Commit graph -->
+                <Border
+                    Grid.Row="3"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+                    <ListView x:Name="GraphList" SelectionMode="None" Padding="8,8,8,8">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Padding" Value="8,0" />
+                                <Setter Property="MinHeight" Value="36" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:GraphCommitRow">
+                                <Grid ColumnSpacing="12" Height="36">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="64" />
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="110" />
                                     </Grid.ColumnDefinitions>
-                                    <FontIcon
+                                    <controls:CommitGraphCanvas
                                         Grid.Column="0"
-                                        FontSize="12"
-                                        VerticalAlignment="Center"
-                                        Glyph="&#xE8B7;" />
+                                        Width="{x:Bind GraphWidth}"
+                                        Row="{x:Bind Row}" />
                                     <TextBlock
                                         Grid.Column="1"
                                         VerticalAlignment="Center"
-                                        Text="{x:Bind Name}"
-                                        TextTrimming="CharacterEllipsis" />
+                                        FontFamily="Cascadia Code, Consolas"
+                                        FontSize="12"
+                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                        Text="{x:Bind ShortSha}" />
                                     <ItemsControl
                                         Grid.Column="2"
                                         VerticalAlignment="Center"
-                                        ItemsSource="{x:Bind Icons}"
-                                        IsHitTestVisible="False"
-                                        Visibility="{x:Bind HasIcons}">
+                                        ItemsSource="{x:Bind Refs}"
+                                        Visibility="{x:Bind HasRefs}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="5" />
+                                                <StackPanel Orientation="Horizontal" Spacing="4" />
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="imaging:SvgImageSource">
-                                                <Image Width="13" Height="13" Source="{x:Bind}" />
+                                            <DataTemplate x:DataType="x:String">
+                                                <Border
+                                                    Padding="6,1"
+                                                    CornerRadius="8"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}">
+                                                    <TextBlock
+                                                        FontSize="10"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                        Text="{x:Bind}" />
+                                                </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-                                </Grid>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
-
-            <!-- Manually collapses/expands the hero, animated; an alternative to scrolling
-                 content to shrink it. Declared last so it stays on top for hit-testing. -->
-            <Button
-                x:Name="HeroCollapseButton"
-                Margin="0,0,10,10"
-                Padding="6"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                CornerRadius="16"
-                Click="ToggleHero_Click">
-                <FontIcon x:Name="HeroCollapseIcon" FontSize="12" Glyph="&#xE70E;" />
-            </Button>
-        </Grid>
-
-        <!-- Section tabs -->
-        <SelectorBar
-            x:Name="SectionBar"
-            Grid.Row="1"
-            Margin="4,10,0,0"
-            SelectionChanged="SectionBar_SelectionChanged">
-            <SelectorBarItem x:Name="ReadmeTab" Text="README" IsSelected="True" />
-            <SelectorBarItem x:Name="GitTab" Text="Git" Visibility="Collapsed" />
-            <SelectorBarItem x:Uid="Detail_FilesTab" x:Name="FilesTab" Text="Files" />
-            <!-- Text becomes "GitHub"/"GitLab"; only shown when the remote matches a connected account. -->
-            <SelectorBarItem x:Name="ForgeTab" Text="GitHub" Visibility="Collapsed" />
-        </SelectorBar>
-
-        <!-- README -->
-        <Grid x:Name="ReadmeContainer" Grid.Row="2" Margin="0,12,0,24">
-            <Border
-                CornerRadius="{ThemeResource OverlayCornerRadius}"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1">
-                <Grid>
-                    <WebView2 x:Name="ReadmeView" Visibility="Collapsed" />
-                    <TextBlock
-                        x:Uid="Detail_NoReadme"
-                        x:Name="NoReadmeText"
-                        Margin="24"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Style="{StaticResource BodyTextBlockStyle}"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="No README found in this project." />
-                </Grid>
-            </Border>
-        </Grid>
-
-        <!-- Git -->
-        <Grid
-            x:Name="GitContainer"
-            Grid.Row="2"
-            Margin="0,12,0,24"
-            RowSpacing="8"
-            Visibility="Collapsed">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <!-- Toolbar -->
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
-                <ComboBox
-                    x:Name="BranchPicker"
-                    MinWidth="170"
-                    VerticalAlignment="Center"
-                    SelectionChanged="BranchPicker_SelectionChanged" />
-                <Button x:Uid="Detail_NewBranchTip" x:Name="NewBranchButton" Click="NewBranch_Click" ToolTipService.ToolTip="Create a branch at HEAD and switch to it">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon FontSize="14" Glyph="&#xE710;" />
-                        <TextBlock x:Uid="Detail_Branch" Text="Branch" />
-                    </StackPanel>
-                </Button>
-                <Button x:Name="FetchButton" Click="Fetch_Click" ToolTipService.ToolTip="git fetch --all --prune">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon FontSize="14" Glyph="&#xE895;" />
-                        <TextBlock Text="Fetch" />
-                    </StackPanel>
-                </Button>
-                <Button x:Name="PullButton" Click="Pull_Click" ToolTipService.ToolTip="git pull">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon FontSize="14" Glyph="&#xE896;" />
-                        <TextBlock Text="Pull" />
-                    </StackPanel>
-                </Button>
-                <Button x:Name="PushButton" Click="Push_Click" ToolTipService.ToolTip="git push">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon FontSize="14" Glyph="&#xE898;" />
-                        <TextBlock Text="Push" />
-                    </StackPanel>
-                </Button>
-                <Button x:Name="StashButton" Click="Stash_Click" ToolTipService.ToolTip="git stash push -u">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon FontSize="14" Glyph="&#xE7B8;" />
-                        <TextBlock Text="Stash" />
-                    </StackPanel>
-                </Button>
-                <Button x:Name="StashPopButton" Click="StashPop_Click" ToolTipService.ToolTip="git stash pop">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon FontSize="14" Glyph="&#xE8E5;" />
-                        <TextBlock x:Name="StashPopLabel" Text="Pop" />
-                    </StackPanel>
-                </Button>
-                <Button
-                    x:Name="ToggleChangesButton"
-                    Click="ToggleWorkingChanges_Click"
-                    Visibility="Collapsed">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon FontSize="13" Glyph="&#xE70F;" />
-                        <TextBlock x:Name="ToggleChangesLabel" Text="Changes" />
-                    </StackPanel>
-                </Button>
-                <ProgressRing
-                    x:Name="GitBusyRing"
-                    Width="18"
-                    Height="18"
-                    VerticalAlignment="Center"
-                    IsActive="False" />
-                <TextBlock
-                    x:Name="AheadBehindText"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                <TextBlock
-                    x:Name="GitCountsText"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                <TextBlock
-                    x:Name="GitStatusText"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            </StackPanel>
-
-            <InfoBar
-                x:Name="GitOpInfo"
-                Grid.Row="1"
-                IsOpen="False" />
-
-            <!-- Working tree changes & quick commit -->
-            <Border
-                x:Name="WorkingChangesCard"
-                Grid.Row="2"
-                MaxHeight="230"
-                Padding="12"
-                CornerRadius="{ThemeResource OverlayCornerRadius}"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                Visibility="Collapsed">
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="320" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <Grid Grid.Column="0" RowSpacing="8">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <ListView
-                            x:Name="WorkingChangesList"
-                            Grid.Row="0"
-                            SelectionMode="Single"
-                            SelectionChanged="WorkingChangesList_SelectionChanged" />
-
-                        <Grid Grid.Row="1" ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBox
-                                x:Uid="Detail_CommitMessage"
-                                x:Name="QuickCommitMessageBox"
-                                Grid.Column="0"
-                                PlaceholderText="Commit message…" />
-                            <Button
-                                x:Uid="Detail_CommitAll"
-                                Grid.Column="1"
-                                Style="{StaticResource AccentButtonStyle}"
-                                Content="Commit"
-                                Click="QuickCommit_Click" />
-                        </Grid>
-                    </Grid>
-
-                    <Border
-                        Grid.Column="1"
-                        Padding="10"
-                        CornerRadius="6"
-                        Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                            <RichTextBlock
-                                x:Name="WorkingDiffOutput"
-                                FontFamily="Cascadia Code, Consolas"
-                                FontSize="12"
-                                IsTextSelectionEnabled="True" />
-                        </ScrollViewer>
-                    </Border>
-                </Grid>
-            </Border>
-
-            <!-- Commit graph -->
-            <Border
-                Grid.Row="3"
-                CornerRadius="{ThemeResource OverlayCornerRadius}"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1">
-                <ListView x:Name="GraphList" SelectionMode="None" Padding="8,8,8,8">
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="Padding" Value="8,0" />
-                            <Setter Property="MinHeight" Value="36" />
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:GraphCommitRow">
-                            <Grid ColumnSpacing="12" Height="36">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="64" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="110" />
-                                </Grid.ColumnDefinitions>
-                                <controls:CommitGraphCanvas
-                                    Grid.Column="0"
-                                    Width="{x:Bind GraphWidth}"
-                                    Row="{x:Bind Row}" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    FontFamily="Cascadia Code, Consolas"
-                                    FontSize="12"
-                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                    Text="{x:Bind ShortSha}" />
-                                <ItemsControl
-                                    Grid.Column="2"
-                                    VerticalAlignment="Center"
-                                    ItemsSource="{x:Bind Refs}"
-                                    Visibility="{x:Bind HasRefs}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" Spacing="4" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="x:String">
-                                            <Border
-                                                Padding="6,1"
-                                                CornerRadius="8"
-                                                Background="{ThemeResource AccentFillColorDefaultBrush}">
-                                                <TextBlock
-                                                    FontSize="10"
-                                                    FontWeight="SemiBold"
-                                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                                    Text="{x:Bind}" />
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <TextBlock
-                                    Grid.Column="3"
-                                    VerticalAlignment="Center"
-                                    Text="{x:Bind Message}"
-                                    TextTrimming="CharacterEllipsis" />
-                                <TextBlock
-                                    Grid.Column="4"
-                                    VerticalAlignment="Center"
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind Author}" />
-                                <TextBlock
-                                    Grid.Column="5"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right"
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind WhenText}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </Border>
-        </Grid>
-
-        <!-- Files -->
-        <Grid
-            x:Name="FilesContainer"
-            Grid.Row="2"
-            Margin="0,12,0,24"
-            ColumnSpacing="12"
-            Visibility="Collapsed">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="340" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <Border
-                Grid.Column="0"
-                CornerRadius="{ThemeResource OverlayCornerRadius}"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1">
-                <TreeView
-                    x:Name="FileTree"
-                    Margin="4,8"
-                    SelectionMode="Single"
-                    Expanding="FileTree_Expanding"
-                    ItemInvoked="FileTree_ItemInvoked">
-                    <TreeView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:FileTreeNode">
-                            <TreeViewItem
-                                ItemsSource="{x:Bind Children}"
-                                HasUnrealizedChildren="{x:Bind IsDirectory}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Image
-                                        Width="14"
-                                        Height="14"
+                                    <TextBlock
+                                        Grid.Column="3"
                                         VerticalAlignment="Center"
-                                        Source="{x:Bind Icon}"
-                                        Visibility="{x:Bind HasIcon}" />
-                                    <FontIcon
-                                        FontSize="13"
+                                        Text="{x:Bind Message}"
+                                        TextTrimming="CharacterEllipsis" />
+                                    <TextBlock
+                                        Grid.Column="4"
                                         VerticalAlignment="Center"
+                                        Style="{StaticResource CaptionTextBlockStyle}"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Glyph="{x:Bind Glyph}"
-                                        Visibility="{x:Bind ShowsGlyph}" />
-                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
-                                </StackPanel>
-                            </TreeViewItem>
-                        </DataTemplate>
-                    </TreeView.ItemTemplate>
-                </TreeView>
-            </Border>
+                                        Text="{x:Bind Author}" />
+                                    <TextBlock
+                                        Grid.Column="5"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Right"
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind WhenText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Border>
+            </Grid>
 
-            <Border
-                Grid.Column="1"
-                CornerRadius="{ThemeResource OverlayCornerRadius}"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBlock
-                        x:Uid="Detail_FilePreviewHint"
-                        x:Name="FileHeader"
-                        Margin="16,12"
-                        Style="{StaticResource BodyStrongTextBlockStyle}"
-                        Text="Select a file to preview it"
-                        TextTrimming="CharacterEllipsis" />
-                    <Grid Grid.Row="1">
-                        <WebView2 x:Name="FileView" Visibility="Collapsed" />
-                        <ScrollViewer
-                            x:Name="FileFallbackScroll"
-                            Padding="16,0,16,16"
-                            HorizontalScrollBarVisibility="Auto"
-                            VerticalScrollBarVisibility="Auto">
-                            <Grid>
-                                <TextBlock
-                                    x:Name="FileContentText"
-                                    FontFamily="Cascadia Code, Consolas"
-                                    FontSize="12.5"
-                                    IsTextSelectionEnabled="True"
-                                    TextWrapping="NoWrap" />
-                                <Image
-                                    x:Name="FilePreviewImage"
-                                    MaxWidth="900"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Top"
-                                    Stretch="Uniform"
-                                    Visibility="Collapsed" />
-                            </Grid>
-                        </ScrollViewer>
-                    </Grid>
-                </Grid>
-            </Border>
-        </Grid>
-
-        <!-- Forge (GitHub / GitLab) -->
-        <Grid
-            x:Name="ForgeContainer"
-            Grid.Row="2"
-            Margin="0,12,0,24"
-            RowSpacing="12"
-            Visibility="Collapsed">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <!-- Repo header -->
-            <Border
-                Grid.Row="0"
-                Padding="16,12"
-                CornerRadius="{ThemeResource OverlayCornerRadius}"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1">
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
-                        <TextBlock x:Name="ForgeRepoName" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                        <TextBlock
-                            x:Name="ForgeRepoDescription"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            TextWrapping="Wrap"
-                            Visibility="Collapsed" />
-                    </StackPanel>
-
-                    <StackPanel
-                        Grid.Column="1"
-                        Orientation="Horizontal"
-                        Spacing="12"
-                        VerticalAlignment="Center">
-                        <PersonPicture
-                            x:Name="ForgeAccountAvatar"
-                            Width="24"
-                            Height="24"
-                            VerticalAlignment="Center"
-                            Visibility="Collapsed" />
-                        <ProgressRing x:Name="ForgeLoading" Width="16" Height="16" IsActive="False" />
-                        <TextBlock
-                            x:Name="ForgeRepoStats"
-                            VerticalAlignment="Center"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
-
-                    <Button
-                        x:Name="ForgeOpenRepoButton"
-                        Grid.Column="2"
-                        VerticalAlignment="Center"
-                        Click="ForgeOpenRepo_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon FontSize="13" Glyph="&#xE8A7;" />
-                            <TextBlock x:Name="ForgeOpenRepoLabel" Text="Open on GitHub" />
-                        </StackPanel>
-                    </Button>
-                </Grid>
-            </Border>
-
-            <!-- PRs / issues / CI runs, side by side, each independently scrollable. Scrolling
-                 any one of them also collapses the hero (see HookForgeScroll), same as the
-                 Git/README tabs; the corner button on the hero does the same thing without
-                 needing to scroll first. -->
-            <Grid Grid.Row="1" ColumnSpacing="12">
+            <!-- Files -->
+            <Grid
+                x:Name="FilesContainer"
+                Grid.Row="1"
+                Margin="0,12,0,24"
+                ColumnSpacing="12"
+                Visibility="Collapsed">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="340" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
@@ -772,85 +712,36 @@
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <TextBlock
-                            x:Name="ForgePrsHeader"
-                            Margin="16,12"
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="Open pull requests" />
-                        <TextBlock
-                            x:Uid="Detail_NothingOpen"
-                            x:Name="ForgePrsEmpty"
-                            Grid.Row="1"
-                            Margin="16,0,16,16"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="Nothing open."
-                            Visibility="Collapsed" />
-                        <ScrollViewer x:Name="ForgePrScroll" Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl x:Name="ForgePrList">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ForgeItemViewModel">
-                                        <Button
-                                            HorizontalAlignment="Stretch"
-                                            HorizontalContentAlignment="Stretch"
-                                            Padding="8"
-                                            Background="Transparent"
-                                            BorderThickness="0"
-                                            Tag="{x:Bind WebUrl}"
-                                            Click="ForgeItem_Click"
-                                            ToolTipService.ToolTip="{x:Bind WebUrl}">
-                                            <Grid ColumnSpacing="10">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <!-- Octicon: git-pull-request (MIT, © GitHub) -->
-                                                <Viewbox
-                                                    Grid.Column="0"
-                                                    Width="16"
-                                                    Height="16"
-                                                    VerticalAlignment="Center">
-                                                    <Path
-                                                        Fill="{x:Bind IconBrush}"
-                                                        Data="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z" />
-                                                </Viewbox>
-                                                <StackPanel Grid.Column="1" Spacing="2">
-                                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                                        <TextBlock
-                                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                            Text="{x:Bind Title}"
-                                                            TextTrimming="CharacterEllipsis" />
-                                                        <Border
-                                                            Padding="6,1"
-                                                            VerticalAlignment="Center"
-                                                            CornerRadius="8"
-                                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                            Visibility="{x:Bind IsDraft}">
-                                                            <TextBlock
-                                                                x:Uid="Detail_Draft"
-                                                                FontSize="10"
-                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                Text="Draft" />
-                                                        </Border>
-                                                    </StackPanel>
-                                                    <TextBlock
-                                                        Style="{StaticResource CaptionTextBlockStyle}"
-                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="{x:Bind MetaText}"
-                                                        TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Grid>
+                    <TreeView
+                        x:Name="FileTree"
+                        Margin="4,8"
+                        SelectionMode="Single"
+                        Expanding="FileTree_Expanding"
+                        ItemInvoked="FileTree_ItemInvoked">
+                        <TreeView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:FileTreeNode">
+                                <TreeViewItem
+                                    ItemsSource="{x:Bind Children}"
+                                    HasUnrealizedChildren="{x:Bind IsDirectory}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Image
+                                            Width="14"
+                                            Height="14"
+                                            VerticalAlignment="Center"
+                                            Source="{x:Bind Icon}"
+                                            Visibility="{x:Bind HasIcon}" />
+                                        <FontIcon
+                                            FontSize="13"
+                                            VerticalAlignment="Center"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Glyph="{x:Bind Glyph}"
+                                            Visibility="{x:Bind ShowsGlyph}" />
+                                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
+                                    </StackPanel>
+                                </TreeViewItem>
+                            </DataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
                 </Border>
 
                 <Border
@@ -865,154 +756,368 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <TextBlock
-                            x:Name="ForgeIssuesHeader"
+                            x:Uid="Detail_FilePreviewHint"
+                            x:Name="FileHeader"
                             Margin="16,12"
                             Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="Open issues" />
-                        <TextBlock
-                            x:Uid="Detail_NothingOpen"
-                            x:Name="ForgeIssuesEmpty"
-                            Grid.Row="1"
-                            Margin="16,0,16,16"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="Nothing open."
-                            Visibility="Collapsed" />
-                        <ScrollViewer x:Name="ForgeIssueScroll" Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl x:Name="ForgeIssueList">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ForgeItemViewModel">
-                                        <Button
-                                            HorizontalAlignment="Stretch"
-                                            HorizontalContentAlignment="Stretch"
-                                            Padding="8"
-                                            Background="Transparent"
-                                            BorderThickness="0"
-                                            Tag="{x:Bind WebUrl}"
-                                            Click="ForgeItem_Click"
-                                            ToolTipService.ToolTip="{x:Bind WebUrl}">
-                                            <Grid ColumnSpacing="10">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <!-- Octicon: issue-opened (MIT, © GitHub) -->
-                                                <Viewbox
-                                                    Grid.Column="0"
-                                                    Width="16"
-                                                    Height="16"
-                                                    VerticalAlignment="Center">
-                                                    <Path
-                                                        Fill="{x:Bind IconBrush}"
-                                                        Data="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z" />
-                                                </Viewbox>
-                                                <StackPanel Grid.Column="1" Spacing="2">
-                                                    <TextBlock
-                                                        Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                        Text="{x:Bind Title}"
-                                                        TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock
-                                                        Style="{StaticResource CaptionTextBlockStyle}"
-                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="{x:Bind MetaText}"
-                                                        TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                            Text="Select a file to preview it"
+                            TextTrimming="CharacterEllipsis" />
+                        <Grid Grid.Row="1">
+                            <WebView2 x:Name="FileView" Visibility="Collapsed" />
+                            <ScrollViewer
+                                x:Name="FileFallbackScroll"
+                                Padding="16,0,16,16"
+                                HorizontalScrollBarVisibility="Auto"
+                                VerticalScrollBarVisibility="Auto">
+                                <Grid>
+                                    <TextBlock
+                                        x:Name="FileContentText"
+                                        FontFamily="Cascadia Code, Consolas"
+                                        FontSize="12.5"
+                                        IsTextSelectionEnabled="True"
+                                        TextWrapping="NoWrap" />
+                                    <Image
+                                        x:Name="FilePreviewImage"
+                                        MaxWidth="900"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Stretch="Uniform"
+                                        Visibility="Collapsed" />
+                                </Grid>
+                            </ScrollViewer>
+                        </Grid>
                     </Grid>
                 </Border>
+            </Grid>
 
+            <!-- Forge (GitHub / GitLab) -->
+            <Grid
+                x:Name="ForgeContainer"
+                Grid.Row="1"
+                Margin="0,12,0,24"
+                RowSpacing="12"
+                Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Repo header -->
                 <Border
-                    Grid.Column="2"
+                    Grid.Row="0"
+                    Padding="16,12"
                     CornerRadius="{ThemeResource OverlayCornerRadius}"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <TextBlock
-                            x:Name="ForgeRunsHeader"
-                            Margin="16,12"
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="Workflow runs" />
-                        <TextBlock
-                            x:Uid="Detail_NoRuns"
-                            x:Name="ForgeRunsEmpty"
-                            Grid.Row="1"
-                            Margin="16,0,16,16"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="No runs yet."
-                            Visibility="Collapsed" />
-                        <ScrollViewer x:Name="ForgeRunScroll" Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl x:Name="ForgeRunList">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ForgeRunViewModel">
-                                        <Button
-                                            HorizontalAlignment="Stretch"
-                                            HorizontalContentAlignment="Stretch"
-                                            Padding="8"
-                                            Background="Transparent"
-                                            BorderThickness="0"
-                                            Tag="{x:Bind WebUrl}"
-                                            Click="ForgeItem_Click"
-                                            ToolTipService.ToolTip="{x:Bind WebUrl}">
-                                            <Grid ColumnSpacing="10">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="86" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                                                <!-- Status pill -->
-                                                <Border
-                                                    Grid.Column="0"
-                                                    Padding="8,3"
-                                                    VerticalAlignment="Top"
-                                                    HorizontalAlignment="Left"
-                                                    CornerRadius="10"
-                                                    Background="{x:Bind StatusBackground}">
-                                                    <StackPanel Orientation="Horizontal" Spacing="5">
-                                                        <FontIcon
-                                                            FontSize="11"
-                                                            Glyph="{x:Bind StatusGlyph}"
-                                                            Foreground="{x:Bind StatusBrush}" />
-                                                        <TextBlock
-                                                            FontSize="11"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{x:Bind StatusBrush}"
-                                                            Text="{x:Bind StatusLabel}" />
-                                                    </StackPanel>
-                                                </Border>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
+                            <TextBlock x:Name="ForgeRepoName" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock
+                                x:Name="ForgeRepoDescription"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                TextWrapping="Wrap"
+                                Visibility="Collapsed" />
+                        </StackPanel>
 
-                                                <StackPanel Grid.Column="1" Spacing="2">
-                                                    <TextBlock TextTrimming="CharacterEllipsis">
-                                                        <Run FontWeight="SemiBold" Text="{x:Bind Name}" /><Run Text="  " /><Run Text="{x:Bind Title}" />
-                                                    </TextBlock>
-                                                    <TextBlock
-                                                        Style="{StaticResource CaptionTextBlockStyle}"
-                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="{x:Bind DetailText}"
-                                                        TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock
-                                                        Style="{StaticResource CaptionTextBlockStyle}"
-                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="{x:Bind TimeText}" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                        <StackPanel
+                            Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="12"
+                            VerticalAlignment="Center">
+                            <PersonPicture
+                                x:Name="ForgeAccountAvatar"
+                                Width="24"
+                                Height="24"
+                                VerticalAlignment="Center"
+                                Visibility="Collapsed" />
+                            <ProgressRing x:Name="ForgeLoading" Width="16" Height="16" IsActive="False" />
+                            <TextBlock
+                                x:Name="ForgeRepoStats"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <Button
+                            x:Name="ForgeOpenRepoButton"
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Click="ForgeOpenRepo_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontSize="13" Glyph="&#xE8A7;" />
+                                <TextBlock x:Name="ForgeOpenRepoLabel" Text="Open on GitHub" />
+                            </StackPanel>
+                        </Button>
                     </Grid>
                 </Border>
+
+                <!-- PRs / issues / CI runs, side by side, each independently scrollable. Scrolling
+                     any one of them also collapses the hero (see HookForgeScroll), same as the
+                     Git/README tabs; the corner button on the hero does the same thing without
+                     needing to scroll first. -->
+                <Grid Grid.Row="1" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border
+                        Grid.Column="0"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock
+                                x:Name="ForgePrsHeader"
+                                Margin="16,12"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Open pull requests" />
+                            <TextBlock
+                                x:Uid="Detail_NothingOpen"
+                                x:Name="ForgePrsEmpty"
+                                Grid.Row="1"
+                                Margin="16,0,16,16"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Nothing open."
+                                Visibility="Collapsed" />
+                            <ScrollViewer x:Name="ForgePrScroll" Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl x:Name="ForgePrList">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ForgeItemViewModel">
+                                            <Button
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Stretch"
+                                                Padding="8"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Tag="{x:Bind WebUrl}"
+                                                Click="ForgeItem_Click"
+                                                ToolTipService.ToolTip="{x:Bind WebUrl}">
+                                                <Grid ColumnSpacing="10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <!-- Octicon: git-pull-request (MIT, © GitHub) -->
+                                                    <Viewbox
+                                                        Grid.Column="0"
+                                                        Width="16"
+                                                        Height="16"
+                                                        VerticalAlignment="Center">
+                                                        <Path
+                                                            Fill="{x:Bind IconBrush}"
+                                                            Data="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z" />
+                                                    </Viewbox>
+                                                    <StackPanel Grid.Column="1" Spacing="2">
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock
+                                                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                                Text="{x:Bind Title}"
+                                                                TextTrimming="CharacterEllipsis" />
+                                                            <Border
+                                                                Padding="6,1"
+                                                                VerticalAlignment="Center"
+                                                                CornerRadius="8"
+                                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                                Visibility="{x:Bind IsDraft}">
+                                                                <TextBlock
+                                                                    x:Uid="Detail_Draft"
+                                                                    FontSize="10"
+                                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                    Text="Draft" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                        <TextBlock
+                                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                            Text="{x:Bind MetaText}"
+                                                            TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <Border
+                        Grid.Column="1"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock
+                                x:Name="ForgeIssuesHeader"
+                                Margin="16,12"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Open issues" />
+                            <TextBlock
+                                x:Uid="Detail_NothingOpen"
+                                x:Name="ForgeIssuesEmpty"
+                                Grid.Row="1"
+                                Margin="16,0,16,16"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Nothing open."
+                                Visibility="Collapsed" />
+                            <ScrollViewer x:Name="ForgeIssueScroll" Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl x:Name="ForgeIssueList">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ForgeItemViewModel">
+                                            <Button
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Stretch"
+                                                Padding="8"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Tag="{x:Bind WebUrl}"
+                                                Click="ForgeItem_Click"
+                                                ToolTipService.ToolTip="{x:Bind WebUrl}">
+                                                <Grid ColumnSpacing="10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <!-- Octicon: issue-opened (MIT, © GitHub) -->
+                                                    <Viewbox
+                                                        Grid.Column="0"
+                                                        Width="16"
+                                                        Height="16"
+                                                        VerticalAlignment="Center">
+                                                        <Path
+                                                            Fill="{x:Bind IconBrush}"
+                                                            Data="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z" />
+                                                    </Viewbox>
+                                                    <StackPanel Grid.Column="1" Spacing="2">
+                                                        <TextBlock
+                                                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                            Text="{x:Bind Title}"
+                                                            TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock
+                                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                            Text="{x:Bind MetaText}"
+                                                            TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <Border
+                        Grid.Column="2"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock
+                                x:Name="ForgeRunsHeader"
+                                Margin="16,12"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Workflow runs" />
+                            <TextBlock
+                                x:Uid="Detail_NoRuns"
+                                x:Name="ForgeRunsEmpty"
+                                Grid.Row="1"
+                                Margin="16,0,16,16"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="No runs yet."
+                                Visibility="Collapsed" />
+                            <ScrollViewer x:Name="ForgeRunScroll" Grid.Row="1" Padding="8,0,8,8" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl x:Name="ForgeRunList">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ForgeRunViewModel">
+                                            <Button
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Stretch"
+                                                Padding="8"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Tag="{x:Bind WebUrl}"
+                                                Click="ForgeItem_Click"
+                                                ToolTipService.ToolTip="{x:Bind WebUrl}">
+                                                <Grid ColumnSpacing="10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="86" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Status pill -->
+                                                    <Border
+                                                        Grid.Column="0"
+                                                        Padding="8,3"
+                                                        VerticalAlignment="Top"
+                                                        HorizontalAlignment="Left"
+                                                        CornerRadius="10"
+                                                        Background="{x:Bind StatusBackground}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                                            <FontIcon
+                                                                FontSize="11"
+                                                                Glyph="{x:Bind StatusGlyph}"
+                                                                Foreground="{x:Bind StatusBrush}" />
+                                                            <TextBlock
+                                                                FontSize="11"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{x:Bind StatusBrush}"
+                                                                Text="{x:Bind StatusLabel}" />
+                                                        </StackPanel>
+                                                    </Border>
+
+                                                    <StackPanel Grid.Column="1" Spacing="2">
+                                                        <TextBlock TextTrimming="CharacterEllipsis">
+                                                            <Run FontWeight="SemiBold" Text="{x:Bind Name}" /><Run Text="  " /><Run Text="{x:Bind Title}" />
+                                                        </TextBlock>
+                                                        <TextBlock
+                                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                            Text="{x:Bind DetailText}"
+                                                            TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock
+                                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                            Text="{x:Bind TimeText}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>

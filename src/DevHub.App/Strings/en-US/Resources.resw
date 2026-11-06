@@ -81,10 +81,15 @@
   <data name="Detail_CollapseHero" xml:space="preserve"><value>Collapse</value></data>
   <data name="Detail_ExpandHero" xml:space="preserve"><value>Expand</value></data>
   <data name="Detail_Open.Text" xml:space="preserve"><value>Open</value></data>
-  <data name="Detail_Explorer.Content" xml:space="preserve"><value>Explorer</value></data>
+  <data name="Detail_ExplorerLabel.Text" xml:space="preserve"><value>Explorer</value></data>
+  <data name="Detail_MoreActionsTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>More actions</value></data>
+  <data name="Detail_ManageSubprojectsItem.Text" xml:space="preserve"><value>Manage subprojects…</value></data>
+  <data name="Detail_CleanDiskItem.Text" xml:space="preserve"><value>Disk usage &amp; cleanup…</value></data>
+  <data name="Detail_RenameItem.Text" xml:space="preserve"><value>Rename project…</value></data>
+  <data name="Detail_SubprojectsLabel.Text" xml:space="preserve"><value>Subprojects</value></data>
+  <data name="Detail_ViewOn" xml:space="preserve"><value>View on {0}</value></data>
+  <data name="Detail_Remote" xml:space="preserve"><value>Remote</value></data>
   <data name="Detail_RunTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Run this project in a terminal</value></data>
-  <data name="Detail_ManageSubprojectsTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Manage subprojects</value></data>
-  <data name="Detail_RenameTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Rename project</value></data>
   <data name="Detail_FilesTab.Text" xml:space="preserve"><value>Files</value></data>
   <data name="Detail_NoReadme.Text" xml:space="preserve"><value>No README found in this project.</value></data>
   <data name="Detail_NewBranchTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Create a branch at HEAD and switch to it</value></data>
@@ -441,7 +446,6 @@
   <data name="Detail_Terminal.Text" xml:space="preserve"><value>Terminal</value></data>
   <data name="Detail_TerminalTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Open terminal here</value></data>
   <data name="Detail_PinTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Pin / unpin project</value></data>
-  <data name="Detail_CleanDiskTip.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Disk usage &amp; clean dependencies/build artifacts</value></data>
   <data name="Detail_SuggestedConfigs" xml:space="preserve"><value>Detected commands</value></data>
   <data name="Detail_Changes" xml:space="preserve"><value>Changes</value></data>
   <data name="Detail_CommitMessage.PlaceholderText" xml:space="preserve"><value>Commit message…</value></data>
