@@ -55,6 +55,7 @@ public sealed partial class ProjectViewModel : ObservableObject
     /// <summary>Branch and sync state; null until loaded in the background (or not a repository).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasGitStatus))]
+    [NotifyPropertyChangedFor(nameof(ShowsGitSeparator))]
     [NotifyPropertyChangedFor(nameof(BranchName))]
     [NotifyPropertyChangedFor(nameof(HasChanges))]
     [NotifyPropertyChangedFor(nameof(ChangesText))]
@@ -68,6 +69,9 @@ public sealed partial class ProjectViewModel : ObservableObject
     public partial GitStatusSummary? GitStatus { get; set; }
 
     public bool HasGitStatus => GitStatus is not null;
+
+    /// <summary>A divider between the git state and the forge host, when both are shown.</summary>
+    public bool ShowsGitSeparator => HasGitStatus && HasRemote;
 
     public string BranchName => GitStatus?.Branch ?? "";
 

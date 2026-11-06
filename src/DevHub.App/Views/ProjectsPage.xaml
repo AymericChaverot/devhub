@@ -156,12 +156,20 @@
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind Name}" />
-                                <FontIcon
-                                    FontSize="12"
+                                <!--  Git logo (Simple Icons, CC0) in the brand's orange, which reads on both themes.  -->
+                                <Viewbox
+                                    x:Uid="Proj_GitRepoIcon"
+                                    Width="13"
+                                    Height="13"
                                     VerticalAlignment="Center"
-                                    Glyph="&#xE9A6;"
-                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                    Visibility="{x:Bind IsGitRepository}" />
+                                    ToolTipService.ToolTip="Git repository"
+                                    Visibility="{x:Bind IsGitRepository}">
+                                    <Grid Width="24" Height="24">
+                                        <Path
+                                            Data="M13.09 23.549a1.54 1.54 0 0 1-2.18 0L.451 13.089a1.54 1.54 0 0 1 0-2.179l7.191-7.19 2.733 2.733a1.85 1.85 0 0 0 .964 2.326v6.66a1.849 1.849 0 1 0 1.54 0V8.957l2.508 2.508a1.85 1.85 0 1 0 1.09-1.09l-2.634-2.634a1.85 1.85 0 0 0-2.378-2.377L8.73 2.63 10.91.451a1.54 1.54 0 0 1 2.179 0l10.459 10.46a1.54 1.54 0 0 1 0 2.179z"
+                                            Fill="#F05032" />
+                                    </Grid>
+                                </Viewbox>
                                 <ItemsControl ItemsSource="{x:Bind Badges}" VerticalAlignment="Center">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -209,13 +217,26 @@
                                 Orientation="Horizontal"
                                 Spacing="10"
                                 Visibility="{x:Bind HasGitStatus, Mode=OneWay}">
-                                <TextBlock
-                                    MaxWidth="160"
-                                    VerticalAlignment="Center"
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind BranchName, Mode=OneWay}"
-                                    TextTrimming="CharacterEllipsis" />
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <!--  Branch glyph (no Fluent icon exists): two commits on a line, one forking off.  -->
+                                    <Viewbox Width="12" Height="12" VerticalAlignment="Center">
+                                        <Grid Width="24" Height="24">
+                                            <Path
+                                                Data="M6,7.5 V16.5 M18,9.5 C18,14 6,12.5 6,16.5 M6,2.5 A2.5,2.5 0 1 1 6,7.5 A2.5,2.5 0 1 1 6,2.5 Z M6,16.5 A2.5,2.5 0 1 1 6,21.5 A2.5,2.5 0 1 1 6,16.5 Z M18,4.5 A2.5,2.5 0 1 1 18,9.5 A2.5,2.5 0 1 1 18,4.5 Z"
+                                                Stroke="{ThemeResource TextFillColorSecondaryBrush}"
+                                                StrokeEndLineCap="Round"
+                                                StrokeStartLineCap="Round"
+                                                StrokeThickness="2" />
+                                        </Grid>
+                                    </Viewbox>
+                                    <TextBlock
+                                        MaxWidth="160"
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind BranchName, Mode=OneWay}"
+                                        TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
                                 <StackPanel
                                     Orientation="Horizontal"
                                     Spacing="5"
@@ -244,6 +265,12 @@
                                     ToolTipService.ToolTip="{x:Bind BehindToolTip, Mode=OneWay}"
                                     Visibility="{x:Bind HasBehind, Mode=OneWay}" />
                             </StackPanel>
+                            <Border
+                                Width="1"
+                                Height="14"
+                                VerticalAlignment="Center"
+                                Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                Visibility="{x:Bind ShowsGitSeparator, Mode=OneWay}" />
                             <TextBlock
                                 VerticalAlignment="Center"
                                 Style="{StaticResource CaptionTextBlockStyle}"
