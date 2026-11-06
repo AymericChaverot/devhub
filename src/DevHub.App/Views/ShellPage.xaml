@@ -4,7 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:views="using:DevHub.App.Views">
 
-    <Grid>
+    <!--  The accelerators cover the whole window: never show their automatic "Ctrl+K" tip.  -->
+    <Grid KeyboardAcceleratorPlacementMode="Hidden">
         <Grid.KeyboardAccelerators>
             <KeyboardAccelerator Key="K" Modifiers="Control" Invoked="CommandPaletteAccelerator_Invoked" />
             <KeyboardAccelerator Key="P" Modifiers="Control" Invoked="CommandPaletteAccelerator_Invoked" />
