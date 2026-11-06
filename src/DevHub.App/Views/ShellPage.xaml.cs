@@ -88,8 +88,9 @@ public sealed partial class ShellPage : Page
         var openPaneWidth = Nav.OpenPaneLength > 0 ? Nav.OpenPaneLength : 320;
         var compactPaneWidth = Nav.CompactPaneLength > 0 ? Nav.CompactPaneLength : 48;
 
+        // The expanded grid stretches inside the button's padding; a fixed width here would
+        // overflow that content area and clip the trailing "Ctrl+K" hint.
         QuickSearchExpandedGrid.Visibility = isOpen ? Visibility.Visible : Visibility.Collapsed;
-        QuickSearchExpandedGrid.Width = Math.Max(0, openPaneWidth - 30);
         QuickSearchCompactIcon.Visibility = isOpen ? Visibility.Collapsed : Visibility.Visible;
         QuickSearchButton.MinWidth = compactPaneWidth - 8;
         QuickSearchButton.Width = (isOpen ? openPaneWidth : compactPaneWidth) - 8;
