@@ -1,6 +1,7 @@
 using DevHub.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppLifecycle;
 using Serilog;
 
 namespace DevHub.App;
@@ -54,6 +55,10 @@ public partial class App : Application
             Log.Warning(ex, "Toast notification registration failed; timers will finish silently");
         }
 
+        var appInstance = AppInstance.GetCurrent();
+        Views.ShellPage.PendingLaunchCommand = ReadLaunchCommand(appInstance.GetActivatedEventArgs());
+        appInstance.Activated += OnRedirectedActivation;
+
         _window = new MainWindow();
         _mainWindow = _window;
         MainWindowHandle = WinRT.Interop.WindowNative.GetWindowHandle(_window);
@@ -66,6 +71,26 @@ public partial class App : Application
     }
 
     private static Window? _mainWindow;
+
+    /// <summary>A second launch was redirected here (see <see cref="Program"/>): come forward and act on it.</summary>
+    private void OnRedirectedActivation(object? sender, AppActivationArguments args)
+    {
+        var command = ReadLaunchCommand(args);
+        _window?.DispatcherQueue.TryEnqueue(async () =>
+        {
+            MainWindow.Current?.BringToFront();
+            if (command is not null && Views.ShellPage.Current is { } shell)
+            {
+                await shell.RunLaunchCommandAsync(command);
+            }
+        });
+    }
+
+    private static LaunchCommand? ReadLaunchCommand(AppActivationArguments args) =>
+        args.Kind == ExtendedActivationKind.Launch
+        && args.Data is Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs launch
+            ? LaunchCommand.Parse(launch.Arguments)
+            : null;
 
     /// <summary>Applies "System" / "Light" / "Dark" to the whole window, live.</summary>
     public static void ApplyTheme(string theme)

@@ -38,6 +38,20 @@ public sealed partial class MainWindow : Window
         RootFrame.Navigate(typeof(ShellPage));
     }
 
+    /// <summary>Restores the window if minimized and brings it to the front.</summary>
+    public void BringToFront()
+    {
+        if (AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter
+            {
+                State: Microsoft.UI.Windowing.OverlappedPresenterState.Minimized,
+            } presenter)
+        {
+            presenter.Restore();
+        }
+
+        Activate();
+    }
+
     public void SetTitleBarDimmed(bool dimmed)
     {
         TitleBarDimOverlay.Visibility = dimmed ? Visibility.Visible : Visibility.Collapsed;

@@ -72,7 +72,46 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    private void Nav_Loaded(object sender, RoutedEventArgs e) => NavigateTo("home");
+    /// <summary>A command DevHub was launched with, run once the shell has loaded.</summary>
+    public static LaunchCommand? PendingLaunchCommand { get; set; }
+
+    /// <summary>Carries out a launch command (jump list entry, or a second launch redirected here).</summary>
+    public async Task RunLaunchCommandAsync(LaunchCommand command)
+    {
+        switch (command)
+        {
+            case LaunchCommand.ShowPalette when CommandPaletteOverlay.Visibility != Visibility.Visible:
+                await ToggleCommandPaletteAsync();
+                break;
+
+            case LaunchCommand.OpenProject open:
+                var projects = await App.Services.GetRequiredService<IProjectStore>().GetAllAsync();
+                var project = projects.FirstOrDefault(
+                    p => string.Equals(p.Path, open.Path, StringComparison.OrdinalIgnoreCase));
+                if (project is not null)
+                {
+                    OpenProjectDetail(project);
+                }
+                else
+                {
+                    // Moved or deleted since the jump list was built.
+                    NavigateTo("projects");
+                }
+
+                break;
+        }
+    }
+
+    private async void Nav_Loaded(object sender, RoutedEventArgs e)
+    {
+        NavigateTo("home");
+
+        if (PendingLaunchCommand is { } command)
+        {
+            PendingLaunchCommand = null;
+            await RunLaunchCommandAsync(command);
+        }
+    }
 
     private async void Nav_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {

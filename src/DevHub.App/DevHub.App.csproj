@@ -19,6 +19,8 @@
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <PublishProfile>win-$(Platform).pubxml</PublishProfile>
     <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <!-- Program.cs provides Main, to make DevHub single-instance. -->
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
